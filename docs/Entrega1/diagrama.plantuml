@@ -1,0 +1,48 @@
+@startuml saldo-positivo
+title "Sistema de Controle de Despesas Pessoais"
+
+' Define nodes
+rectangle "Usuário" as Usuario
+rectangle "Sistema de Controle de\nDespesas" as Sistema
+rectangle "Banco de Dados" as DB
+
+' Define connections between primary components
+Usuario <--> Sistema
+Sistema <--> DB
+
+' User actions flow
+rectangle "Cadastrar categorias\nde despesas" as UC1
+rectangle "Registrar novas\ndespesas" as UC2
+rectangle "Visualizar e filtrar\ndespesas" as UC3
+rectangle "Gerar relatórios de\ngastos" as UC4
+rectangle "Definir orçamento e\nreceber notificações" as UC5
+rectangle "Registrar entradas de\ndinheiro (como\nsalário)" as UC6
+
+Usuario -down-> UC1
+UC1 -down-> UC2
+UC2 -down-> UC3
+UC3 -down-> UC4
+UC4 -down-> UC5
+UC5 -down-> UC6
+
+' System actions flow
+rectangle "Armazena e recupera\ninformações no\nbanco de dados" as SC1
+rectangle "Calcula o saldo\ndisponível" as SC2
+rectangle "Gera relatórios e\ngráficos" as SC3
+rectangle "Envia notificações de\nlimite de orçamento" as SC4
+
+Sistema -down-> SC1
+SC1 -down-> SC2
+SC2 -down-> SC3
+SC3 -down-> SC4
+
+' Database actions flow
+rectangle "Salvar categorias,\ndespesas e entradas\nde dinheiro" as DBC1
+rectangle "Armazenar regras de\norçamento e\nnotificações" as DBC2
+rectangle "Permitir consultas\npara relatórios e\nexibição de dados" as DBC3
+
+DB -down-> DBC1
+DBC1 -down-> DBC2
+DBC2 -down-> DBC3
+
+@enduml
