@@ -1,0 +1,256 @@
+@startuml "Fluxograma Principal"
+!theme plain
+title Fluxograma Principal
+skinparam Rankdir top-to-bottom
+skinparam defaultTextAlignment center
+
+start
+if (Usuário Autenticado?) then (não)
+    :Login/Registro;
+    repeat
+    repeat while (Autenticação válida?) is (não)
+    ->sim;
+endif
+
+:Painel Principal;
+
+while (Continuar na aplicação?) is (sim)
+    fork
+        :Gerenciar Despesas;
+        fork
+            :Adicionar Despesa;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Editar Despesa;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Excluir Despesa;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Categorizar Despesa;
+            ->
+            :Voltar ao Painel;
+        end fork
+    fork again
+        :Gerenciar Receitas;
+        fork
+            :Adicionar Receita;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Editar Receita;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Excluir Receita;
+            ->
+            :Voltar ao Painel;
+        end fork
+    fork again
+        :Visualizar Saldo;
+        fork
+            :Ver Saldo Atual;
+            ->
+            :Voltar ao Painel;
+        fork again
+            :Ver Histórico;
+            ->
+            :Voltar ao Painel;
+        end fork
+    fork again
+        :Relatórios;
+        fork
+            :Relatório por Período;
+            fork
+                :Despesas no Período;
+                ->
+                :Voltar ao Painel;
+            fork again
+                :Receitas no Período;
+                ->
+                :Voltar ao Painel;
+            fork again
+                :Comparativo Períodos;
+                ->
+                :Voltar ao Painel;
+            end fork
+        fork again
+            :Relatório por Categoria;
+            fork
+                :Despesas por Categoria;
+                ->
+                :Voltar ao Painel;
+            fork again
+                :Evolução da Categoria;
+                ->
+                :Voltar ao Painel;
+            end fork
+        end fork
+    end fork
+endwhile (não)
+stop
+
+@enduml
+
+@startuml "Diagrama de Componentes"
+!theme plain
+title Diagrama de Componentes
+
+package "Frontend (NextJS)" {
+  [Páginas]
+  [Componentes]
+  [Hooks Personalizados]
+  [Contexto de Autenticação]
+  [Rotas da API]
+}
+
+package "Backend" {
+  package "Camada de Serviços" {
+    [Serviço de Autenticação] as Auth
+
+    package "Serviços Financeiros" {
+      [Serviço de Despesas] as Despesas
+      [Serviço de Receitas] as Receitas
+      [Serviço de Saldo] as Saldo
+
+      note right of Saldo
+        Atualiza saldo quando:
+        * Nova receita é registrada
+        * Nova despesa é registrada
+        * Receita/despesa é modificada
+        * Receita/despesa é excluída
+      end note
+    }
+  }
+
+  package "Camada de Dados" {
+    [Prisma ORM] as ORM
+
+    note right of ORM
+      Transações garantem consistência
+      entre operações relacionadas
+    end note
+  }
+}
+
+database "PostgreSQL" {
+  [Banco de Dados]
+}
+
+' Fluxo Frontend -> Backend
+[Páginas] --> [Componentes]
+[Páginas] --> [Hooks Personalizados]
+[Componentes] --> [Hooks Personalizados]
+[Hooks Personalizados] --> [Rotas da API]
+
+' Rotas API -> Serviços
+[Rotas da API] --> Auth
+[Rotas da API] --> Despesas
+[Rotas da API] --> Receitas
+[Rotas da API] --> Saldo
+
+' Interações entre Serviços
+Despesas ..> Saldo : Notifica alterações
+Receitas ..> Saldo : Notifica alterações
+
+' Acesso ao Banco
+Auth --> ORM
+Despesas --> ORM
+Receitas --> ORM
+Saldo --> ORM
+
+ORM --> [Banco de Dados]
+
+@enduml
+
+@startuml "Diagrama de Implantação"
+!theme plain
+title Diagrama de Implantação
+
+node "Cliente" {
+  [Navegador Web]
+}
+
+cloud "Plataforma Vercel" {
+  [Aplicação NextJS]
+  [Funções Serverless]
+}
+
+database "Serviço de Banco de Dados" {
+  [Banco de Dados PostgreSQL]
+}
+
+[Navegador Web] -right-> [Aplicação NextJS] : HTTPS
+[Aplicação NextJS] -right-> [Funções Serverless] : Chamadas API
+[Funções Serverless] -right-> [Banco de Dados PostgreSQL] : Consultas SQL
+@enduml
+
+@startuml "Diagrama Entidade-Relacionamento"
+!theme plain
+title Diagrama Entidade-Relacionamento
+
+entity "USUARIO" {
+  * id : uuid <<PK>>
+  --
+  * email : texto
+  * senha_hash : texto
+  * nome : texto
+  * perfil : enum
+  * criado_em : data_hora
+  * atualizado_em : data_hora
+}
+
+entity "DESPESA" {
+  * id : uuid <<PK>>
+  --
+  * usuario_id : uuid <<FK>>
+  * categoria_id : uuid <<FK>>
+  * valor : decimal
+  * descricao : texto
+  * data : data
+  * criado_em : data_hora
+  * atualizado_em : data_hora
+}
+
+entity "RECEITA" {
+  * id : uuid <<PK>>
+  --
+  * usuario_id : uuid <<FK>>
+  * valor : decimal
+  * descricao : texto
+  * data : data
+  * criado_em : data_hora
+  * atualizado_em : data_hora
+}
+
+entity "CATEGORIA" {
+  * id : uuid <<PK>>
+  --
+  * usuario_id : uuid <<FK>>
+  * nome : texto
+  * cor : texto
+  * criado_em : data_hora
+  * atualizado_em : data_hora
+}
+
+entity "SALDO_CONSOLIDADO" {
+  * id : uuid <<PK>>
+  --
+  * usuario_id : uuid <<FK>>
+  * valor_total : decimal
+  * mes_referencia : data
+  * total_receitas : decimal
+  * total_despesas : decimal
+  * criado_em : data_hora
+  * atualizado_em : data_hora
+}
+
+USUARIO ||--o{ DESPESA : cria
+USUARIO ||--o{ RECEITA : cria
+USUARIO ||--o{ CATEGORIA : cria
+USUARIO ||--o{ SALDO_CONSOLIDADO : possui
+DESPESA }o--|| CATEGORIA : pertence_a
+@enduml
