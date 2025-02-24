@@ -40,6 +40,10 @@ O nome do sistema de controle de despesas pessoais é Saldo Positivo.
 - **Relatórios:** Uma tela com as informações da Receita/Entrada é Despesa/Saída do usuário, que ajuda a manter o controle financeiro.
 - **Categorias:** São os filtros de despesas do usuário como por exemplo, em áreas como lazer, moradia e alimentação.
 - **Saldo:** Diferenças das receitas e despesas.
+- **SEO:** Search Engine Optimization (Otimização para Motores de Busca, em tradução livre).
+- **ORM:** Object Relational Mapping (Mapeamento Objeto-Relacional, em tradução livre).
+- **BaaS:** Backend as a Service (Banco como serviço, em tradução livre).
+- **IDE:** Integrated Development Environment (Ambiente de Desenvolvimento Integrado, em tradução livre).
 
 ## 3 REQUISITOS FUNCIONAIS
 
@@ -162,36 +166,46 @@ Permite a visualização do saldo atual e do total de despesas registradas.
 
 ## 7 DESCRIÇÃO DO AMBIENTE DE DESENVOLVIMENTO/PRODUÇÃO
 
-### Repositório
+Esta seção apresenta detalhes e informações sobre o ambiente de desenvolvimento/produção.
+
+### 7.1 Repositório
 
 O código-fonte do projeto será armazenado e gerenciado em um repositório do GitHub, permitindo controle de versão e colaboração eficiente entre os desenvolvedores.
 
-### Ferramentas e Tecnologias
+### 7.2 Ferramentas e Tecnologias
 
-#### Frontend
+#### 7.2.1 Frontend
 
-- **Framework:** Next.js será utilizado para a construção da interface web, garantindo performance otimizada e Search Engine Optimization (SEO) aprimorado.
-- **Biblioteca de Componentes:** Tailwind CSS será utilizado para estilização eficiente e responsiva.
-- **Gerenciador de Pacotes:** npm/yarn será utilizado para instalação e gerenciamento de dependências do projeto.
+O Framework Next.js será utilizado para a construção da interface web, garantindo performance otimizada e SEO aprimorado.
 
-#### Backend
+A Biblioteca de Componentes Tailwind CSS será utilizada para estilização eficiente e responsiva.
 
-- **Linguagens:** HTML, CSS, Javascript, SQL.
-- **Framework:** Next.js será utilizado para a criação das APIs serverless que lidam com as operações do sistema.
-- **ORM:** Prisma facilitará a comunicação com o banco de dados e garantirá a integridade dos dados.
+O Gerenciador de Pacotes pnpm será utilizado para instalação e gerenciamento de dependências do projeto.
 
-#### Banco de Dados
+#### 7.2.2 Backend
 
-- **Banco de Dados:** PostgreSQL – escolhido por sua confiabilidade e suporte a operações complexas.
-- **Hospedagem:** Supabase – utilizada como Backend as a Service (BaaS) para gerenciar o banco de dados.
+As linguagens utilizadas serão HTML, CSS, Javascript, SQL.
 
-### Ambiente de Desenvolvimento
+O framework Next.js será utilizado para a criação das APIs serverless que lidam com as operações do sistema.
 
-- **IDE:** VS Code – ambiente principal de desenvolvimento, com várias extensões que podem auxiliar no processo.
-- **Controle de Versão:** Git/GitHub – para versionamento e colaboração no código.
+O ORM Prisma facilitará a comunicação com o banco de dados e garantirá a integridade dos dados.
 
-### Ambiente de Produção
+#### 7.2.3 Banco de Dados
 
-- **Hospedagem Frontend:** Vercel – responsável pelo deploy do Next.js, garantindo alta performance e escalabilidade.
-- **Banco de Dados:** Supabase/PostgreSQL – hospedado em nuvem para garantir acessibilidade e backups automáticos.
-- **Monitoramento:** Vercel Analytics e Supabase Logs – para acompanhamento da performance e detecção de possíveis falhas.
+O banco de dados utilizado será o PostgreSQL, escolhido por sua confiabilidade e suporte a operações complexas.
+
+A hospedagem Supabase será utilizada como BaaS para gerenciar o banco de dados.
+
+#### 7.2.4 Ambiente de Desenvolvimento
+
+A IDE utilizada será o VS Code, ambiente principal de desenvolvimento, com várias extensões que podem auxiliar na codificação.
+
+A ferramenta para controle de versão utilizada será o Git/GitHub, para versionamento e colaboração no código.
+
+#### 7.2.5 Ambiente de Produção
+
+A hospedagem do frontend será feita no Vercel, responsável pelo deploy do Next.js, garantindo alta performance e escalabilidade.
+
+O banco de dados Supabase/PostgreSQL será hospedado em nuvem para garantir acessibilidade e backups automáticos.
+
+O monitoramento será feito no Vercel Analytics e Supabase Logs, para acompanhamento da performance e detecção de possíveis falhas.
