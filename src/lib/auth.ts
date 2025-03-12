@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Credenciais inválidas");
         }
 
-        const user = await db.user.findFirst({
+        const user = await db.user.findUnique({
           where: {
             email: credentials.email,
           },

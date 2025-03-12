@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { ReactNode } from "react";
 
 interface DashboardErrorProps {
   title?: string;
@@ -21,7 +21,6 @@ export function DashboardError({
         <button
           onClick={onRetry}
           className="mt-4 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-200"
-          type="button"
         >
           Tentar novamente
         </button>
