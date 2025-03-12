@@ -37,10 +37,16 @@ export default async function DespesasPage() {
       userId: string;
       createdAt: Date;
       updatedAt: Date;
+      color?: string;
     };
   }) => ({
     ...despesa,
     amount: despesa.amount.toNumber(),
+    description: despesa.description || null, // Garantir que description seja string | null
+    category: {
+      ...despesa.category,
+      color: despesa.category.color || "#6E56CF", // Adicionar cor padrão se não existir
+    }
   }));
 
   return (

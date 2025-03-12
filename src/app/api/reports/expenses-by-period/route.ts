@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Buscar despesas do período anterior para comparação (se solicitado)
-    let previousPeriodExpenses = [];
+    let previousPeriodExpenses: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }[] = [];
     if (compareWithPrevious) {
       previousPeriodExpenses = await db.expense.groupBy({
         by: ['categoryId'],
@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
     // Buscar nomes das categorias
     const categoryIds = [
       ...new Set([
-        ...currentPeriodExpenses.map((item: any) => item.categoryId),
-        ...previousPeriodExpenses.map((item: any) => item.categoryId),
+        ...currentPeriodExpenses.map((item: { categoryId: string }) => item.categoryId),
+        ...previousPeriodExpenses.map((item: { categoryId: string }) => item.categoryId),
       ]),
     ];
 
@@ -79,13 +79,15 @@ export async function GET(request: NextRequest) {
 
     // Calcular o total de despesas do período atual
     const totalCurrentExpenses = currentPeriodExpenses.reduce(
-      (acc: number, item: any) => acc + (item._sum.amount?.toNumber() ?? 0),
+      (acc: number, item: { _sum: { amount: { toNumber(): number } | null } }) =>
+        acc + (item._sum.amount?.toNumber() ?? 0),
       0
     );
 
     // Calcular o total de despesas do período anterior
     const totalPreviousExpenses = previousPeriodExpenses.reduce(
-      (acc: number, item: any) => acc + (item._sum.amount?.toNumber() ?? 0),
+      (acc: number, item: { _sum: { amount: { toNumber(): number } | null } }) =>
+        acc + (item._sum.amount?.toNumber() ?? 0),
       0
     );
 
@@ -108,13 +110,14 @@ export async function GET(request: NextRequest) {
       percentageChange: compareWithPrevious && totalPreviousExpenses > 0
         ? ((totalCurrentExpenses - totalPreviousExpenses) / totalPreviousExpenses) * 100
         : null,
-      expensesByCategory: currentPeriodExpenses.map((item: any) => {
-        const category = categories.find((cat: any) => cat.id === item.categoryId);
+      expensesByCategory: currentPeriodExpenses.map((item: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) => {
+        const category = categories.find((cat: { id: string; name: string }) => cat.id === item.categoryId);
         const currentAmount = item._sum.amount?.toNumber() ?? 0;
         
         // Encontrar a mesma categoria no período anterior
         const previousItem = previousPeriodExpenses.find(
-          (prev: any) => prev.categoryId === item.categoryId
+          (prev: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) =>
+            prev.categoryId === item.categoryId
         );
         const previousAmount = previousItem?._sum.amount?.toNumber() ?? 0;
         

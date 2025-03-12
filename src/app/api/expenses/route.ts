@@ -1,14 +1,15 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import * as z from "zod";
 import { updateUserBalance } from "@/lib/balance-utils";
 
 const expenseSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
   description: z.string().optional(),
-  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+  date: z.string().refine((date) => !Number.isNaN(Date.parse(date)), {
     message: "Data inválida",
   }),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
@@ -29,8 +30,23 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
     const categoryId = searchParams.get("categoryId");
 
+    // Definir o tipo da query
+    type QueryType = {
+      where: {
+        userId: string;
+        date?: {
+          gte?: Date;
+          lte?: Date;
+        };
+        categoryId?: string;
+      };
+      orderBy: {
+        date: "desc" | "asc";
+      };
+    };
+
     // Construir a query
-    const query: any = {
+    const query: QueryType = {
       where: {
         userId: session.user.id,
       },
@@ -65,7 +81,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Converter os valores Decimal para números
-    const formattedExpenses = expenses.map((expense: any) => ({
+    const formattedExpenses = expenses.map((expense) => ({
       ...expense,
       amount: expense.amount.toNumber(),
     }));
@@ -79,7 +95,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -141,7 +157,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -156,6 +172,13 @@ export async function PUT(req: Request) {
 
     if (!id) {
       return new NextResponse(JSON.stringify({ error: "ID não fornecido" }), {
+        status: 400,
+      });
+    }
+
+    // Verificar se o ID é um UUID válido
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return new NextResponse(JSON.stringify({ error: "ID inválido" }), {
         status: 400,
       });
     }
@@ -215,7 +238,7 @@ export async function PUT(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -230,6 +253,13 @@ export async function DELETE(req: Request) {
 
     if (!id) {
       return new NextResponse(JSON.stringify({ error: "ID não fornecido" }), {
+        status: 400,
+      });
+    }
+
+    // Verificar se o ID é um UUID válido
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return new NextResponse(JSON.stringify({ error: "ID inválido" }), {
         status: 400,
       });
     }

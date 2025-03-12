@@ -64,7 +64,9 @@ export default function Home() {
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
+										aria-hidden="true"
 									>
+										<title>Ícone de gráfico</title>
 										<path
 											strokeLinecap="round"
 											strokeLinejoin="round"
@@ -89,7 +91,9 @@ export default function Home() {
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
+										aria-hidden="true"
 									>
+										<title>Ícone de moeda</title>
 										<path
 											strokeLinecap="round"
 											strokeLinejoin="round"
@@ -114,7 +118,9 @@ export default function Home() {
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
+										aria-hidden="true"
 									>
+										<title>Ícone de relatório</title>
 										<path
 											strokeLinecap="round"
 											strokeLinejoin="round"
@@ -166,13 +172,13 @@ export default function Home() {
 								</p>
 							</div>
 							<div className="flex space-x-4">
-								<a href="#" className="hover:text-blue-400">
+								<a href="/termos" className="hover:text-blue-400">
 									Termos de Uso
 								</a>
-								<a href="#" className="hover:text-blue-400">
+								<a href="/privacidade" className="hover:text-blue-400">
 									Política de Privacidade
 								</a>
-								<a href="#" className="hover:text-blue-400">
+								<a href="/contato" className="hover:text-blue-400">
 									Contato
 								</a>
 							</div>

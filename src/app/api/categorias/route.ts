@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import * as z from "zod";
 
 const categorySchema = z.object({
@@ -32,7 +33,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -73,6 +74,11 @@ export async function PUT(req: Request) {
 
     if (!id) {
       return new NextResponse("ID não fornecido", { status: 400 });
+    }
+
+    // Verificar se o ID é um UUID válido
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return new NextResponse("ID inválido", { status: 400 });
     }
 
     const body = await req.json();
@@ -98,7 +104,7 @@ export async function PUT(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -111,6 +117,11 @@ export async function DELETE(req: Request) {
 
     if (!id) {
       return new NextResponse("ID não fornecido", { status: 400 });
+    }
+
+    // Verificar se o ID é um UUID válido
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return new NextResponse("ID inválido", { status: 400 });
     }
 
     await db.category.delete({

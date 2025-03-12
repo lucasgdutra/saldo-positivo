@@ -3,12 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const expenseSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
   description: z.string().optional(),
-  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+  date: z.string().refine((date) => !Number.isNaN(Date.parse(date)), {
     message: "Data inválida",
   }),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
@@ -47,7 +47,7 @@ export function ExpenseDialog({
   const [categories, setCategories] = useState<Category[]>([]);
   
   // Formatar a data para o formato YYYY-MM-DD para o input date
-  const formatDateForInput = (date: Date | null): string => {
+  const formatDateForInput = useCallback((date: Date | null): string => {
     if (!date) return "";
     const d = new Date(date);
     // Usar o fuso horário local em vez de UTC
@@ -55,7 +55,7 @@ export function ExpenseDialog({
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
   // Buscar categorias
   useEffect(() => {
@@ -108,7 +108,7 @@ export function ExpenseDialog({
         categoryId: "",
       });
     }
-  }, [initialData, reset]);
+  }, [initialData, reset, formatDateForInput]);
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -29,7 +29,7 @@ export function BalanceChart({ data, isLoading: initialLoading = false }: Balanc
   const [isLoading, setIsLoading] = useState(initialLoading);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (data) {
       setChartData(data);
       return;
@@ -56,11 +56,11 @@ export function BalanceChart({ data, isLoading: initialLoading = false }: Balanc
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [data]);
 
   useEffect(() => {
     fetchData();
-  }, [data]);
+  }, [fetchData]);
 
   if (isLoading) {
     return (

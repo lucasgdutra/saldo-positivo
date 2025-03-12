@@ -40,7 +40,7 @@ export async function GET() {
 
     // Combinar e ordenar transações recentes
     const combinedTransactions = [
-      ...expenses.map((expense: any) => ({
+      ...expenses.map((expense: { id: string; amount: { toNumber(): number }; description: string | null; date: Date; category?: { name: string } }) => ({
         id: expense.id,
         type: 'expense',
         amount: expense.amount.toNumber(),
@@ -49,7 +49,7 @@ export async function GET() {
         date: expense.date.toString(),
         category: expense.category?.name,
       })),
-      ...revenues.map((revenue: any) => ({
+      ...revenues.map((revenue: { id: string; amount: { toNumber(): number }; description: string | null; date: Date }) => ({
         id: revenue.id,
         type: 'revenue',
         amount: revenue.amount.toNumber(),

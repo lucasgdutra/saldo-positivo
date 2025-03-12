@@ -3,12 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const revenueSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
   description: z.string().optional(),
-  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+  date: z.string().refine((date) => !Number.isNaN(Date.parse(date)), {
     message: "Data inválida",
   }),
 });
@@ -36,7 +36,7 @@ export function RevenueDialog({
   const [isLoading, setIsLoading] = useState(false);
   
   // Formatar a data para o formato YYYY-MM-DD para o input date
-  const formatDateForInput = (date: Date | null): string => {
+  const formatDateForInput = useCallback((date: Date | null): string => {
     if (!date) return "";
     const d = new Date(date);
     // Usar o fuso horário local em vez de UTC
@@ -44,7 +44,7 @@ export function RevenueDialog({
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
   const {
     register,
@@ -75,7 +75,7 @@ export function RevenueDialog({
         date: formatDateForInput(new Date()),
       });
     }
-  }, [initialData, reset]);
+  }, [initialData, reset, formatDateForInput]);
 
   const onSubmit = async (data: RevenueFormData) => {
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { DashboardErrorContainer } from "./dashboard-error";
 
@@ -16,7 +16,7 @@ export function DashboardSummary() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSummaryData = async () => {
+  const fetchSummaryData = useCallback(async () => {
     if (!session?.user?.id) return;
 
     try {
@@ -51,21 +51,27 @@ export function DashboardSummary() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     fetchSummaryData();
-  }, [session]);
+  }, [fetchSummaryData]);
 
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="rounded-lg border p-4">
-            <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
-            <div className="mt-2 h-8 w-32 animate-pulse rounded bg-gray-200"></div>
-          </div>
-        ))}
+        <div className="rounded-lg border p-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="mt-2 h-8 w-32 animate-pulse rounded bg-gray-200" />
+        </div>
+        <div className="rounded-lg border p-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="mt-2 h-8 w-32 animate-pulse rounded bg-gray-200" />
+        </div>
+        <div className="rounded-lg border p-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="mt-2 h-8 w-32 animate-pulse rounded bg-gray-200" />
+        </div>
       </div>
     );
   }

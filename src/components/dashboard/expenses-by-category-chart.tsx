@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   PieChart,
   Pie,
@@ -41,7 +41,7 @@ export function ExpensesByCategoryChart({
   const [isLoading, setIsLoading] = useState(initialLoading);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (data) {
       setChartData(data);
       return;
@@ -69,11 +69,11 @@ export function ExpensesByCategoryChart({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [data]);
 
   useEffect(() => {
     fetchData();
-  }, [data]);
+  }, [fetchData]);
 
   if (isLoading) {
     return (
@@ -121,7 +121,7 @@ export function ExpensesByCategoryChart({
               >
                 {chartData.map((entry, index) => (
                   <Cell
-                    key={`cell-${index}`}
+                    key={`cell-${entry.name}`}
                     fill={COLORS[index % COLORS.length]}
                   />
                 ))}

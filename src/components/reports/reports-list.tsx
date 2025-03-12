@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import {
   BarChart,
   Bar,
@@ -29,6 +30,44 @@ interface ReportsListProps {
   initialCategories: Category[];
 }
 
+interface CategoryExpense {
+  categoryId: string;
+  categoryName: string;
+  currentAmount: number;
+  previousAmount: number | null;
+  percentageChange: number | null;
+  percentageOfTotal: number;
+}
+
+interface PeriodExpense {
+  key: string;
+  label: string;
+  amount: number;
+}
+
+interface ReportData {
+  period?: {
+    start: string;
+    end: string;
+    label: string;
+  };
+  previousPeriod?: {
+    start: string;
+    end: string;
+    label: string;
+  } | null;
+  category?: {
+    id: string;
+    name: string;
+  };
+  currentPeriodTotal?: number;
+  previousPeriodTotal?: number | null;
+  percentageChange?: number | null;
+  expensesByCategory?: CategoryExpense[];
+  expenses?: PeriodExpense[];
+  totalAmount?: number;
+}
+
 // Cores para os gráficos
 const COLORS = [
   "#0088FE",
@@ -50,7 +89,7 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
   const [groupBy, setGroupBy] = useState<string>("month");
   const [reportType, setReportType] = useState<string>("byPeriod");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -140,9 +179,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
                 `${categoryName}: ${(percent * 100).toFixed(0)}%`
               }
             >
-              {reportData.expensesByCategory.map((entry: any, index: number) => (
+              {reportData.expensesByCategory.map((entry: CategoryExpense, index: number) => (
                 <Cell
-                  key={`cell-${index}`}
+                  key={`cell-${entry.categoryId}`}
                   fill={COLORS[index % COLORS.length]}
                 />
               ))}
@@ -223,8 +262,8 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             </tr>
           </thead>
           <tbody>
-            {reportData.expensesByCategory.map((item: any, index: number) => (
-              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+            {reportData.expensesByCategory.map((item: CategoryExpense) => (
+              <tr key={item.categoryId} className={item.categoryId.charCodeAt(0) % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                 <td className="border p-2">{item.categoryName}</td>
                 <td className="border p-2 text-right">{formatValue(item.currentAmount)}</td>
                 {compareWithPrevious && (
@@ -242,17 +281,17 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             ))}
             <tr className="bg-secondary font-bold">
               <td className="border p-2">Total</td>
-              <td className="border p-2 text-right">{formatValue(reportData.currentPeriodTotal)}</td>
+              <td className="border p-2 text-right">{formatValue(reportData.currentPeriodTotal ?? 0)}</td>
               {compareWithPrevious && (
                 <>
                   <td className="border p-2 text-right">
                     {reportData.previousPeriodTotal !== null
-                      ? formatValue(reportData.previousPeriodTotal)
+                      ? formatValue(reportData.previousPeriodTotal ?? 0)
                       : "N/A"}
                   </td>
                   <td className="border p-2 text-right">
                     {reportData.percentageChange !== null
-                      ? formatPercentage(reportData.percentageChange)
+                      ? formatPercentage(reportData.percentageChange ?? 0)
                       : "N/A"}
                   </td>
                 </>
@@ -281,15 +320,15 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             </tr>
           </thead>
           <tbody>
-            {reportData.expenses.map((item: any, index: number) => (
-              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+            {reportData.expenses.map((item: PeriodExpense) => (
+              <tr key={item.key} className={item.key.charCodeAt(0) % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                 <td className="border p-2">{item.label}</td>
                 <td className="border p-2 text-right">{formatValue(item.amount)}</td>
               </tr>
             ))}
             <tr className="bg-secondary font-bold">
               <td className="border p-2">Total</td>
-              <td className="border p-2 text-right">{formatValue(reportData.totalAmount)}</td>
+              <td className="border p-2 text-right">{formatValue(reportData.totalAmount ?? 0)}</td>
             </tr>
           </tbody>
         </table>
@@ -313,8 +352,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Tipo de Relatório</label>
+                <label htmlFor="report-type" className="block text-sm font-medium mb-1">Tipo de Relatório</label>
                 <select
+                  id="report-type"
                   className="w-full rounded-md border border-input p-2"
                   value={reportType}
                   onChange={(e) => {
@@ -329,8 +369,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
 
               {reportType === "byCategory" && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Categoria</label>
+                  <label htmlFor="category-select" className="block text-sm font-medium mb-1">Categoria</label>
                   <select
+                    id="category-select"
                     className="w-full rounded-md border border-input p-2"
                     value={selectedCategoryId}
                     onChange={(e) => setSelectedCategoryId(e.target.value)}
@@ -348,8 +389,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Data Inicial</label>
+                <label htmlFor="start-date" className="block text-sm font-medium mb-1">Data Inicial</label>
                 <input
+                  id="start-date"
                   type="date"
                   className="w-full rounded-md border border-input p-2"
                   value={startDate}
@@ -357,8 +399,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Data Final</label>
+                <label htmlFor="end-date" className="block text-sm font-medium mb-1">Data Final</label>
                 <input
+                  id="end-date"
                   type="date"
                   className="w-full rounded-md border border-input p-2"
                   value={endDate}
@@ -383,8 +426,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
 
             {reportType === "byCategory" && (
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Agrupar por</label>
+                <label htmlFor="group-by" className="block text-sm font-medium mb-1">Agrupar por</label>
                 <select
+                  id="group-by"
                   className="w-full rounded-md border border-input p-2"
                   value={groupBy}
                   onChange={(e) => setGroupBy(e.target.value)}

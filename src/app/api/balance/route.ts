@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { updateUserBalance } from "@/lib/balance-utils";
 
 export async function GET() {
@@ -79,7 +80,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 

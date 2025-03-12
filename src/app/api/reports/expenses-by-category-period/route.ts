@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // Calcular o total de despesas
     const totalAmount = expenses.reduce(
-      (acc: number, expense: any) => {
+      (acc: number, expense: { amount: { toNumber(): number } }) => {
         return acc + expense.amount.toNumber();
       },
       0
@@ -100,10 +100,10 @@ export async function GET(request: NextRequest) {
 }
 
 // Função para agrupar despesas por período (mês, semana ou dia)
-function groupExpensesByPeriod(expenses: any[], groupBy: string) {
+function groupExpensesByPeriod(expenses: { date: Date; amount: { toNumber(): number } }[], groupBy: string) {
   const groupedData: Record<string, { label: string; amount: number }> = {};
 
-  expenses.forEach((expense) => {
+  for (const expense of expenses) {
     const date = new Date(expense.date);
     let key: string;
     let label: string;
@@ -140,7 +140,7 @@ function groupExpensesByPeriod(expenses: any[], groupBy: string) {
     }
 
     groupedData[key].amount += expense.amount.toNumber();
-  });
+  }
 
   // Converter para array e ordenar por chave
   return Object.entries(groupedData)

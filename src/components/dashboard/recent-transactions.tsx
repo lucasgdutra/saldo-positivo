@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DashboardErrorContainer } from "./dashboard-error";
 
 type Transaction = {
@@ -25,7 +25,7 @@ export function RecentTransactions({
   const [isLoading, setIsLoading] = useState(initialLoading);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (data) {
       setTransactions(data);
       return;
@@ -53,13 +53,11 @@ export function RecentTransactions({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [data]);
 
   useEffect(() => {
     fetchData();
-    // fetchData depende de data, mas não está incluída nas dependências
-    // porque é recriada a cada renderização
-  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchData]);
 
   if (isLoading) {
     return (

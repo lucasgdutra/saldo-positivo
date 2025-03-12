@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -59,6 +59,7 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
           <button
             onClick={resetError}
             className="mt-4 rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-200"
+            type="button"
           >
             Tentar novamente
           </button>
