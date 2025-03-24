@@ -24,27 +24,23 @@ export async function GET() {
 
     // Se não existir, criar um novo saldo
     if (!balance) {
-      // Obter o mês atual
+      // Obter o mês atual (apenas para referência)
       const hoje = new Date();
       const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
-      // Calcular totais de receitas e despesas
+      // Calcular totais de receitas e despesas de todo o histórico
       const [totalRevenues, totalExpenses] = await Promise.all([
         db.revenue.aggregate({
           where: {
             userId: session.user.id,
-            date: {
-              gte: inicioMes,
-            },
+            // Sem filtro de data para considerar todo o histórico
           },
           _sum: { amount: true },
         }),
         db.expense.aggregate({
           where: {
             userId: session.user.id,
-            date: {
-              gte: inicioMes,
-            },
+            // Sem filtro de data para considerar todo o histórico
           },
           _sum: { amount: true },
         }),

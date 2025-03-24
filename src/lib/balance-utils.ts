@@ -1,33 +1,29 @@
 import { db } from "@/lib/db";
 
 /**
- * Atualiza o saldo do usuário com base nas receitas e despesas do mês atual
+ * Atualiza o saldo do usuário com base em todas as receitas e despesas (histórico completo)
  * @param userId ID do usuário
  * @returns O saldo atualizado
  */
 export async function updateUserBalance(userId: string) {
   try {
-    // Obter o mês atual
+    // Obter o mês atual (apenas para referência)
     const hoje = new Date();
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
-    // Calcular totais de receitas e despesas
+    // Calcular totais de receitas e despesas de todo o histórico
     const [totalRevenues, totalExpenses] = await Promise.all([
       db.revenue.aggregate({
         where: {
           userId: userId,
-          date: {
-            gte: inicioMes,
-          },
+          // Sem filtro de data para considerar todo o histórico
         },
         _sum: { amount: true },
       }),
       db.expense.aggregate({
         where: {
           userId: userId,
-          date: {
-            gte: inicioMes,
-          },
+          // Sem filtro de data para considerar todo o histórico
         },
         _sum: { amount: true },
       }),

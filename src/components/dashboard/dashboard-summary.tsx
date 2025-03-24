@@ -111,7 +111,7 @@ export function DashboardSummary() {
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-lg border p-4">
-            <div className="text-sm text-muted-foreground">Saldo Disponível</div>
+            <div className="text-sm text-muted-foreground">Saldo Total (Histórico Completo)</div>
             <div className="mt-2 text-2xl font-bold">
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",

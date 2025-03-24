@@ -441,7 +441,7 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             )}
 
             <button
-              className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+              className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90"
               type="button"
               onClick={handleGenerateReport}
               disabled={isLoading}

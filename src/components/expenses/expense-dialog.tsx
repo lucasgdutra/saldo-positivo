@@ -217,7 +217,7 @@ export function ExpenseDialog({
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isLoading}
             >
               {isLoading ? "Salvando..." : "Salvar"}
