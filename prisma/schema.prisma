@@ -44,13 +44,14 @@ model Expense {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String    @db.Uuid
-  categoryId  String    @db.Uuid
+  categoryId  String?   @db.Uuid  // <- aqui fica opcional
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
 }
+
 
 model Revenue {
   id          String    @id @default(uuid()) @db.Uuid
