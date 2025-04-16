@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       const description = row.title;
       const amount = parseFloat(row.amount);
 
-      if (!date || isNaN(amount)) continue;
+      if (!date || isNaN(amount) || amount <=0) continue;
 
       const despesa = await db.expense.create({
         data: {

@@ -36,22 +36,33 @@ export function ImportarHistorico() {
   };
 
   return (
-    <div className="mb-6">
-      <h2 className="text-lg font-semibold mb-2">Importar Histórico do Cartão</h2>
-      <div className="flex items-center gap-4">
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-        />
-        <button
-          className="bg-primary text-white px-4 py-2 rounded"
-          onClick={handleUpload}
-        >
-          Enviar CSV
-        </button>
-      </div>
-      {mensagem && <p className="text-sm mt-2 text-blue-600">{mensagem}</p>}
+    <div className="mb-6 p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+    <h2 className="text-lg font-semibold mb-2">📥 Importar Histórico do Cartão</h2>
+  
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <input
+        type="file"
+        accept=".csv"
+        id="fileInput"
+        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                   file:rounded-lg file:border-0
+                   file:text-sm file:font-semibold
+                   file:bg-primary file:text-white
+                   hover:file:bg-primary/90"
+      />
+      <button
+        onClick={handleUpload}
+        className="bg-primary text-white px-5 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+      >
+        Enviar CSV
+      </button>
     </div>
+  
+    {mensagem && (
+      <p className="text-sm mt-2 text-blue-600">{mensagem}</p>
+    )}
+  </div>
+  
   );
 }

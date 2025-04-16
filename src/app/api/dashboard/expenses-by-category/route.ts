@@ -32,7 +32,9 @@ export async function GET() {
     });
 
     // Buscar nomes das categorias
-    const categoryIds = expensesByCategory.map((item: { categoryId: string }) => item.categoryId);
+    const categoryIds = expensesByCategory
+  .map((item: { categoryId: string | null }) => item.categoryId)
+  .filter((id): id is string => id !== null); // filtra só strings válidas
     const categories = await db.category.findMany({
       where: {
         id: {
@@ -42,8 +44,11 @@ export async function GET() {
     });
 
     // Preparar dados para o gráfico de pizza
-    const expensesByCategoryData = expensesByCategory.map((item: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) => {
-      const category = categories.find((cat: { id: string; name: string }) => cat.id === item.categoryId);
+    const expensesByCategoryData = expensesByCategory.map((item: {
+      categoryId: string | null;
+      _sum: { amount: { toNumber(): number } | null };
+    }) => {
+      const category = categories.find((cat) => cat.id === item.categoryId);
       return {
         name: category?.name || 'Sem categoria',
         value: item._sum.amount?.toNumber() ?? 0,
