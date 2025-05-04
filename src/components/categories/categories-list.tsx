@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CategoryDialog } from "./category-dialog";
+import { toast } from "sonner";
 
 interface Category {
   id: string;
@@ -52,6 +53,7 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
             cat.id === selectedCategory.id ? updatedCategory : cat
           )
         );
+        toast.success("Categoria atualizada com sucesso!"); // Toast de sucesso para atualização
       } else {
         // Criar nova categoria
         const response = await fetch("/api/categorias", {
@@ -66,13 +68,16 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 
         const newCategory = await response.json();
         setCategorias((prev) => [...prev, newCategory]);
+        toast.success("Categoria criada com sucesso!"); // Toast de sucesso para criação
       }
 
       router.refresh();
       handleCloseDialog();
     } catch (error) {
       console.error("Erro ao salvar categoria:", error);
-      alert("Erro ao salvar categoria. Tente novamente.");
+      // Substituir alert por toast.error
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      toast.error(`Erro ao salvar categoria: ${errorMessage}`);
     }
   };
 
@@ -87,9 +92,12 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 
         setCategorias((prev) => prev.filter((cat) => cat.id !== id));
         router.refresh();
+        toast.success("Categoria excluída com sucesso!"); // Toast de sucesso para exclusão
       } catch (error) {
         console.error("Erro ao excluir categoria:", error);
-        alert("Erro ao excluir categoria. Tente novamente.");
+        // Substituir alert por toast.error
+        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+        toast.error(`Erro ao excluir categoria: ${errorMessage}`);
       }
     }
   };

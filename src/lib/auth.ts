@@ -29,7 +29,8 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error("Usuário não encontrado");
+          // Usuário não encontrado ou sem senha definida, retorna null para indicar falha de autenticação
+          return null;
         }
 
         const isPasswordValid = await compare(
@@ -38,7 +39,8 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
-          throw new Error("Senha incorreta");
+          // Senha incorreta, retorna null para indicar falha de autenticação
+          return null;
         }
 
         return {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { RevenueDialog } from "./revenue-dialog";
 import { formatCurrency } from "@/lib/utils";
 
@@ -89,17 +90,19 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
         if (!response.ok) throw new Error("Erro ao excluir receita");
 
         setRevenues((prev) => prev.filter((rev) => rev.id !== id));
+        toast.success("Receita excluída com sucesso!");
         router.refresh();
       } catch (error) {
         console.error("Erro ao excluir receita:", error);
-        alert("Erro ao excluir receita. Tente novamente.");
+        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
+        toast.error(`Erro ao excluir receita: ${errorMessage}`);
       }
     }
   };
 
-  // Função para formatar a data
+  // Função para formatar a data (mantendo o dia UTC original)
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('pt-BR');
+  	return new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   };
 
   return (

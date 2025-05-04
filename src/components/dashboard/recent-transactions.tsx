@@ -107,7 +107,7 @@ export function RecentTransactions({
                     <span className="font-medium">{transaction.description}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        {new Date(transaction.date).toLocaleDateString("pt-BR")}
+                        {new Date(transaction.date).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
                       </span>
                       {transaction.category && (
                         <>

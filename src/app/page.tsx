@@ -1,4 +1,9 @@
+"use client"; // Adicionar "use client" para usar hooks
+
+import { useEffect } from "react"; // Importar useEffect
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation"; // Importar hooks de navegação
+import { toast } from "sonner"; // Importar toast
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
 

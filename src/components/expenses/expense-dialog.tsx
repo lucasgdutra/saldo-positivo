@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 
 const expenseSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
@@ -46,15 +47,15 @@ export function ExpenseDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   
-  // Formatar a data para o formato YYYY-MM-DD para o input date
+  // Formatar a data para o formato YYYY-MM-DD para o input date (usando UTC)
   const formatDateForInput = useCallback((date: Date | null): string => {
-    if (!date) return "";
-    const d = new Date(date);
-    // Usar o fuso horário local em vez de UTC
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  	if (!date) return "";
+  	const d = new Date(date);
+  	// Usar métodos UTC para garantir que o dia original seja mantido
+  	const year = d.getUTCFullYear();
+  	const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
+  	const day = String(d.getUTCDate()).padStart(2, '0');
+  	return `${year}-${month}-${day}`;
   }, []);
 
   // Buscar categorias
@@ -111,13 +112,16 @@ export function ExpenseDialog({
   }, [initialData, reset, formatDateForInput]);
 
   const onSubmit = async (data: ExpenseFormData) => {
+    const isEditing = !!initialData; // Verifica se estamos editando
     try {
       setIsLoading(true);
       await onSave(data);
+      toast.success(isEditing ? "Despesa atualizada com sucesso!" : "Despesa criada com sucesso!");
       reset();
       onClose();
-    } catch (error) {
-      console.error("Erro ao salvar despesa:", error);
+    } catch (error: any) {
+      console.error(`Erro ao ${isEditing ? 'atualizar' : 'criar'} despesa:`, error);
+      toast.error(`Erro ao ${isEditing ? 'atualizar' : 'criar'} despesa: ${error?.message || 'Erro desconhecido'}`);
     } finally {
       setIsLoading(false);
     }

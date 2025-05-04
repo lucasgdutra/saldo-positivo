@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Esquema para login
 const loginSchema = z.object({
@@ -23,6 +25,8 @@ const registerSchema = z.object({
 type AuthFormData = z.infer<typeof loginSchema | typeof registerSchema>;
 
 export function AuthForm() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const schema = isLogin ? loginSchema : registerSchema;
   const {
@@ -47,8 +51,8 @@ export function AuthForm() {
         await signIn("credentials", {
           email: data.email,
           password: data.password,
-          callbackUrl: "/dashboard",
-          redirect: true,
+          // callbackUrl: "/dashboard",
+          // redirect: true,
         });
       } else {
         // Registrar novo usuário
@@ -85,6 +89,17 @@ export function AuthForm() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam === "CredentialsSignin") {
+      // Limpa o parâmetro de erro da URL PRIMEIRO para evitar toast duplicado em Strict Mode
+      router.replace('/', { scroll: false });
+      toast.error("Credenciais inválidas. Por favor, tente novamente.");
+    }
+    // Adicione outras verificações de erro do NextAuth aqui, se necessário
+    // else if (errorParam === 'OAuthSignin') { ... }
+  }, [searchParams]);
 
   return (
     <div className="w-full max-w-md space-y-8">

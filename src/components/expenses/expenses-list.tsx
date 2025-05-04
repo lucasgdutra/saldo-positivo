@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner"; // Adicionado
 import { ExpenseDialog } from "./expense-dialog";
 import { formatCurrency } from "@/lib/utils";
 
@@ -122,13 +123,17 @@ export function ExpensesList({ initialExpenses }: ExpensesListProps) {
 					method: "DELETE",
 				});
 
-				if (!response.ok) throw new Error("Erro ao excluir despesa");
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({})); // Tenta pegar detalhes do erro
+					throw new Error(errorData?.message || "Erro ao excluir despesa");
+				}
 
 				setExpenses((prev) => prev.filter((exp) => exp.id !== id));
+				toast.success("Despesa excluída com sucesso!"); // Toast de sucesso
 				router.refresh();
-			} catch (error) {
+			} catch (error: any) { // Tipando o erro
 				console.error("Erro ao excluir despesa:", error);
-				alert("Erro ao excluir despesa. Tente novamente.");
+				toast.error(`Erro ao excluir despesa: ${error?.message || 'Erro desconhecido'}`); // Toast de erro
 			}
 		}
 	};
@@ -180,9 +185,9 @@ export function ExpensesList({ initialExpenses }: ExpensesListProps) {
 		setExpenses(initialExpenses);
 	};
 
-	// Função para formatar a data
+	// Função para formatar a data (mantendo o dia UTC original)
 	const formatDate = (date: Date) => {
-		return new Date(date).toLocaleDateString("pt-BR");
+		return new Date(date).toLocaleDateString("pt-BR", { timeZone: "UTC" });
 	};
 
 	// Função para obter o estilo da categoria
