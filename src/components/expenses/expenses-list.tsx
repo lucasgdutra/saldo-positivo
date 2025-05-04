@@ -131,9 +131,12 @@ export function ExpensesList({ initialExpenses }: ExpensesListProps) {
 				setExpenses((prev) => prev.filter((exp) => exp.id !== id));
 				toast.success("Despesa excluída com sucesso!"); // Toast de sucesso
 				router.refresh();
-			} catch (error: any) { // Tipando o erro
+			} catch (error: any) {
+				// Tipando o erro
 				console.error("Erro ao excluir despesa:", error);
-				toast.error(`Erro ao excluir despesa: ${error?.message || 'Erro desconhecido'}`); // Toast de erro
+				toast.error(
+					`Erro ao excluir despesa: ${error?.message || "Erro desconhecido"}`,
+				); // Toast de erro
 			}
 		}
 	};
@@ -322,20 +325,20 @@ export function ExpensesList({ initialExpenses }: ExpensesListProps) {
 												<span className="text-sm text-muted-foreground">
 													{formatDate(despesa.date)}
 												</span>
-												<div
-													className="ml-2 rounded-full px-2 py-0.5 text-xs text-white"
-													style={getCategoryStyle(despesa.category.color)}
-												>
-													{despesa.category.name}
-												</div>
+											</div>
+											<div
+												className="mt-1 sm:mt-0 inline-block rounded-full px-2 py-0.5 text-xs text-white self-start" // Modificado: mt-1, sm:mt-0, inline-block, self-start
+												style={getCategoryStyle(despesa.category.color)}
+											>
+												{despesa.category.name}
 											</div>
 											{despesa.description && (
-												<p className="text-sm text-muted-foreground">
+												<p className="text-sm text-muted-foreground pt-1">
 													{despesa.description}
 												</p>
 											)}
 										</div>
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-2 self-end sm:self-auto">
 											<button
 												className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
 												type="button"
