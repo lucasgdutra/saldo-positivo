@@ -19,7 +19,7 @@ type ExpenseFormData = z.infer<typeof expenseSchema>;
 interface Category {
   id: string;
   name: string;
-  color: string;
+  color: string | undefined;
   userId: string;
 }
 

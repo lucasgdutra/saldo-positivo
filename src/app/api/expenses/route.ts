@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as z from "zod";
 import { updateUserBalance } from "@/lib/balance-utils";
+import { Expense, Category } from "@prisma/client";
 
 const expenseSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Converter os valores Decimal para números
-    const formattedExpenses = expenses.map((expense) => ({
+    const formattedExpenses = expenses.map((expense: Expense & { category: Category }) => ({
       ...expense,
       amount: expense.amount.toNumber(),
     }));
@@ -167,7 +168,7 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get("id");
 
     if (!id) {
@@ -248,7 +249,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams;
     const id = searchParams.get("id");
 
     if (!id) {
