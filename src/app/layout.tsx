@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner"; // Importar Toaster
@@ -34,6 +35,8 @@ export default function RootLayout({
 					{children}
 					<Toaster position="top-right" expand={true} richColors />
 				</AuthProvider>
+				<Analytics />
+				<SpeedInsights />
 			</body>
 		</html>
 	);
