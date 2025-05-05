@@ -12,9 +12,9 @@ type PrismaTransactionClient = any; // Simplificado
  */
 export class ExpenseRepository {
   // Aceita o cliente Prisma base, o estendido ou um cliente de transação
-  private prisma: PrismaClient | PrismaClientWithExtensions | PrismaTransactionClient;
+  private prisma: PrismaClientWithExtensions;
 
-  constructor(prismaClient: PrismaClient | PrismaClientWithExtensions | PrismaTransactionClient) {
+  constructor(prismaClient: PrismaClientWithExtensions) {
     this.prisma = prismaClient;
   }
 
@@ -139,9 +139,9 @@ export class ExpenseRepository {
     type GroupByResultItem = { categoryId: string | null; _sum: { amount: Decimal | null } };
 
     const categoryIds = result
-        .map((item: GroupByResultItem) => item.categoryId)
-        // Adiciona o tipo para 'id' no filter
-        .filter((id: string | null): id is string => id !== null); // Type guard para filtrar nulls
+      .map((item: GroupByResultItem) => item.categoryId)
+      // Adiciona o tipo para 'id' no filter
+      .filter((id: string | null): id is string => id !== null); // Type guard para filtrar nulls
 
     const categories = await this.prisma.category.findMany({
       where: {

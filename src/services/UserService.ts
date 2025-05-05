@@ -30,7 +30,7 @@ class UserService {
    * @returns O objeto do usuário (sem o saldo explícito aqui, use getBalance) ou null se não encontrado.
    */
   async getUserById(userId: string): Promise<Omit<User, 'balance'> | null> { // Ajusta o tipo de retorno
-    console.log(`UserService: Buscando usuário com ID: ${userId}`);
+    
     // findById agora retorna User & { balance: Balance | null }, mas podemos omitir balance aqui
     // se a intenção é apenas pegar os dados do User.
     const userWithBalance = await this.userRepository.findById(userId);
@@ -49,7 +49,7 @@ class UserService {
     * @returns O objeto do usuário com o saldo incluído, ou null se não encontrado.
     */
    async getUserByIdWithBalance(userId: string): Promise<(User & { balance: Balance | null }) | null> {
-       console.log(`UserService: Buscando usuário com saldo, ID: ${userId}`);
+       
        const user = await this.userRepository.findById(userId);
        if (!user) {
            console.warn(`UserService: Usuário com ID ${userId} não encontrado ao buscar com saldo.`);
@@ -66,7 +66,7 @@ class UserService {
    * @throws Error se o usuário não for encontrado.
    */
   async updateUser(userId: string, data: Partial<Omit<User, 'id' | 'balance' | 'createdAt' | 'updatedAt'>>): Promise<User> {
-    console.log(`UserService: Atualizando usuário com ID: ${userId}`);
+    
     const user = await this.getUserById(userId);
     if (!user) {
       console.error(`UserService: Tentativa de atualizar usuário não existente: ${userId}`);
@@ -84,7 +84,7 @@ class UserService {
         return user; // Retorna o usuário sem alterações se nada for fornecido
     }
 
-    console.log(`UserService: Dados para atualização para usuário ${userId}:`, updateData);
+    
     return this.userRepository.update(userId, updateData);
   }
 
@@ -95,7 +95,7 @@ class UserService {
    * @throws Error se o usuário ou o saldo não forem encontrados.
    */
   async getUserBalance(userId: string): Promise<Decimal> {
-    console.log(`UserService: Buscando saldo para o usuário ID: ${userId}`);
+    
     // Usa o método getBalance do repositório
     const balance = await this.userRepository.getBalance(userId);
     if (!balance) {
@@ -104,7 +104,7 @@ class UserService {
       // throw new Error('Saldo do usuário não encontrado');
       return new Decimal(0); // Ou lançar erro dependendo da regra
     }
-    console.log(`UserService: Saldo encontrado para ${userId}: ${balance.totalAmount}`);
+    
     return balance.totalAmount; // Retorna o valor numérico do saldo
   }
 
@@ -130,7 +130,7 @@ class UserService {
       throw new Error('Valor inválido para atualização de saldo. O valor deve ser positivo.');
     }
 
-    console.log(`UserService: Atualizando saldo para usuário ID: ${userId}, Valor: ${amount}, Operação: ${operationType}, Dentro da transação: ${!!tx}`);
+    
 
     // Define a função interna que realiza a lógica de atualização
     // Aceita apenas o tipo específico do cliente de transação inferido
@@ -143,7 +143,7 @@ class UserService {
       let currentAmount = new Decimal(0);
       if (currentBalance) {
         currentAmount = currentBalance.totalAmount;
-        console.log(`UserService (updateLogic): Saldo atual de ${userId}: ${currentAmount}`);
+        
       } else {
         console.warn(`UserService (updateLogic): Saldo não encontrado para ${userId}. Assumindo 0.`);
       }
@@ -152,15 +152,15 @@ class UserService {
       let newAmount: Decimal;
       if (operationType === 'add') {
         newAmount = currentAmount.add(amount);
-        console.log(`UserService (updateLogic): Novo saldo calculado (adição) para ${userId}: ${newAmount}`);
+        
       } else {
         newAmount = currentAmount.sub(amount);
-        console.log(`UserService (updateLogic): Novo saldo calculado (subtração) para ${userId}: ${newAmount}`);
+        
       }
 
       // 3. Atualizar o saldo
       await userRepo.updateBalancePartial(userId, { totalAmount: newAmount.toNumber() });
-      console.log(`UserService (updateLogic): Saldo atualizado para ${userId}. Novo valor: ${newAmount}`);
+      
 
       // 4. Retornar o usuário atualizado (sem o saldo)
       const finalUser = await userRepo.findById(userId);
@@ -169,7 +169,7 @@ class UserService {
         throw new Error('Falha ao buscar usuário após atualização de saldo.');
       }
       const { balance, ...userWithoutBalance } = finalUser;
-      console.log(`UserService (updateLogic): Retornando usuário ${userId} após atualização de saldo.`);
+      
       return userWithoutBalance as User;
     };
 
@@ -197,7 +197,7 @@ class UserService {
    * @throws Error se o usuário não for encontrado ou se o saldo for inválido.
    */
   async setUserBalance(userId: string, newBalance: Decimal): Promise<User> {
-    console.log(`UserService: Definindo saldo diretamente para usuário ID: ${userId}, Novo Saldo: ${newBalance}`);
+    
     if (newBalance.isNaN() || !newBalance.isFinite()) {
         console.error(`UserService: Tentativa de definir saldo inválido (${newBalance}) para usuário ${userId}.`);
         throw new Error('Saldo inválido fornecido.');
@@ -214,10 +214,10 @@ class UserService {
         console.warn(`UserService: Definindo um saldo negativo (${newBalance}) para o usuário ${userId}. Verifique as regras de negócio.`);
     }
 
-    console.log(`UserService: Definindo saldo para ${userId}: ${newBalance}`);
+    
     // Usa updateBalancePartial para definir o saldo. Converte Decimal para number.
     await this.userRepository.updateBalancePartial(userId, { totalAmount: newBalance.toNumber() });
-    console.log(`UserService: Saldo definido diretamente com sucesso para ${userId}.`);
+    
 
     // Retorna o usuário atualizado (sem o saldo explícito)
     const updatedUser = await this.getUserById(userId);
@@ -240,7 +240,7 @@ class UserService {
    * @throws Error se o usuário não for encontrado ou se ocorrer um erro durante o recálculo.
    */
   async recalculateBalance(userId: string): Promise<Balance> {
-    console.log(`UserService: Iniciando recálculo de saldo para o usuário ID: ${userId}`);
+    
 
     // Importa repositórios necessários dinamicamente para evitar ciclos de dependência
     // Importa repositórios necessários
@@ -273,7 +273,7 @@ class UserService {
 
       // 4. Calcular o novo saldo
       const newCalculatedBalance = totalRevenue.sub(totalExpense);
-      console.log(`UserService (recalculate): Saldo recalculado para ${userId}: Receitas=${totalRevenue}, Despesas=${totalExpense}, Saldo=${newCalculatedBalance}`);
+      
 
       // 5. Buscar o objeto Balance atual
       let currentBalance = await userRepo.getBalance(userId);
@@ -292,7 +292,7 @@ class UserService {
                 referenceMonth: new Date(), // Adicionado - Usando data atual
             }
         });
-        console.log(`UserService (recalculate): Novo objeto Balance criado para ${userId} com saldo ${newCalculatedBalance}, receitas ${totalRevenue}, despesas ${totalExpense}.`);
+        
       } else {
           // Atualiza apenas se o valor calculado for diferente do atual ou outros totais mudaram
           const currentBalanceAmountDecimal = new Decimal(currentBalance.totalAmount);
@@ -310,9 +310,9 @@ class UserService {
                 totalExpenses: totalExpense.toNumber(), // Atualiza total de despesas
                 // referenceMonth: new Date(), // Opcional: atualizar mês de referência
               });
-              console.log(`UserService (recalculate): Saldo/Totais atualizados no objeto Balance para ${userId}. Novo saldo: ${newCalculatedBalance}, Receitas: ${totalRevenue}, Despesas: ${totalExpense}`);
+              
           } else {
-              console.log(`UserService (recalculate): Saldo e totais recalculados são iguais aos atuais. Nenhuma atualização necessária no Balance.`);
+              
           }
       }
 
@@ -327,7 +327,7 @@ class UserService {
           throw new Error('Falha ao obter o saldo final após o recálculo.');
       }
 
-     console.log(`UserService: Recálculo de saldo concluído para ${userId}. Saldo final: ${finalBalance.totalAmount}`);
+     
      return finalBalance;
    });
   }
@@ -339,7 +339,7 @@ class UserService {
    * @throws Error se ocorrer um erro ao buscar os dados.
    */
   async getBalanceHistory(userId: string): Promise<{ month: string; receitas: number; despesas: number }[]> {
-    console.log(`UserService: Buscando histórico de saldo para o usuário ID: ${userId}`);
+    
     try {
       // Obter os últimos 6 meses
       const hoje = new Date();
@@ -397,7 +397,7 @@ class UserService {
         })
       );
 
-      console.log(`UserService: Histórico de saldo encontrado para ${userId}.`);
+      
       return dadosMensais;
     } catch (error) {
       console.error(`UserService: Erro ao buscar histórico de saldo para ${userId}:`, error);

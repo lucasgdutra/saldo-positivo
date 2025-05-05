@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'; // Para hashear a senha
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log(`Start seeding ...`);
+  
 
   // 1. Criar um usuário de exemplo
   const hashedPassword = await bcrypt.hash('password123', 10); // Hashear a senha
@@ -18,7 +18,7 @@ async function main() {
       password: hashedPassword,
     },
   });
-  console.log(`Created user with id: ${user.id}`);
+  
 
   // 2. Criar categorias de exemplo para o usuário
   // Assumindo uma constraint unique composta @@unique([name, userId]) no model Category
@@ -32,9 +32,9 @@ async function main() {
       category = await prisma.category.create({
         data: { name, userId },
       });
-      console.log(`Created category: ${name}`);
+      
     } else {
-      console.log(`Found category: ${name}`);
+      
     }
     return category;
   }
@@ -80,7 +80,7 @@ async function main() {
       categoryId: category3.id,
     },
   });
-  console.log(`Created sample expenses.`);
+  
 
   // 4. Criar receitas de exemplo
   await prisma.revenue.create({
@@ -99,9 +99,9 @@ async function main() {
       userId: user.id,
     },
   });
-  console.log(`Created sample revenues.`);
+  
 
-  console.log(`Seeding finished.`);
+  
 }
 
 main()

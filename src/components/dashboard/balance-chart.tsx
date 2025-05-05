@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
+import { z } from "zod";
+import { trpc } from "@/lib/trpc";
 import {
   BarChart,
   Bar,
@@ -13,54 +15,47 @@ import {
 } from "recharts";
 import { DashboardErrorContainer } from "./dashboard-error";
 
-type BalanceData = {
-  month: string;
-  receitas: number;
-  despesas: number;
-};
+// Esquema Zod para validação (mais flexível)
+const BalanceDataSchema = z.object({
+  month: z.coerce.string(), // Coerção para string
+  receitas: z.number().optional().default(0), // Permitir opcional com fallback 0, remover nonnegative temporariamente
+  despesas: z.number().optional().default(0), // Permitir opcional com fallback 0, remover nonnegative temporariamente
+});
 
-type BalanceChartProps = {
-  data?: BalanceData[];
-  isLoading?: boolean;
-};
+const BalanceHistoryResponseSchema = z.array(BalanceDataSchema);
 
-export function BalanceChart({ data, isLoading: initialLoading = false }: BalanceChartProps) {
-  const [chartData, setChartData] = useState<BalanceData[]>([]);
-  const [isLoading, setIsLoading] = useState(initialLoading);
-  const [error, setError] = useState<string | null>(null);
+type BalanceData = z.infer<typeof BalanceDataSchema>;
 
-  const fetchData = useCallback(async () => {
-    if (data) {
-      setChartData(data);
-      return;
+// Não precisamos mais de props, o componente buscará seus próprios dados
+export function BalanceChart() {
+  const {
+    data: chartData = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = trpc.dashboard.balanceHistory.useQuery();
+
+  // Memoizar formatters com useCallback
+  const formatYAxisTick = useCallback((value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      notation: "compact",
+      compactDisplay: "short",
+    }).format(value);
+  }, []);
+
+  const formatTooltipValue = useCallback((value: number | string) => {
+    // Garantir que o valor seja um número antes de formatar
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numericValue)) {
+      return 'N/A'; // Ou algum valor padrão se não for número
     }
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(numericValue);
+  }, []);
 
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await fetch('/api/dashboard/balance-history');
-      
-      if (!response.ok) {
-        throw new Error('Falha ao buscar dados do histórico de saldo');
-      }
-      
-      const balanceData = await response.json();
-      setChartData(balanceData);
-    } catch (err) {
-      console.error('Erro ao buscar dados do histórico:', err);
-      setError('Não foi possível carregar os dados do histórico');
-      
-      // Não usar dados fictícios em caso de erro
-      setChartData([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   if (isLoading) {
     return (
@@ -71,12 +66,12 @@ export function BalanceChart({ data, isLoading: initialLoading = false }: Balanc
   }
 
   return (
-    <DashboardErrorContainer 
-      isError={!!error} 
-      error={error}
-      onRetry={fetchData}
+    <DashboardErrorContainer
+      isError={isError}
+      error={error?.message || null} // Passa a mensagem de erro
+      onRetry={refetch} // Usa a função refetch do useQuery
     >
-      {chartData.length === 0 ? (
+      {chartData.length === 0 && !isLoading && !isError ? ( // Adiciona verificação para não mostrar "sem histórico" durante loading ou erro
         <div className="h-80 w-full flex flex-col items-center justify-center p-6 text-center border rounded-lg">
           <h3 className="text-lg font-medium mb-2">Sem histórico de receitas e despesas</h3>
           <p className="text-muted-foreground mb-4">
@@ -112,24 +107,15 @@ export function BalanceChart({ data, isLoading: initialLoading = false }: Balanc
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("pt-BR", {
-                    notation: "compact",
-                    compactDisplay: "short",
-                  }).format(value)
-                }
+                tickFormatter={formatYAxisTick} // Usar formatter memoizado
               />
               <Tooltip
-                formatter={(value) =>
-                  new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(Number(value))
-                }
+                formatter={formatTooltipValue} // Usar formatter memoizado
               />
               <Legend />
-              <Bar dataKey="receitas" name="Receitas" fill="#10b981" />
-              <Bar dataKey="despesas" name="Despesas" fill="#ef4444" />
+              {/* Adicionar stackId para empilhar barras se necessário, mas aqui são valores distintos */}
+              <Bar dataKey="receitas" name="Receitas" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="despesas" name="Despesas" fill="#ef4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

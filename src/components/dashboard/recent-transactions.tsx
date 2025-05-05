@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
 import { DashboardErrorContainer } from "./dashboard-error";
 
 type Transaction = {
@@ -12,52 +12,14 @@ type Transaction = {
   category?: string;
 };
 
-type RecentTransactionsProps = {
-  data?: Transaction[];
-  isLoading?: boolean;
-};
-
-export function RecentTransactions({
-  data,
-  isLoading: initialLoading = false,
-}: RecentTransactionsProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(initialLoading);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    if (data) {
-      setTransactions(data);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await fetch('/api/dashboard/recent-transactions');
-      
-      if (!response.ok) {
-        throw new Error('Falha ao buscar transações recentes');
-      }
-      
-      const transactionsData = await response.json();
-      
-      setTransactions(transactionsData);
-    } catch (err) {
-      console.error('Erro ao buscar transações recentes:', err);
-      setError('Não foi possível carregar as transações recentes');
-      
-      // Não usar dados fictícios em caso de erro
-      setTransactions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+export function RecentTransactions() {
+  const {
+    data: transactions = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = trpc.dashboard.recentTransactions.useQuery();
 
   if (isLoading) {
     return (
@@ -68,10 +30,10 @@ export function RecentTransactions({
   }
 
   return (
-    <DashboardErrorContainer 
-      isError={!!error} 
-      error={error}
-      onRetry={fetchData}
+    <DashboardErrorContainer
+      isError={isError}
+      error={error?.message || null}
+      onRetry={refetch}
     >
       <div className="w-full">
         <div className="rounded-md border">
@@ -80,7 +42,7 @@ export function RecentTransactions({
             <small className="text-xs text-muted-foreground block mt-1">Últimas 5 transações, para mais detalhes gere um <a href="/relatorios" className="text-primary hover:underline font-medium">relatório</a></small>
           </div>
           <div className="divide-y">
-            {transactions.length === 0 ? (
+            {transactions.length === 0 && !isLoading && !isError ? ( // Adiciona verificação para não mostrar "sem transações" durante loading ou erro
               <div className="p-6 text-center">
                 <p className="text-muted-foreground mb-4">
                   Você ainda não possui transações registradas.

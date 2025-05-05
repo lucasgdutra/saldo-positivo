@@ -1,31 +1,80 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { RevenueDialog } from "./revenue-dialog";
 import { formatCurrency } from "@/lib/utils";
+import { trpc } from "@/lib/trpc"; // Importar trpc
+import type { AppRouter } from "@/server/routers/_app"; // Importar o tipo do AppRouter
+import type { inferRouterOutputs } from "@trpc/server"; // Importar inferRouterOutputs
+import type { TRPCClientErrorLike } from "@trpc/client"; // Importar tipo de erro
 
-interface Revenue {
-  id: string;
-  amount: number;
-  description: string | null;
-  date: Date;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Inferir o tipo de saída para receitas
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type Revenue = RouterOutput["revenues"]["list"][number];
 
-interface RevenuesListProps {
-  initialRevenues: Revenue[];
-}
-
-export function RevenuesList({ initialRevenues }: RevenuesListProps) {
+export function RevenuesList() {
+  // Adicionar os useState que foram removidos
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
-  const [revenues, setRevenues] = useState<Revenue[]>(initialRevenues);
-  const router = useRouter();
+  const queryClient = useQueryClient();
+  const utils = trpc.useUtils(); // Obter utils para invalidação
 
+  // --- Query para buscar receitas com tRPC ---
+  const {
+    data: revenuesData = [],
+    isLoading,
+    isError,
+    error,
+  } = trpc.revenues.list.useQuery({}, { // Passar objeto vazio como input
+    // O tipo Revenue já é inferido
+    // A conversão de data já é feita pelo superjson
+  });
+
+  // --- Mutations com tRPC ---
+  const createRevenueMutation = trpc.revenues.create.useMutation({
+    onSuccess: () => {
+      utils.revenues.list.invalidate();
+      utils.revenues.getRecent.invalidate();
+      queryClient.invalidateQueries({ queryKey: ["balanceHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["recentTransactions"] });
+      toast.success("Receita criada com sucesso!");
+      handleCloseDialog();
+    },
+    onError: (error: TRPCClientErrorLike<AppRouter>) => { // Adicionar tipo ao erro
+      toast.error(`Erro ao criar receita: ${error.message}`);
+    },
+  });
+
+  const updateRevenueMutation = trpc.revenues.update.useMutation({
+    onSuccess: () => {
+      utils.revenues.list.invalidate();
+      utils.revenues.getRecent.invalidate();
+      queryClient.invalidateQueries({ queryKey: ["balanceHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["recentTransactions"] });
+      toast.success("Receita atualizada com sucesso!");
+      handleCloseDialog();
+    },
+    onError: (error: TRPCClientErrorLike<AppRouter>) => { // Adicionar tipo ao erro
+      toast.error(`Erro ao atualizar receita: ${error.message}`);
+    },
+  });
+
+  const deleteRevenueMutation = trpc.revenues.delete.useMutation({
+    onSuccess: () => {
+      utils.revenues.list.invalidate();
+      utils.revenues.getRecent.invalidate();
+      queryClient.invalidateQueries({ queryKey: ["balanceHistory"] });
+      queryClient.invalidateQueries({ queryKey: ["recentTransactions"] });
+      toast.success("Receita excluída com sucesso!");
+    },
+    onError: (error: TRPCClientErrorLike<AppRouter>) => { // Adicionar tipo ao erro
+      toast.error(`Erro ao excluir receita: ${error.message}`);
+    },
+  });
+
+  // --- Handlers ---
   const handleOpenDialog = (revenue?: Revenue) => {
     setSelectedRevenue(revenue || null);
     setIsDialogOpen(true);
@@ -36,74 +85,30 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
     setIsDialogOpen(false);
   };
 
-  const handleSaveRevenue = async (data: { amount: number; description?: string; date: string }) => {
-    try {
-      if (selectedRevenue) {
-        // Editar receita existente
-        const response = await fetch(`/api/revenues?id=${selectedRevenue.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) throw new Error("Erro ao atualizar receita");
-
-        const updatedRevenue = await response.json();
-        setRevenues((prev) =>
-          prev.map((rev) =>
-            rev.id === selectedRevenue.id ? updatedRevenue : rev
-          )
-        );
-      } else {
-        // Criar nova receita
-        const response = await fetch("/api/revenues", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) throw new Error("Erro ao criar receita");
-
-        const newRevenue = await response.json();
-        setRevenues((prev) => [newRevenue, ...prev]);
-      }
-
-      router.refresh();
-      handleCloseDialog();
-    } catch (error) {
-      console.error("Erro ao salvar receita:", error);
-      alert("Erro ao salvar receita. Tente novamente.");
+  const handleSaveRevenue = (data: { amount: number; description?: string; date: string }) => {
+    if (selectedRevenue) {
+      updateRevenueMutation.mutate({ id: selectedRevenue.id, data });
+    } else {
+      createRevenueMutation.mutate(data);
     }
   };
 
-  const handleDeleteRevenue = async (id: string) => {
+  const handleDeleteRevenue = (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir esta receita?")) {
-      try {
-        const response = await fetch(`/api/revenues?id=${id}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) throw new Error("Erro ao excluir receita");
-
-        setRevenues((prev) => prev.filter((rev) => rev.id !== id));
-        toast.success("Receita excluída com sucesso!");
-        router.refresh();
-      } catch (error) {
-        console.error("Erro ao excluir receita:", error);
-        const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
-        toast.error(`Erro ao excluir receita: ${errorMessage}`);
-      }
+      deleteRevenueMutation.mutate({ id });
     }
   };
 
-  // Função para formatar a data (mantendo o dia UTC original)
-  const formatDate = (date: Date) => {
-  	return new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  // --- Funções Auxiliares ---
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) {
+			return "Data inválida";
+		}
+    return dateObj.toLocaleDateString('pt-BR');
   };
+
+  const isMutating = createRevenueMutation.isPending || updateRevenueMutation.isPending || deleteRevenueMutation.isPending;
 
   return (
     <>
@@ -116,9 +121,10 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
             </p>
           </div>
           <button
-            className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90"
+            className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:opacity-50"
             type="button"
             onClick={() => handleOpenDialog()}
+            disabled={isMutating}
           >
             Nova Receita
           </button>
@@ -126,13 +132,22 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
 
         <div className="rounded-lg border">
           <div className="p-4">
-            <div className="grid gap-4">
-              {revenues.length === 0 ? (
-                <p className="text-center text-muted-foreground">
-                  Nenhuma receita cadastrada.
-                </p>
-              ) : (
-                revenues.map((receita) => (
+            {isLoading && (
+              <div className="text-center text-muted-foreground py-4">Carregando receitas...</div>
+            )}
+            {isError && error && (
+              <div className="text-center text-red-600 py-4">
+                Erro ao carregar receitas: {error.message}
+              </div>
+            )}
+            {!isLoading && !isError && revenuesData.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhuma receita cadastrada.
+              </p>
+            )}
+            {!isLoading && !isError && revenuesData.length > 0 && (
+              <div className="grid gap-4">
+                {revenuesData.map((receita) => (
                   <div
                     key={receita.id}
                     className="flex items-center justify-between rounded-lg border p-4"
@@ -140,7 +155,7 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-green-600">
-                          {formatCurrency(receita.amount)}
+                          {formatCurrency(Number(receita.amount))}
                         </span>
                         <span className="text-sm text-muted-foreground">
                           {formatDate(receita.date)}
@@ -154,24 +169,26 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
+                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary disabled:opacity-50"
                         type="button"
                         onClick={() => handleOpenDialog(receita)}
+                        disabled={isMutating}
                       >
                         Editar
                       </button>
                       <button
-                        className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
+                        className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
                         type="button"
                         onClick={() => handleDeleteRevenue(receita.id)}
+                        disabled={isMutating}
                       >
                         Excluir
                       </button>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -180,7 +197,9 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
         onSave={handleSaveRevenue}
-        initialData={selectedRevenue || undefined}
+        isSaving={createRevenueMutation.isPending || updateRevenueMutation.isPending}
+        // Converter amount para number antes de passar para o dialog
+        initialData={selectedRevenue ? { ...selectedRevenue, amount: Number(selectedRevenue.amount) } : undefined}
       />
     </>
   );

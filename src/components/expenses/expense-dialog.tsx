@@ -3,8 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import type { RouterOutputs } from "@/lib/trpc";
+
+type CategoryType = RouterOutputs["categories"]["list"][number];
+type ExpenseWithCategory = RouterOutputs["expenses"]["list"][number];
 
 const expenseSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
@@ -17,65 +21,37 @@ const expenseSchema = z.object({
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
-interface Category {
-  id: string;
-  name: string;
-  color: string | undefined;
-  userId: string;
+interface ExpenseWithNumberAmount extends Omit<ExpenseWithCategory, "amount"> {
+  amount: number;
 }
 
 interface ExpenseDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: ExpenseFormData) => Promise<void>;
-  initialData?: {
-    id: string;
-    amount: number;
-    description: string | null;
-    date: Date;
-    categoryId: string;
-    category?: Category;
-  };
+  onSave: (data: ExpenseFormData) => void;
+  categories: CategoryType[];
+  isSaving?: boolean;
+  initialData?: ExpenseWithNumberAmount;
 }
 
 export function ExpenseDialog({
   isOpen,
   onClose,
   onSave,
+  categories,
+  isSaving = false,
   initialData,
 }: ExpenseDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  
   // Formatar a data para o formato YYYY-MM-DD para o input date (usando UTC)
-  const formatDateForInput = useCallback((date: Date | null): string => {
-  	if (!date) return "";
-  	const d = new Date(date);
-  	// Usar métodos UTC para garantir que o dia original seja mantido
-  	const year = d.getUTCFullYear();
-  	const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
-  	const day = String(d.getUTCDate()).padStart(2, '0');
-  	return `${year}-${month}-${day}`;
+  const formatDateForInput = useCallback((date: Date | string | null): string => {
+    if (!date) return "";
+    const d = new Date(date);
+    // Usar métodos UTC para garantir que o dia original seja mantido
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0"); // getUTCMonth é 0-indexado
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }, []);
-
-  // Buscar categorias
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categorias");
-        if (response.ok) {
-          const data = await response.json();
-          setCategories(data);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar categorias:", error);
-      }
-    };
-
-    if (isOpen) {
-      fetchCategories();
-    }
-  }, [isOpen]);
 
   const {
     register,
@@ -91,7 +67,7 @@ export function ExpenseDialog({
       categoryId: "",
     },
   });
-  
+
   // Atualizar o formulário quando initialData mudar
   useEffect(() => {
     if (initialData) {
@@ -111,20 +87,8 @@ export function ExpenseDialog({
     }
   }, [initialData, reset, formatDateForInput]);
 
-  const onSubmit = async (data: ExpenseFormData) => {
-    const isEditing = !!initialData; // Verifica se estamos editando
-    try {
-      setIsLoading(true);
-      await onSave(data);
-      toast.success(isEditing ? "Despesa atualizada com sucesso!" : "Despesa criada com sucesso!");
-      reset();
-      onClose();
-    } catch (error: any) {
-      console.error(`Erro ao ${isEditing ? 'atualizar' : 'criar'} despesa:`, error);
-      toast.error(`Erro ao ${isEditing ? 'atualizar' : 'criar'} despesa: ${error?.message || 'Erro desconhecido'}`);
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: ExpenseFormData) => {
+    onSave(data);
   };
 
   if (!isOpen) return null;
@@ -148,13 +112,13 @@ export function ExpenseDialog({
               min="0.01"
               className="mt-1 block w-full rounded-md border px-3 py-2"
               placeholder="0,00"
-              disabled={isLoading}
+              disabled={isSaving}
             />
             {errors.amount && (
               <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="description" className="block text-sm font-medium">
               Descrição
@@ -165,13 +129,15 @@ export function ExpenseDialog({
               id="description"
               className="mt-1 block w-full rounded-md border px-3 py-2"
               placeholder="Ex: Aluguel, Mercado, etc."
-              disabled={isLoading}
+              disabled={isSaving}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.description.message}
+              </p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="categoryId" className="block text-sm font-medium">
               Categoria
@@ -180,9 +146,13 @@ export function ExpenseDialog({
               {...register("categoryId")}
               id="categoryId"
               className="mt-1 block w-full rounded-md border px-3 py-2"
-              disabled={isLoading}
+              disabled={isSaving || categories.length === 0}
             >
-              <option value="">Selecione uma categoria</option>
+              <option value="">
+                {categories.length === 0
+                  ? "Carregando..."
+                  : "Selecione uma categoria"}
+              </option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -190,10 +160,12 @@ export function ExpenseDialog({
               ))}
             </select>
             {errors.categoryId && (
-              <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.categoryId.message}
+              </p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="date" className="block text-sm font-medium">
               Data
@@ -203,28 +175,28 @@ export function ExpenseDialog({
               type="date"
               id="date"
               className="mt-1 block w-full rounded-md border px-3 py-2"
-              disabled={isLoading}
+              disabled={isSaving}
             />
             {errors.date && (
               <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
             )}
           </div>
-          
+
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-              disabled={isLoading}
+              className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSaving}
             >
               Cancelar
             </button>
             <button
               type="submit"
               className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isSaving}
             >
-              {isLoading ? "Salvando..." : "Salvar"}
+              {isSaving ? "Salvando..." : "Salvar"}
             </button>
           </div>
         </form>

@@ -48,7 +48,7 @@ class CategoryService {
     }
 
 
-    console.log(`CategoryService: Criando categoria '${trimmedName}' para usuário ${userId}.`);
+    
     // O repositório espera Prisma.CategoryUncheckedCreateInput
     return this.categoryRepository.create({ name: trimmedName, userId });
   }
@@ -60,7 +60,7 @@ class CategoryService {
    * @returns A categoria encontrada ou null.
    */
   async getCategoryById(id: string, userId: string): Promise<Category | null> {
-    console.log(`CategoryService: Buscando categoria ID ${id} para usuário ${userId}.`);
+    
     return this.categoryRepository.findById(id, userId);
   }
 
@@ -70,7 +70,7 @@ class CategoryService {
    * @returns Uma lista de categorias.
    */
   async getCategoriesByUser(userId: string): Promise<Category[]> {
-    console.log(`CategoryService: Listando categorias para usuário ${userId}.`);
+    
     return this.categoryRepository.findByUserId(userId);
   }
 
@@ -118,7 +118,7 @@ class CategoryService {
     }
 
 
-    console.log(`CategoryService: Atualizando categoria ID ${id} para usuário ${userId} com nome '${trimmedName}'.`);
+    
     // O repositório espera Prisma.CategoryUpdateInput
     return this.categoryRepository.update(id, userId, { name: trimmedName });
   }
@@ -131,7 +131,7 @@ class CategoryService {
    * @throws Error se a categoria não for encontrada, não pertencer ao usuário, ou estiver em uso.
    */
   async deleteCategory(id: string, userId: string): Promise<Category> {
-    console.log(`CategoryService: Tentando deletar categoria ID ${id} para usuário ${userId}.`);
+    
 
     // 1. Verifica se a categoria existe e pertence ao usuário
     const category = await this.getCategoryById(id, userId);
@@ -158,7 +158,7 @@ class CategoryService {
 
 
     // 4. Se não estiver em uso por despesas, deleta a categoria
-    console.log(`CategoryService: Categoria ${id} ('${category.name}') não está em uso. Procedendo com a deleção para usuário ${userId}.`);
+    
     return this.categoryRepository.delete(id, userId);
   }
 }

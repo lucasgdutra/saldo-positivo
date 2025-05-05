@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useEffect } from "react";
+import { useEffect } from "react"; // Remover useState
 
 const categorySchema = z.object({
   name: z.string().min(1, "Nome da categoria é obrigatório"),
@@ -14,7 +14,8 @@ type CategoryFormData = z.infer<typeof categorySchema>;
 interface CategoryDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: CategoryFormData) => Promise<void>;
+  onSave: (data: CategoryFormData) => void; // Mudar para void, já que a mutation é síncrona
+  isSaving?: boolean; // Adicionar prop isSaving
   initialData?: {
     id: string;
     name: string;
@@ -25,9 +26,10 @@ export function CategoryDialog({
   isOpen,
   onClose,
   onSave,
+  isSaving = false, // Usar a prop isSaving, default false
   initialData,
 }: CategoryDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  // Remover estado isLoading interno
   const {
     register,
     handleSubmit,
@@ -53,17 +55,12 @@ export function CategoryDialog({
     }
   }, [initialData, reset]);
 
-  const onSubmit = async (data: CategoryFormData) => {
-    try {
-      setIsLoading(true);
-      await onSave(data);
-      reset();
-      onClose();
-    } catch (error) {
-      console.error("Erro ao salvar categoria:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  // Simplificar onSubmit, não precisa mais ser async nem gerenciar isLoading
+  const onSubmit = (data: CategoryFormData) => {
+    onSave(data);
+    // O fechamento do dialog e reset são feitos no onSuccess da mutation no componente pai
+    // reset(); // Pode ser mantido se quiser limpar o form imediatamente
+    // onClose(); // Removido daqui
   };
 
   if (!isOpen) return null;
@@ -85,7 +82,7 @@ export function CategoryDialog({
               id="name"
               className="mt-1 block w-full rounded-md border px-3 py-2"
               placeholder="Ex: Alimentação"
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -95,17 +92,17 @@ export function CategoryDialog({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-              disabled={isLoading}
+              className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSaving} // Usar isSaving
             >
               Cancelar
             </button>
             <button
               type="submit"
               className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             >
-              {isLoading ? "Salvando..." : "Salvar"}
+              {isSaving ? "Salvando..." : "Salvar"}
             </button>
           </div>
         </form>

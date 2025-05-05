@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/providers/auth-provider";
+import { QueryProvider } from "@/providers/query-provider"; // Importar QueryProvider
 import { Toaster } from "@/components/ui/sonner"; // Importar Toaster
 import "./globals.css";
 
@@ -32,8 +33,10 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<AuthProvider>
-					{children}
-					<Toaster position="top-right" expand={true} richColors />
+					<QueryProvider>
+						{children}
+						<Toaster position="top-right" expand={true} richColors />
+					</QueryProvider>
 				</AuthProvider>
 				<Analytics />
 				<SpeedInsights />

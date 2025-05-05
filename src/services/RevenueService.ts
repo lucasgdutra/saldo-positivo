@@ -44,7 +44,7 @@ class RevenueService {
     }
 
 
-    console.log(`RevenueService: Iniciando criação de receita para usuário ${userId}, valor: ${revenueAmount}`);
+    
 
     return this.prisma.$transaction(async (tx: TransactionClient) => {
       // Cria instância do repositório com o cliente de transação
@@ -59,15 +59,15 @@ class RevenueService {
         description,
         date,
       };
-      console.log(`RevenueService (TX): Criando registro de receita...`, createData);
+      
       const newRevenue = await revenueRepoTx.create(createData);
-      console.log(`RevenueService (TX): Receita ID ${newRevenue.id} criada.`);
+      
 
       // 2. Atualiza o saldo do usuário (adiciona o valor da receita) usando a instância principal
       //    e passando o cliente de transação 'tx'
-      console.log(`RevenueService (TX): Atualizando saldo do usuário ${userId} (adicionando ${revenueAmount}).`);
+      
       await this.userService.updateUserBalance(userId, revenueAmount, 'add', tx); // Passa tx aqui
-      console.log(`RevenueService (TX): Saldo do usuário ${userId} atualizado.`);
+      
 
       return newRevenue;
     });
@@ -81,7 +81,7 @@ class RevenueService {
    * @throws Error se a receita encontrada não pertencer ao usuário especificado.
    */
   async getRevenueById(id: string, userId: string): Promise<Revenue | null> {
-    console.log(`RevenueService: Buscando receita ID ${id} para usuário ${userId}.`);
+    
     const revenue = await this.revenueRepository.findById(id);
 
     if (revenue && revenue.userId !== userId) {
@@ -102,7 +102,7 @@ class RevenueService {
    * @returns Uma lista de receitas.
    */
   async getRevenuesByUser(userId: string): Promise<Revenue[]> {
-    console.log(`RevenueService: Listando receitas para usuário ${userId}.`);
+    
     return this.revenueRepository.findByUserId(userId);
   }
 
@@ -114,7 +114,7 @@ class RevenueService {
    * @returns Uma lista de receitas no período.
    */
   async getRevenuesByUserAndPeriod(userId: string, startDate: Date, endDate: Date): Promise<Revenue[]> {
-    console.log(`RevenueService: Listando receitas para usuário ${userId} entre ${startDate.toISOString()} e ${endDate.toISOString()}.`);
+    
     return this.revenueRepository.findByUserIdAndPeriod(userId, startDate, endDate);
   }
 
@@ -143,7 +143,7 @@ class RevenueService {
     }
 
 
-    console.log(`RevenueService: Iniciando atualização da receita ID ${id} para usuário ${userId}.`);
+    
 
     return this.prisma.$transaction(async (tx: TransactionClient) => {
       // Cria instância do repositório com o cliente de transação
@@ -161,7 +161,7 @@ class RevenueService {
         throw new Error('Acesso não permitido para atualizar esta receita.');
       }
       const oldAmount = originalRevenue.amount;
-      console.log(`RevenueService (TX): Receita ${id} encontrada. Valor antigo: ${oldAmount}.`);
+      
 
       // 2. Prepara os dados para atualização
       const updateData: Prisma.RevenueUpdateInput = {};
@@ -174,15 +174,15 @@ class RevenueService {
            return originalRevenue; // Nenhuma alteração necessária
        }
 
-      console.log(`RevenueService (TX): Atualizando receita ${id} com dados:`, updateData);
+      
       const updatedRevenue = await revenueRepoTx.update(id, updateData);
-      console.log(`RevenueService (TX): Receita ${id} atualizada. Novo valor: ${updatedRevenue.amount}.`);
+      
 
       // 3. Calcula a diferença e ajusta o saldo do usuário
       // Apenas ajusta se o valor foi alterado
       if (newAmount !== undefined && !newAmount.equals(oldAmount)) {
         const difference = newAmount.sub(oldAmount);
-        console.log(`RevenueService (TX): Diferença de valor: ${difference}. Ajustando saldo do usuário ${userId}.`);
+        
         if (difference.isPositive()) {
           // Se o novo valor é maior, adiciona a diferença, passando tx
           await this.userService.updateUserBalance(userId, difference, 'add', tx);
@@ -190,9 +190,9 @@ class RevenueService {
           // Se o novo valor é menor, subtrai a diferença (valor absoluto), passando tx
           await this.userService.updateUserBalance(userId, difference.abs(), 'subtract', tx);
         }
-         console.log(`RevenueService (TX): Saldo do usuário ${userId} ajustado.`);
+         
       } else {
-          console.log(`RevenueService (TX): Valor da receita ${id} não alterado. Saldo do usuário ${userId} não precisa de ajuste.`);
+          
       }
 
       return updatedRevenue;
@@ -207,7 +207,7 @@ class RevenueService {
    * @throws Error se a receita não for encontrada ou a operação falhar.
    */
   async deleteRevenue(id: string, userId: string): Promise<Revenue> {
-    console.log(`RevenueService: Iniciando deleção da receita ID ${id} para usuário ${userId}.`);
+    
 
     return this.prisma.$transaction(async (tx: TransactionClient) => {
       // Cria instância do repositório com o cliente de transação
@@ -225,17 +225,17 @@ class RevenueService {
         throw new Error('Acesso não permitido para deletar esta receita.');
       }
       const amountToDelete = revenueToDelete.amount;
-      console.log(`RevenueService (TX): Receita ${id} encontrada. Valor: ${amountToDelete}.`);
+      
 
       // 2. Deleta a receita
-      console.log(`RevenueService (TX): Deletando receita ${id}.`);
+      
       await revenueRepoTx.delete(id);
-      console.log(`RevenueService (TX): Receita ${id} deletada.`);
+      
 
       // 3. Atualiza o saldo do usuário (subtrai o valor da receita), passando tx
-      console.log(`RevenueService (TX): Atualizando saldo do usuário ${userId} (subtraindo ${amountToDelete}).`);
+      
       await this.userService.updateUserBalance(userId, amountToDelete, 'subtract', tx);
-      console.log(`RevenueService (TX): Saldo do usuário ${userId} atualizado.`);
+      
 
       return revenueToDelete; // Retorna o objeto que foi deletado
     });
@@ -248,11 +248,11 @@ class RevenueService {
    * @throws Error se ocorrer um erro ao buscar os dados.
    */
   async getRecentRevenues(userId: string, limit: number = 5): Promise<Revenue[]> {
-    console.log(`RevenueService: Buscando ${limit} receitas recentes para usuário ${userId}.`);
+    
     try {
       // Utiliza o método do repositório que já busca as recentes com limite
       const recentRevenues = await this.revenueRepository.findRecentByUserId(userId, limit);
-      console.log(`RevenueService: ${recentRevenues.length} receitas recentes encontradas para ${userId}.`);
+      
       return recentRevenues;
     } catch (error) {
       console.error(`RevenueService: Erro ao buscar receitas recentes para ${userId}:`, error);

@@ -13,16 +13,17 @@ export default async function RelatoriosPage() {
     redirect("/");
   }
 
-  // Buscar categorias para o filtro
-  const categorias = await db.category.findMany({
-    where: { userId: session.user.id },
-    orderBy: { name: "asc" },
-  });
+  // Remove a busca de categorias inicial, o componente buscará via tRPC
+  // const categorias = await db.category.findMany({
+  //   where: { userId: session.user.id },
+  //   orderBy: { name: "asc" },
+  // });
 
   return (
     <AuthGuard requireAuth>
       <AppLayout>
-        <ReportsList initialCategories={categorias} />
+        {/* Remove a prop initialCategories */}
+        <ReportsList />
       </AppLayout>
     </AuthGuard>
   );

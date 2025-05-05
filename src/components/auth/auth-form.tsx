@@ -8,6 +8,8 @@ import * as z from "zod";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { trpc } from "@/lib/trpc";
+
 // Esquema para login
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -42,6 +44,8 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const registerMutation = trpc.auth.register.useMutation();
+
   const onSubmit = async (data: AuthFormData) => {
     setError(null);
     setIsLoading(true);
@@ -51,28 +55,14 @@ export function AuthForm() {
         await signIn("credentials", {
           email: data.email,
           password: data.password,
-          // callbackUrl: "/dashboard",
-          // redirect: true,
         });
       } else {
-        // Registrar novo usuário
-        const response = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-            name: data.name,
-          }),
+        // Registrar novo usuário via tRPC
+        const result = await registerMutation.mutateAsync({
+          email: data.email,
+          password: data.password,
+          name: data.name!,
         });
-
-        const responseData = await response.json();
-
-        if (!response.ok) {
-          throw new Error(responseData.error || "Erro ao criar conta");
-        }
 
         // Login automático após registro bem-sucedido
         await signIn("credentials", {
@@ -82,9 +72,14 @@ export function AuthForm() {
           redirect: true,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
+      // tRPC pode lançar Error ou TRPCClientError
+      const msg =
+        err?.data?.zodError?.formErrors?.[0] ||
+        err?.message ||
+        "Ocorreu um erro";
+      setError(msg);
       console.error("Erro de autenticação:", err);
-      setError(err instanceof Error ? err.message : "Ocorreu um erro");
     } finally {
       setIsLoading(false);
     }

@@ -58,7 +58,7 @@ class ExpenseService {
         throw new Error('Categoria inválida ou não encontrada.');
     }
 
-    console.log(`ExpenseService: Iniciando criação de despesa para usuário ${userId}, valor: ${expenseAmount}, categoria: ${categoryId}`);
+    
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
       // Cria instância do repositório com o cliente de transação
@@ -72,15 +72,15 @@ class ExpenseService {
         date,
         categoryId,
       };
-      console.log(`ExpenseService (TX): Criando registro de despesa...`, createData);
+      
       const newExpense = await expenseRepoTx.create(createData);
-      console.log(`ExpenseService (TX): Despesa ID ${newExpense.id} criada.`);
+      
 
       // 2. Atualiza o saldo do usuário (subtrai o valor da despesa)
-      console.log(`ExpenseService (TX): Atualizando saldo do usuário ${userId} (subtraindo ${expenseAmount}).`);
+      
       // Passa 'tx' para garantir que a atualização do saldo ocorra na mesma transação
       await this.userService.updateUserBalance(userId, expenseAmount, 'subtract', tx);
-      console.log(`ExpenseService (TX): Saldo do usuário ${userId} atualizado.`);
+      
 
       // Retorna a despesa criada (pode incluir a categoria dependendo do repo)
       // Para garantir, buscamos novamente com a categoria incluída usando o repo da transação
@@ -105,7 +105,7 @@ class ExpenseService {
    */
   // O tipo de retorno do repositório com include é Prisma.ExpenseGetPayload<{ include: { category: true } }>
   async getExpenseById(id: string, userId: string): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }> | null> {
-    console.log(`ExpenseService: Buscando despesa ID ${id} para usuário ${userId}.`);
+    
     const expense = await this.expenseRepository.findById(id);
 
     if (!expense) {
@@ -130,7 +130,7 @@ class ExpenseService {
    * @returns Uma lista de despesas (com categorias incluídas).
    */
   async getExpensesByUser(userId: string): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
-    console.log(`ExpenseService: Listando despesas para usuário ${userId}.`);
+    
     // findByUserId já inclui categoria
     return this.expenseRepository.findByUserId(userId);
     // O tipo de retorno do repositório já está correto
@@ -144,7 +144,7 @@ class ExpenseService {
    * @returns Uma lista de despesas no período (com categorias incluídas).
    */
   async getExpensesByUserAndPeriod(userId: string, startDate: Date, endDate: Date): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
-    console.log(`ExpenseService: Listando despesas para usuário ${userId} entre ${startDate.toISOString()} e ${endDate.toISOString()}.`);
+    
      // findByUserIdAndPeriod já inclui categoria
     return this.expenseRepository.findByUserIdAndPeriod(userId, startDate, endDate);
     // O tipo de retorno do repositório já está correto
@@ -184,7 +184,7 @@ class ExpenseService {
         }
     }
 
-    console.log(`ExpenseService: Iniciando atualização da despesa ID ${id} para usuário ${userId}.`);
+    
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
       const expenseRepoTx = new ExpenseRepository(tx);
@@ -200,7 +200,7 @@ class ExpenseService {
         throw new Error('Acesso não permitido para atualizar esta despesa.');
       }
       const oldAmount = originalExpense.amount;
-      console.log(`ExpenseService (TX): Despesa ${id} encontrada. Valor antigo: ${oldAmount}.`);
+      
 
       // 2. Prepara os dados para atualização
       const updateData: Prisma.ExpenseUpdateInput = {};
@@ -224,14 +224,14 @@ class ExpenseService {
              return currentExpenseWithCategory; // Retorna o tipo correto do repositório
        }
 
-      console.log(`ExpenseService (TX): Atualizando despesa ${id} com dados:`, updateData);
+      
       const updatedExpense = await expenseRepoTx.update(id, updateData);
-      console.log(`ExpenseService (TX): Despesa ${id} atualizada. Novo valor: ${updatedExpense.amount}.`);
+      
 
       // 3. Calcula a diferença e ajusta o saldo do usuário
       if (newAmount !== undefined && !newAmount.equals(oldAmount)) {
         const difference = newAmount.sub(oldAmount); // difference > 0 se aumentou, < 0 se diminuiu
-        console.log(`ExpenseService (TX): Diferença de valor: ${difference}. Ajustando saldo do usuário ${userId}.`);
+        
         if (difference.isPositive()) {
           // Se o novo valor é maior, subtrai a diferença do saldo
           await this.userService.updateUserBalance(userId, difference, 'subtract', tx);
@@ -239,9 +239,9 @@ class ExpenseService {
           // Se o novo valor é menor, adiciona a diferença (que é negativa, então adiciona o valor absoluto) ao saldo
           await this.userService.updateUserBalance(userId, difference.abs(), 'add', tx);
         }
-         console.log(`ExpenseService (TX): Saldo do usuário ${userId} ajustado.`);
+         
       } else {
-          console.log(`ExpenseService (TX): Valor da despesa ${id} não alterado. Saldo do usuário ${userId} não precisa de ajuste.`);
+          
       }
 
       // Retorna a despesa atualizada com a categoria
@@ -263,7 +263,7 @@ class ExpenseService {
    * @throws Error se a despesa não for encontrada ou a operação falhar.
    */
   async deleteExpense(id: string, userId: string): Promise<Expense> {
-    console.log(`ExpenseService: Iniciando deleção da despesa ID ${id} para usuário ${userId}.`);
+    
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
       const expenseRepoTx = new ExpenseRepository(tx);
@@ -279,17 +279,17 @@ class ExpenseService {
         throw new Error('Acesso não permitido para deletar esta despesa.');
       }
       const amountToDelete = expenseToDelete.amount;
-      console.log(`ExpenseService (TX): Despesa ${id} encontrada. Valor: ${amountToDelete}.`);
+      
 
       // 2. Deleta a despesa
-      console.log(`ExpenseService (TX): Deletando despesa ${id}.`);
+      
       const deletedExpenseData = await expenseRepoTx.delete(id); // delete retorna o objeto deletado
-      console.log(`ExpenseService (TX): Despesa ${id} deletada.`);
+      
 
       // 3. Atualiza o saldo do usuário (adiciona o valor da despesa de volta)
-      console.log(`ExpenseService (TX): Atualizando saldo do usuário ${userId} (adicionando ${amountToDelete}).`);
+      
       await this.userService.updateUserBalance(userId, amountToDelete, 'add', tx);
-      console.log(`ExpenseService (TX): Saldo do usuário ${userId} atualizado.`);
+      
 
       // Retorna o objeto que foi deletado (sem a categoria, pois o repo delete não inclui)
       return deletedExpenseData;
@@ -303,7 +303,7 @@ class ExpenseService {
    * @throws Error se ocorrer um erro ao buscar os dados.
    */
   async getExpensesByCategoryForCurrentMonth(userId: string): Promise<{ name: string; value: number }[]> {
-    console.log(`ExpenseService: Buscando despesas por categoria do mês atual para usuário ${userId}.`);
+    
     try {
       // Buscar o mês atual
       const hoje = new Date();
@@ -320,7 +320,7 @@ class ExpenseService {
         value: item.total, // O repositório já retorna 'total' como number
       }));
 
-      console.log(`ExpenseService: Despesas por categoria do mês atual encontradas para ${userId}.`);
+      
       return formattedData;
 
     } catch (error) {
@@ -337,11 +337,11 @@ class ExpenseService {
    * @throws Error se ocorrer um erro ao buscar os dados.
    */
   async getRecentExpenses(userId: string, limit: number = 5): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
-    console.log(`ExpenseService: Buscando ${limit} despesas recentes para usuário ${userId}.`);
+    
     try {
       // Utiliza o método do repositório que já busca as recentes com limite
       const recentExpenses = await this.expenseRepository.findRecentByUserId(userId, limit);
-      console.log(`ExpenseService: ${recentExpenses.length} despesas recentes encontradas para ${userId}.`);
+      
       return recentExpenses;
     } catch (error) {
       console.error(`ExpenseService: Erro ao buscar despesas recentes para ${userId}:`, error);
@@ -364,7 +364,7 @@ class ExpenseService {
     startDate: Date,
     endDate: Date
   ): Promise<{ category: Category; expenses: Expense[] }> { // Retorna Expense básico
-    console.log(`ExpenseService: Buscando despesas para relatório por categoria ${categoryId} e período [${startDate.toISOString()} - ${endDate.toISOString()}] para usuário ${userId}.`);
+    
 
     try {
       // 1. Validar a categoria usando CategoryService
@@ -374,7 +374,7 @@ class ExpenseService {
         // Lança erro para ser capturado pela API route e retornar 404 ou 403
         throw new Error('Categoria não encontrada ou acesso não permitido.');
       }
-      console.log(`ExpenseService: Categoria ${category.name} (ID: ${categoryId}) validada para usuário ${userId}.`);
+      
 
       // 2. Buscar todas as despesas do usuário no período
       // O método findByUserIdAndPeriod já inclui a categoria e ordena por data desc.
@@ -394,7 +394,7 @@ class ExpenseService {
       categoryExpenses.sort((a, b) => a.date.getTime() - b.date.getTime());
 
 
-      console.log(`ExpenseService: ${categoryExpenses.length} despesas encontradas para o relatório da categoria ${categoryId}.`);
+      
       // Retorna a categoria validada e as despesas filtradas (sem a categoria incluída, conforme tipo de retorno)
       // Mapeia para remover a propriedade 'category' se ela existir no tipo retornado por findByUserIdAndPeriod
       const expensesToReturn: Expense[] = categoryExpenses.map(({ category: _, ...rest }) => rest);
@@ -423,7 +423,7 @@ class ExpenseService {
     startDate: Date,
     endDate: Date
   ): Promise<{ categoryId: string | null; categoryName: string | null; total: number }[]> {
-    console.log(`ExpenseService: Buscando despesas agrupadas por categoria no período [${startDate.toISOString()} - ${endDate.toISOString()}] para usuário ${userId}.`);
+    
     try {
       // Chama o método do repositório que faz a agregação
       const groupedExpenses = await this.expenseRepository.getTotalExpensesByCategoryAndPeriod(
@@ -432,7 +432,7 @@ class ExpenseService {
         endDate
       );
 
-      console.log(`ExpenseService: ${groupedExpenses.length} grupos de despesas por categoria encontrados para ${userId} no período.`);
+      
       // O repositório já retorna o formato { categoryId, categoryName, total } com total como number.
       return groupedExpenses;
 

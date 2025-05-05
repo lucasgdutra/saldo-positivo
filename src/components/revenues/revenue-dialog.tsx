@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react"; // Remover useState
 import { toast } from "sonner";
 
 const revenueSchema = z.object({
@@ -19,7 +19,8 @@ type RevenueFormData = z.infer<typeof revenueSchema>;
 interface RevenueDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: RevenueFormData) => Promise<void>;
+  onSave: (data: RevenueFormData) => void; // Mudar para void
+  isSaving?: boolean; // Adicionar prop isSaving
   initialData?: {
     id: string;
     amount: number;
@@ -32,9 +33,10 @@ export function RevenueDialog({
   isOpen,
   onClose,
   onSave,
+  isSaving = false, // Usar isSaving
   initialData,
 }: RevenueDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  // Remover estado isLoading interno
   
   // Formatar a data para o formato YYYY-MM-DD para o input date (usando UTC)
   const formatDateForInput = useCallback((date: Date | null): string => {
@@ -78,20 +80,10 @@ export function RevenueDialog({
     }
   }, [initialData, reset, formatDateForInput]);
 
-  const onSubmit = async (data: RevenueFormData) => {
-    try {
-      setIsLoading(true);
-      await onSave(data);
-      toast.success(initialData ? "Receita atualizada com sucesso!" : "Receita criada com sucesso!");
-      reset();
-      onClose();
-    } catch (error) {
-      console.error("Erro ao salvar receita:", error);
-      const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido";
-      toast.error(initialData ? `Erro ao atualizar receita: ${errorMessage}` : `Erro ao criar receita: ${errorMessage}`);
-    } finally {
-      setIsLoading(false);
-    }
+  // Simplificar onSubmit
+  const onSubmit = (data: RevenueFormData) => {
+    onSave(data);
+    // Fechamento e reset agora são feitos no onSuccess da mutation no pai
   };
 
   if (!isOpen) return null;
@@ -115,7 +107,7 @@ export function RevenueDialog({
               min="0.01"
               className="mt-1 block w-full rounded-md border px-3 py-2"
               placeholder="0,00"
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             />
             {errors.amount && (
               <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
@@ -132,7 +124,7 @@ export function RevenueDialog({
               id="description"
               className="mt-1 block w-full rounded-md border px-3 py-2"
               placeholder="Ex: Salário, Freelance, etc."
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
@@ -148,7 +140,7 @@ export function RevenueDialog({
               type="date"
               id="date"
               className="mt-1 block w-full rounded-md border px-3 py-2"
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             />
             {errors.date && (
               <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
@@ -159,17 +151,17 @@ export function RevenueDialog({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border px-4 py-2 hover:bg-gray-50"
-              disabled={isLoading}
+              className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSaving} // Usar isSaving
             >
               Cancelar
             </button>
             <button
               type="submit"
               className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isSaving} // Usar isSaving
             >
-              {isLoading ? "Salvando..." : "Salvar"}
+              {isSaving ? "Salvando..." : "Salvar"}
             </button>
           </div>
         </form>

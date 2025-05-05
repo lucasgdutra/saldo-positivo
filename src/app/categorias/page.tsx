@@ -13,15 +13,17 @@ export default async function CategoriasPage() {
     redirect("/");
   }
 
-  const categorias = await db.category.findMany({
-    where: { userId: session.user.id },
-    orderBy: { name: "asc" },
-  });
+  // Remove a busca de dados inicial, o componente buscará via tRPC
+  // const categorias = await db.category.findMany({
+  //   where: { userId: session.user.id },
+  //   orderBy: { name: "asc" },
+  // });
 
   return (
     <AuthGuard requireAuth>
       <AppLayout>
-        <CategoriesList initialCategories={categorias} />
+        {/* Remove a prop initialCategories */}
+        <CategoriesList />
       </AppLayout>
     </AuthGuard>
   );
