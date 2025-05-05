@@ -1,99 +1,96 @@
-import { db } from "@/lib/db";
+// import { db } from "@/lib/db"; // Removido acesso direto ao DB
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { updateUserBalance } from "@/lib/balance-utils";
+// import { updateUserBalance } from "@/lib/balance-utils"; // Removida função antiga
+import UserService from "@/services/UserService"; // Importa o UserService
+import { Decimal } from "@prisma/client/runtime/library"; // Importa Decimal se necessário para conversão
 
-export async function GET() {
+// Instancia o UserService
+const userService = new UserService();
+
+export async function GET(req: NextRequest) { // Adiciona req para logs futuros se necessário
   try {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return new NextResponse(JSON.stringify({ error: "Não autorizado" }), {
         status: 401,
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Buscar o saldo do usuário
-    let balance = await db.balance.findUnique({
-      where: {
-        userId: session.user.id,
-      },
-    });
+    console.log(`[BALANCE_GET] Buscando saldo para usuário: ${userId}`);
 
-    // Se não existir, criar um novo saldo
-    if (!balance) {
-      // Obter o mês atual (apenas para referência)
-      const hoje = new Date();
-      const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    // Usa o UserService para buscar o usuário com o saldo
+    const userWithBalance = await userService.getUserByIdWithBalance(userId);
 
-      // Calcular totais de receitas e despesas de todo o histórico
-      const [totalRevenues, totalExpenses] = await Promise.all([
-        db.revenue.aggregate({
-          where: {
-            userId: session.user.id,
-            // Sem filtro de data para considerar todo o histórico
-          },
-          _sum: { amount: true },
-        }),
-        db.expense.aggregate({
-          where: {
-            userId: session.user.id,
-            // Sem filtro de data para considerar todo o histórico
-          },
-          _sum: { amount: true },
-        }),
-      ]);
-
-      const revenuesAmount = totalRevenues._sum.amount?.toNumber() ?? 0;
-      const expensesAmount = totalExpenses._sum.amount?.toNumber() ?? 0;
-      const totalAmount = revenuesAmount - expensesAmount;
-
-      // Criar o saldo inicial
-      balance = await db.balance.create({
-        data: {
-          userId: session.user.id,
-          totalAmount,
-          totalRevenues: revenuesAmount,
-          totalExpenses: expensesAmount,
-          referenceMonth: inicioMes,
-        },
-      });
+    // Verifica se o usuário e o saldo existem
+    if (!userWithBalance || !userWithBalance.balance) {
+        console.warn(`[BALANCE_GET] Saldo não encontrado para usuário ${userId}. Retornando zerado.`);
+        // Retorna o objeto zerado conforme comportamento anterior
+        return NextResponse.json({
+            totalAmount: 0,
+            totalRevenues: 0,
+            totalExpenses: 0,
+            referenceMonth: new Date(), // Mantém o comportamento de retornar data atual
+        });
     }
 
+    const balance = userWithBalance.balance;
+
+    // Retorna os valores do saldo, convertendo Decimal para number
+    console.log(`[BALANCE_GET] Saldo encontrado para usuário ${userId}:`, balance);
     return NextResponse.json({
-      totalAmount: balance.totalAmount.toNumber(),
-      totalRevenues: balance.totalRevenues.toNumber(),
-      totalExpenses: balance.totalExpenses.toNumber(),
+      totalAmount: balance.totalAmount instanceof Decimal ? balance.totalAmount.toNumber() : balance.totalAmount,
+      totalRevenues: balance.totalRevenues instanceof Decimal ? balance.totalRevenues.toNumber() : balance.totalRevenues,
+      totalExpenses: balance.totalExpenses instanceof Decimal ? balance.totalExpenses.toNumber() : balance.totalExpenses,
       referenceMonth: balance.referenceMonth,
     });
   } catch (error) {
-    console.error("[BALANCE_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-    });
+    console.error("[BALANCE_GET_ERROR]", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Erro interno do servidor ao buscar saldo" }),
+      { status: 500 },
+    );
   }
 }
 
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return new NextResponse(JSON.stringify({ error: "Não autorizado" }), {
         status: 401,
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Usar a função utilitária para atualizar o saldo
-    const balance = await updateUserBalance(session.user.id);
+    console.log(`[BALANCE_PUT] Iniciando recálculo de saldo para usuário: ${userId}`);
 
-    return NextResponse.json(balance);
+    // Usa o UserService para forçar o recálculo do saldo
+    const updatedBalance = await userService.recalculateBalance(userId);
+
+    console.log(`[BALANCE_PUT] Saldo recalculado para usuário ${userId}:`, updatedBalance);
+
+    // Formata a resposta com os valores convertidos para number
+    const responseData = {
+        totalAmount: updatedBalance.totalAmount instanceof Decimal ? updatedBalance.totalAmount.toNumber() : updatedBalance.totalAmount,
+        totalRevenues: updatedBalance.totalRevenues instanceof Decimal ? updatedBalance.totalRevenues.toNumber() : updatedBalance.totalRevenues,
+        totalExpenses: updatedBalance.totalExpenses instanceof Decimal ? updatedBalance.totalExpenses.toNumber() : updatedBalance.totalExpenses,
+        referenceMonth: updatedBalance.referenceMonth,
+    };
+
+    return NextResponse.json(responseData);
   } catch (error) {
-    console.error("[BALANCE_UPDATE_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-    });
+    console.error("[BALANCE_PUT_ERROR]", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Erro interno do servidor ao atualizar saldo" }),
+      { status: 500 },
+    );
   }
 }

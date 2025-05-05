@@ -1,92 +1,52 @@
-import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { hash } from "bcrypt";
 import * as z from "zod";
+import { AuthService, UserAlreadyExistsError } from "@/services/AuthService";
+import { UserRepository } from "@/repositories/UserRepository";
+import { CategoryRepository } from "@/repositories/CategoryRepository";
+import { db } from "@/lib/db"; // db ainda é necessário para instanciar repositórios
 
-const userSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  name: z.string().min(1, "Nome é obrigatório"),
-});
+// Instanciar repositórios
+const userRepository = new UserRepository(db);
+const categoryRepository = new CategoryRepository(db);
 
-// Lista de categorias padrão para novos usuários
-const DEFAULT_CATEGORIES = [
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Educação",
-  "Saúde",
-  "Lazer",
-  "Vestuário",
-  "Utilidades",
-  "Outros"
-];
-
-// Função para criar categorias padrão para um usuário
-async function createDefaultCategories(userId: string) {
-  const categoriesData = DEFAULT_CATEGORIES.map(name => ({
-    name,
-    userId
-  }));
-
-  await db.category.createMany({
-    data: categoriesData
-  });
-}
+// Instanciar o AuthService com os repositórios
+const authService = new AuthService(userRepository, categoryRepository);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, name } = userSchema.parse(body);
 
-    // Verificar se o usuário já existe
-    const existingUser = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    // A validação do schema agora é feita dentro do AuthService,
+    // mas o ZodError ainda pode ser lançado por ele.
+    const user = await authService.register(body);
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "E-mail já cadastrado" },
-        { status: 409 }
-      );
-    }
-
-    // Criar hash da senha
-    const hashedPassword = await hash(password, 10);
-
-    // Criar usuário
-    const user = await db.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-      },
-    });
-
-    // Criar categorias padrão para o novo usuário
-    await createDefaultCategories(user.id);
-
-    // Retornar usuário sem a senha
-    const { password: _, ...userWithoutPassword } = user;
-    
+    // Retornar usuário criado com sucesso (sem a senha, já tratado no service)
     return NextResponse.json(
-      { user: userWithoutPassword, message: "Usuário criado com sucesso" },
+      { user: user, message: "Usuário criado com sucesso" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Erro ao registrar usuário:", error);
-    
+    console.error("Erro na rota de registro:", error); // Log do erro na rota
+
     if (error instanceof z.ZodError) {
+      // Erro de validação lançado pelo AuthService
       return NextResponse.json(
         { error: "Dados inválidos", details: error.errors },
         { status: 400 }
       );
     }
-    
+
+    if (error instanceof UserAlreadyExistsError) {
+      // Erro específico de usuário já existente lançado pelo AuthService
+      return NextResponse.json(
+        { error: error.message }, // Usa a mensagem do erro customizado
+        { status: 409 } // Conflito
+      );
+    }
+
+    // Outros erros inesperados
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Erro interno do servidor ao registrar usuário" },
       { status: 500 }
     );
   }

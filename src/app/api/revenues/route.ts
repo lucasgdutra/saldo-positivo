@@ -1,10 +1,13 @@
-import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as z from "zod";
-import { updateUserBalance } from "@/lib/balance-utils";
+import RevenueService from "@/services/RevenueService"; // Importar o serviço
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+
+// Instanciar o serviço
+const revenueService = new RevenueService();
 
 const revenueSchema = z.object({
   amount: z.number().positive("O valor deve ser positivo"),
@@ -28,55 +31,26 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
-    // Definir o tipo da query
-    type QueryType = {
-      where: {
-        userId: string;
-        date?: {
-          gte?: Date;
-          lte?: Date;
-        };
-      };
-      orderBy: {
-        date: "desc" | "asc";
-      };
-    };
+    // Usar o serviço para buscar todas as receitas do usuário
+    let revenues = await revenueService.getRevenuesByUser(session.user.id);
 
-    // Construir a query
-    const query: QueryType = {
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: {
-        date: "desc" as const,
-      },
-    };
-
-    // Adicionar filtros de data se fornecidos
-    if (startDate || endDate) {
-      query.where.date = {};
-      
-      if (startDate) {
-        query.where.date.gte = new Date(startDate);
-      }
-      
-      if (endDate) {
-        query.where.date.lte = new Date(endDate);
-      }
+    // Aplicar filtros de data manualmente (se fornecidos)
+    // Similar à lógica de despesas, idealmente o serviço teria um método com filtros.
+    if (startDate) {
+        const start = new Date(startDate);
+        revenues = revenues.filter(rev => rev.date >= start);
+    }
+    if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // Incluir todo o dia final
+        revenues = revenues.filter(rev => rev.date <= end);
     }
 
-    const revenues = await db.revenue.findMany({
-      where: query.where,
-      orderBy: query.orderBy,
-    });
+    // Ordenar por data descendente (como na implementação original)
+    revenues.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-    // Converter os valores Decimal para números
-    const formattedRevenues = revenues.map((revenue: { amount: { toNumber: () => number } }) => ({
-      ...revenue,
-      amount: revenue.amount.toNumber(),
-    }));
-
-    return NextResponse.json(formattedRevenues);
+    // O serviço já deve retornar o amount como number
+    return NextResponse.json(revenues);
   } catch (error) {
     console.error("[REVENUES_ERROR]", error);
     return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
@@ -98,22 +72,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { amount, description, date } = revenueSchema.parse(body);
 
-    const revenue = await db.revenue.create({
-      data: {
-        amount,
-        description: description || "",
-        date: new Date(date),
-        userId: session.user.id,
-      },
+    // Usar o serviço para criar a receita
+    // O serviço deve lidar com a atualização do saldo
+    const revenue = await revenueService.createRevenue({
+      amount,
+      description: description || "",
+      date: new Date(date),
+      userId: session.user.id,
     });
 
-    // Atualizar o saldo do usuário
-    await updateUserBalance(session.user.id);
-
-    return NextResponse.json({
-      ...revenue,
-      amount: revenue.amount.toNumber(),
-    });
+    // O serviço já deve retornar o amount como number
+    return NextResponse.json(revenue);
   } catch (error) {
     console.error("[REVENUES_POST_ERROR]", error);
     
@@ -123,9 +92,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-    });
+    // Adicionar tratamento de erro mais específico se necessário
+    return new NextResponse(
+      JSON.stringify({ error: "Erro interno do servidor ao criar receita" }),
+      { status: 500 },
+    );
   }
 }
 
@@ -158,25 +129,23 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { amount, description, date } = revenueSchema.parse(body);
 
-    const revenue = await db.revenue.update({
-      where: {
+    // Usar o serviço para atualizar a receita
+    // Passar id, userId e os dados da atualização
+    const updatedRevenue = await revenueService.updateRevenue(
         id,
-        userId: session.user.id,
-      },
-      data: {
-        amount,
-        description: description || "",
-        date: new Date(date),
-      },
-    });
+        session.user.id,
+        {
+            amount,
+            description: description || "",
+            date: new Date(date),
+        }
+    );
 
-    // Atualizar o saldo do usuário
-    await updateUserBalance(session.user.id);
+    // O serviço lança erro se não encontrar ou não pertencer ao usuário
+    // O bloco catch tratará esses erros.
 
-    return NextResponse.json({
-      ...revenue,
-      amount: revenue.amount.toNumber(),
-    });
+    // O serviço já deve retornar o amount como number
+    return NextResponse.json(updatedRevenue);
   } catch (error) {
     console.error("[REVENUES_PUT_ERROR]", error);
     
@@ -186,9 +155,24 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-    });
+    // Tratar erros específicos do serviço ou Prisma
+    if (error instanceof Error && (error.message.includes("não encontrada") || error.message.includes("Acesso não permitido"))) {
+       return new NextResponse(
+        JSON.stringify({ error: error.message }),
+        { status: 404 },
+      );
+    }
+    if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
+       return new NextResponse(
+        JSON.stringify({ error: "Recurso não encontrado (Prisma P2025)" }),
+        { status: 404 },
+      );
+    }
+
+    return new NextResponse(
+      JSON.stringify({ error: "Erro interno do servidor ao atualizar receita" }),
+      { status: 500 },
+    );
   }
 }
 
@@ -218,21 +202,32 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    await db.revenue.delete({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    });
+    // Usar o serviço para deletar a receita
+    // O serviço lida com a verificação de permissão e atualização do saldo
+    await revenueService.deleteRevenue(id, session.user.id);
 
-    // Atualizar o saldo do usuário
-    await updateUserBalance(session.user.id);
+    // O serviço lança erro se não encontrar ou não pertencer ao usuário
+    // O bloco catch tratará esses erros.
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("[REVENUES_DELETE_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-    });
+    // Tratar erros específicos do serviço ou Prisma
+    if (error instanceof Error && (error.message.includes("não encontrada") || error.message.includes("Acesso não permitido"))) {
+       return new NextResponse(
+        JSON.stringify({ error: error.message }),
+        { status: 404 },
+      );
+    }
+     if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
+       return new NextResponse(
+        JSON.stringify({ error: "Recurso não encontrado (Prisma P2025)" }),
+        { status: 404 },
+      );
+    }
+    return new NextResponse(
+      JSON.stringify({ error: "Erro interno do servidor ao deletar receita" }),
+      { status: 500 },
+    );
   }
 }

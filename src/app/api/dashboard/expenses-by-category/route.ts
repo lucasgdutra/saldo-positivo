@@ -1,7 +1,9 @@
-import { db } from "@/lib/db";
+// import { db } from "@/lib/db"; // Removido - Acesso direto ao DB não é mais necessário
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import ExpenseService from "@/services/ExpenseService"; // Importa o ExpenseService
+import { db } from "@/lib/db"; // Importa a instância do Prisma para o Service
 
 export async function GET() {
   try {
@@ -13,48 +15,26 @@ export async function GET() {
       });
     }
 
-    // Buscar o mês atual
-    const hoje = new Date();
-    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    // Instancia o ExpenseService com a conexão do Prisma
+    const expenseService = new ExpenseService(db);
 
-    // Buscar despesas agrupadas por categoria
-    const expensesByCategory = await db.expense.groupBy({
-      by: ['categoryId'],
-      where: {
-        userId: session.user.id,
-        date: {
-          gte: inicioMes,
-          lte: fimMes,
-        },
-      },
-      _sum: { amount: true },
-    });
+    // Chama o método do service para buscar as despesas por categoria do mês atual
+    const expensesData = await expenseService.getExpensesByCategoryForCurrentMonth(session.user.id);
 
-    // Buscar nomes das categorias
-    const categoryIds = expensesByCategory.map((item: { categoryId: string }) => item.categoryId);
-    const categories = await db.category.findMany({
-      where: {
-        id: {
-          in: categoryIds,
-        },
-      },
-    });
-
-    // Preparar dados para o gráfico de pizza
-    const expensesByCategoryData = expensesByCategory.map((item: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) => {
-      const category = categories.find((cat: { id: string; name: string }) => cat.id === item.categoryId);
-      return {
-        name: category?.name || 'Sem categoria',
-        value: item._sum.amount?.toNumber() ?? 0,
-      };
-    });
-
-    return NextResponse.json(expensesByCategoryData);
+    return NextResponse.json(expensesData);
   } catch (error) {
-    console.error("[EXPENSES_BY_CATEGORY_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
+    // Loga o erro específico que pode vir do service
+    console.error("[API_EXPENSES_BY_CATEGORY_ERROR]", error);
+
+    // Retorna uma resposta de erro genérica para o cliente
+    let errorMessage = "Erro interno do servidor ao buscar despesas por categoria.";
+    if (error instanceof Error) {
+        // Poderia personalizar a mensagem baseada no tipo de erro, se necessário
+        // errorMessage = error.message; // Cuidado ao expor mensagens de erro internas
+    }
+
+    return new NextResponse(JSON.stringify({ error: errorMessage }), {
+      status: 500, // Mantém o status 500 para erros internos
     });
   }
 }

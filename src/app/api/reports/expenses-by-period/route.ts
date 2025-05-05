@@ -1,13 +1,26 @@
-import { db } from "@/lib/db";
+// import { db } from "@/lib/db"; // Removido - Usar ExpenseService
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { type NextRequest, NextResponse } from "next/server";
+import ExpenseService from "@/services/ExpenseService"; // Importado
+import { Decimal } from "@prisma/client/runtime/library"; // Importado para cálculos se necessário
+
+// Instancia o serviço
+const expenseService = new ExpenseService();
+
+// Define o tipo esperado do resultado do serviço getGroupedExpensesByPeriod
+type GroupedExpenseResult = {
+  categoryId: string | null;
+  categoryName: string | null;
+  total: number; // O serviço já retorna como number
+};
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return new NextResponse(JSON.stringify({ error: "Não autorizado" }), {
         status: 401,
       });
@@ -18,76 +31,63 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
     const compareWithPrevious = searchParams.get("compareWithPrevious") === "true";
 
+    // Validação dos parâmetros de entrada
     if (!startDate || !endDate) {
       return new NextResponse(JSON.stringify({ error: "Datas de início e fim são obrigatórias" }), {
         status: 400,
       });
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Calcular o período anterior com a mesma duração para comparação
-    const periodDuration = end.getTime() - start.getTime();
-    const previousStart = new Date(start.getTime() - periodDuration);
-    const previousEnd = new Date(end.getTime() - periodDuration);
-
-    // Buscar despesas do período atual
-    const currentPeriodExpenses = await db.expense.groupBy({
-      by: ['categoryId'],
-      where: {
-        userId: session.user.id,
-        date: {
-          gte: start,
-          lte: end,
-        },
-      },
-      _sum: { amount: true },
-    });
-
-    // Buscar despesas do período anterior para comparação (se solicitado)
-    let previousPeriodExpenses: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }[] = [];
-    if (compareWithPrevious) {
-      previousPeriodExpenses = await db.expense.groupBy({
-        by: ['categoryId'],
-        where: {
-          userId: session.user.id,
-          date: {
-            gte: previousStart,
-            lte: previousEnd,
-          },
-        },
-        _sum: { amount: true },
+    let start: Date;
+    let end: Date;
+    try {
+      start = new Date(startDate);
+      end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new Error("Formato de data inválido");
+      }
+      // Garante que a data final inclua o dia inteiro
+      end.setHours(23, 59, 59, 999);
+    } catch (e) {
+      return new NextResponse(JSON.stringify({ error: "Formato de data inválido" }), {
+        status: 400,
       });
     }
 
-    // Buscar nomes das categorias
-    const categoryIds = [
-      ...new Set([
-        ...currentPeriodExpenses.map((item: { categoryId: string }) => item.categoryId),
-        ...previousPeriodExpenses.map((item: { categoryId: string }) => item.categoryId),
-      ]),
-    ];
+    // Calcular o período anterior com a mesma duração para comparação
+    const periodDuration = end.getTime() - start.getTime(); // Diferença em milissegundos
+    // Ajuste para garantir que a duração seja de pelo menos 1 dia (86400000 ms) para evitar períodos inválidos
+    const adjustedDuration = Math.max(periodDuration, 86400000);
+    const previousStart = new Date(start.getTime() - adjustedDuration);
+    // O fim do período anterior deve ser um instante antes do início do período atual
+    const previousEnd = new Date(start.getTime() - 1); // Subtrai 1 milissegundo
 
-    const categories = await db.category.findMany({
-      where: {
-        id: {
-          in: categoryIds,
-        },
-      },
-    });
+    // Buscar despesas agrupadas do período atual usando o serviço
+    const currentPeriodGroupedExpenses: GroupedExpenseResult[] = await expenseService.getGroupedExpensesByPeriod(
+      userId,
+      start,
+      end
+    );
 
-    // Calcular o total de despesas do período atual
-    const totalCurrentExpenses = currentPeriodExpenses.reduce(
-      (acc: number, item: { _sum: { amount: { toNumber(): number } | null } }) =>
-        acc + (item._sum.amount?.toNumber() ?? 0),
+    // Buscar despesas agrupadas do período anterior (se solicitado)
+    let previousPeriodGroupedExpenses: GroupedExpenseResult[] = [];
+    if (compareWithPrevious) {
+      previousPeriodGroupedExpenses = await expenseService.getGroupedExpensesByPeriod(
+        userId,
+        previousStart,
+        previousEnd
+      );
+    }
+
+    // Calcular o total de despesas do período atual (soma dos totais retornados pelo serviço)
+    const totalCurrentExpenses = currentPeriodGroupedExpenses.reduce(
+      (acc, item) => acc + item.total,
       0
     );
 
     // Calcular o total de despesas do período anterior
-    const totalPreviousExpenses = previousPeriodExpenses.reduce(
-      (acc: number, item: { _sum: { amount: { toNumber(): number } | null } }) =>
-        acc + (item._sum.amount?.toNumber() ?? 0),
+    const totalPreviousExpenses = previousPeriodGroupedExpenses.reduce(
+      (acc, item) => acc + item.total,
       0
     );
 
@@ -101,43 +101,51 @@ export async function GET(request: NextRequest) {
       previousPeriod: compareWithPrevious
         ? {
             start: previousStart.toISOString(),
-            end: previousEnd.toISOString(),
+            end: previousEnd.toISOString(), // Usa o previousEnd calculado
             label: `${previousStart.toLocaleDateString('pt-BR')} - ${previousEnd.toLocaleDateString('pt-BR')}`,
           }
         : null,
       currentPeriodTotal: totalCurrentExpenses,
       previousPeriodTotal: compareWithPrevious ? totalPreviousExpenses : null,
-      percentageChange: compareWithPrevious && totalPreviousExpenses > 0
+      percentageChange: compareWithPrevious && totalPreviousExpenses !== 0 // Evita divisão por zero
         ? ((totalCurrentExpenses - totalPreviousExpenses) / totalPreviousExpenses) * 100
-        : null,
-      expensesByCategory: currentPeriodExpenses.map((item: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) => {
-        const category = categories.find((cat: { id: string; name: string }) => cat.id === item.categoryId);
-        const currentAmount = item._sum.amount?.toNumber() ?? 0;
-        
+        : (compareWithPrevious && totalCurrentExpenses > 0 ? 100 : null), // Se anterior é 0 e atual > 0, aumento de 100% (ou pode ser Infinity/null)
+      expensesByCategory: currentPeriodGroupedExpenses.map((item) => {
+        const currentAmount = item.total;
+
         // Encontrar a mesma categoria no período anterior
-        const previousItem = previousPeriodExpenses.find(
-          (prev: { categoryId: string; _sum: { amount: { toNumber(): number } | null } }) =>
-            prev.categoryId === item.categoryId
+        const previousItem = previousPeriodGroupedExpenses.find(
+          (prev) => prev.categoryId === item.categoryId
         );
-        const previousAmount = previousItem?._sum.amount?.toNumber() ?? 0;
-        
+        const previousAmount = previousItem?.total ?? 0;
+
+        const percentageOfTotal = totalCurrentExpenses !== 0 ? (currentAmount / totalCurrentExpenses) * 100 : 0;
+
         return {
           categoryId: item.categoryId,
-          categoryName: category?.name || 'Sem categoria',
+          categoryName: item.categoryName || 'Sem categoria', // Usa o nome retornado pelo serviço
           currentAmount,
           previousAmount: compareWithPrevious ? previousAmount : null,
-          percentageChange: compareWithPrevious && previousAmount > 0
+          percentageChange: compareWithPrevious && previousAmount !== 0
             ? ((currentAmount - previousAmount) / previousAmount) * 100
-            : null,
-          percentageOfTotal: (currentAmount / totalCurrentExpenses) * 100,
+            : (compareWithPrevious && currentAmount > 0 ? 100 : null), // Lógica similar ao total
+          percentageOfTotal: percentageOfTotal,
         };
       }),
     };
 
     return NextResponse.json(reportData);
+
   } catch (error) {
     console.error("[EXPENSES_BY_PERIOD_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
+    // Verifica se é um erro lançado pelo nosso serviço (opcional, mas bom para clareza)
+    if (error instanceof Error && error.message.startsWith('Erro ao buscar despesas')) {
+         return new NextResponse(JSON.stringify({ error: error.message }), {
+             status: 500,
+         });
+    }
+    // Erro genérico
+    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor ao gerar relatório." }), {
       status: 500,
     });
   }

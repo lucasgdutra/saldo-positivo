@@ -1,7 +1,9 @@
-import { db } from "@/lib/db";
+// import { db } from "@/lib/db"; // Removido - Acesso direto ao DB não é mais necessário
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import UserService from "@/services/UserService"; // Importa o UserService
+import { db } from "@/lib/db"; // Importa a instância do Prisma para o Service
 
 export async function GET() {
   try {
@@ -13,58 +15,27 @@ export async function GET() {
       });
     }
 
-    // Obter os últimos 6 meses
-    const hoje = new Date();
-    const meses = [];
-    
-    for (let i = 5; i >= 0; i--) {
-      const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      meses.push({
-        inicio: new Date(mes.getFullYear(), mes.getMonth(), 1),
-        fim: new Date(mes.getFullYear(), mes.getMonth() + 1, 0),
-        nome: mes.toLocaleDateString('pt-BR', { month: 'short' }),
-      });
+    // Instancia o UserService com a conexão do Prisma
+    const userService = new UserService(db);
+
+    // Chama o método do service para buscar o histórico de saldo
+    const balanceHistory = await userService.getBalanceHistory(session.user.id);
+
+    return NextResponse.json(balanceHistory);
+  } catch (error) {
+    // Loga o erro específico que pode vir do service
+    console.error("[API_BALANCE_HISTORY_ERROR]", error);
+
+    // Retorna uma resposta de erro genérica para o cliente
+    // O erro específico já foi logado no servidor
+    let errorMessage = "Erro interno do servidor ao buscar histórico de saldo.";
+    if (error instanceof Error) {
+        // Poderia personalizar a mensagem baseada no tipo de erro, se necessário
+        // errorMessage = error.message; // Cuidado ao expor mensagens de erro internas
     }
 
-    // Buscar dados para cada mês
-    const dadosMensais = await Promise.all(
-      meses.map(async (mes) => {
-        const [despesas, receitas] = await Promise.all([
-          db.expense.aggregate({
-            where: {
-              userId: session.user.id,
-              date: {
-                gte: mes.inicio,
-                lte: mes.fim,
-              },
-            },
-            _sum: { amount: true },
-          }),
-          db.revenue.aggregate({
-            where: {
-              userId: session.user.id,
-              date: {
-                gte: mes.inicio,
-                lte: mes.fim,
-              },
-            },
-            _sum: { amount: true },
-          }),
-        ]);
-
-        return {
-          month: mes.nome,
-          receitas: receitas._sum.amount?.toNumber() ?? 0,
-          despesas: despesas._sum.amount?.toNumber() ?? 0,
-        };
-      })
-    );
-
-    return NextResponse.json(dadosMensais);
-  } catch (error) {
-    console.error("[BALANCE_HISTORY_ERROR]", error);
-    return new NextResponse(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
+    return new NextResponse(JSON.stringify({ error: errorMessage }), {
+      status: 500, // Mantém o status 500 para erros internos
     });
   }
 }

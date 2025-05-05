@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
-// Definindo um tipo que pode ser tanto PrismaClient quanto o cliente estendido
-type PrismaClientWithExtensions = ReturnType<typeof getPrismaClient>;
+// Definindo e exportando um tipo que pode ser tanto PrismaClient quanto o cliente estendido
+export type PrismaClientWithExtensions = ReturnType<typeof getPrismaClient>;
 
 // Função para criar o cliente Prisma com extensões
 function getPrismaClient() {
