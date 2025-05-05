@@ -6,15 +6,21 @@ import { PrismaClientWithExtensions, db as prismaInstance } from '@/lib/db';
 // Define um tipo que pode ser PrismaClient ou um cliente de transação Prisma
 type PrismaTransactionClient = any; // Simplificado
 
+type ExtendedTransactionClient = Parameters<Parameters<PrismaClientWithExtensions['$transaction']>[0]>[0];
+
+
+// Novo tipo para aceitar tanto o client padrão quanto o de transação estendido
+type PrismaClientOrTransaction = PrismaClientWithExtensions | ExtendedTransactionClient;
+
 /**
  * Repository para gerenciar operações relacionadas a Despesas (Expenses) no banco de dados.
  * Encapsula toda a lógica de acesso a dados para a entidade Expense.
  */
 export class ExpenseRepository {
   // Aceita o cliente Prisma base, o estendido ou um cliente de transação
-  private prisma: PrismaClientWithExtensions;
+  private prisma: PrismaClientOrTransaction;
 
-  constructor(prismaClient: PrismaClientWithExtensions) {
+  constructor(prismaClient: PrismaClientOrTransaction) {
     this.prisma = prismaClient;
   }
 
@@ -83,7 +89,7 @@ export class ExpenseRepository {
    * @param endDate - Data de fim do período.
    * @returns Uma lista de despesas dentro do período especificado (com categorias incluídas).
    */
-  async findByUserIdAndPeriod(userId: string, startDate: Date, endDate: Date): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
+  async findByUserIdAndPeriod(userId: string, startDate: Date, endDate: Date) {
     return this.prisma.expense.findMany({
       where: {
         userId,
@@ -103,7 +109,7 @@ export class ExpenseRepository {
    * @param limit - O número máximo de despesas a serem retornadas (padrão: 5).
    * @returns Uma lista das despesas mais recentes do usuário (com categorias incluídas).
    */
-  async findRecentByUserId(userId: string, limit: number = 5): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
+  async findRecentByUserId(userId: string, limit: number = 5) {
     return this.prisma.expense.findMany({
       where: { userId },
       include: { category: true },
@@ -119,7 +125,7 @@ export class ExpenseRepository {
    * @param endDate - Data de fim do período.
    * @returns Um array com o total de despesas por categoria.
    */
-  async getTotalExpensesByCategoryAndPeriod(userId: string, startDate: Date, endDate: Date): Promise<{ categoryId: string; categoryName: string | null; total: number }[]> {
+  async getTotalExpensesByCategoryAndPeriod(userId: string, startDate: Date, endDate: Date) {
     const result = await this.prisma.expense.groupBy({
       by: ['categoryId'],
       where: {

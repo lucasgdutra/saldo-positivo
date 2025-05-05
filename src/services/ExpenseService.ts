@@ -9,6 +9,9 @@ import { db as prismaInstance, PrismaClientWithExtensions } from '@/lib/db';
 // Helper type para inferir o tipo do cliente de transação da instância estendida
 type ExtendedTransactionClient = Parameters<Parameters<PrismaClientWithExtensions['$transaction']>[0]>[0];
 
+// Novo tipo para aceitar tanto o client padrão quanto o de transação estendido
+type PrismaClientOrTransaction = PrismaClientWithExtensions | ExtendedTransactionClient;
+
 /**
  * Camada de serviço para gerenciar despesas.
  * Contém a lógica de negócio relacionada às despesas, incluindo validação de categoria e atualização de saldo.
@@ -62,7 +65,7 @@ class ExpenseService {
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
       // Cria instância do repositório com o cliente de transação
-      const expenseRepoTx = new ExpenseRepository(tx);
+      const expenseRepoTx = new ExpenseRepository(tx as PrismaClientOrTransaction);
 
       // 1. Cria a despesa (a validação da categoria já foi feita)
       const createData: Prisma.ExpenseUncheckedCreateInput = {
@@ -187,7 +190,7 @@ class ExpenseService {
     
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
-      const expenseRepoTx = new ExpenseRepository(tx);
+      const expenseRepoTx = new ExpenseRepository(tx as PrismaClientOrTransaction);
 
       // 1. Busca a despesa original para verificar propriedade e obter valor antigo
       const originalExpense = await expenseRepoTx.findById(id);
@@ -266,7 +269,7 @@ class ExpenseService {
     
 
     return this.prisma.$transaction(async (tx: ExtendedTransactionClient) => {
-      const expenseRepoTx = new ExpenseRepository(tx);
+      const expenseRepoTx = new ExpenseRepository(tx as PrismaClientOrTransaction);
 
       // 1. Busca a despesa original para verificar propriedade e obter valor
       const expenseToDelete = await expenseRepoTx.findById(id);
