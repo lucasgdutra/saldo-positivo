@@ -4,6 +4,7 @@ import { useEffect } from "react"; // Importar useEffect
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation"; // Importar hooks de navegação
 import { toast } from "sonner"; // Importar toast
+import Image from "next/image";
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
@@ -14,7 +15,16 @@ export default function Home() {
 				{/* Cabeçalho */}
 				<header className="container mx-auto px-4 py-6">
 					<div className="flex items-center justify-between">
-						<h1 className="text-3xl font-bold text-blue-600">Saldo Positivo</h1>
+						<div className="flex items-center space-x-3">
+							<Image
+								src="/images/logo.jpg"
+								alt="Saldo Positivo Logo"
+								width={48}
+								height={48}
+								className="rounded-lg"
+							/>
+							<h1 className="text-3xl font-bold text-blue-600">Saldo Positivo</h1>
+						</div>
 						<Link
 							href="#auth"
 							className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"

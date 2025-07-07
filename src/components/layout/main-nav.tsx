@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,20 @@ export function MainNav() {
 
 	return (
 		<nav className="flex items-center justify-between w-full px-4 md:px-0">
+			{/* Logo */}
+			<div className="flex items-center space-x-2">
+				<Image
+					src="/images/logo.jpg"
+					alt="Saldo Positivo Logo"
+					width={40}
+					height={40}
+					className="rounded-lg"
+				/>
+				<span className="hidden sm:block text-xl font-bold text-blue-600">
+					Saldo Positivo
+				</span>
+			</div>
+			
 			{/* Desktop Navigation */}
 			<div className="hidden md:flex items-center space-x-6">
 				{routes.map((route) => (
