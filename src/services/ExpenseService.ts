@@ -317,7 +317,7 @@ class ExpenseService {
       // Mapeia o resultado para o formato esperado pela API
       const formattedData = expensesByCategory.map(item => ({
         name: item.categoryName || 'Sem Categoria', // Usa 'Sem Categoria' se categoryName for null
-        value: item.total, // O repositório já retorna 'total' como number
+        value: Number(item.total), // Garantir que é number
       }));
 
       console.log(`ExpenseService: Despesas por categoria do mês atual encontradas para ${userId}.`);

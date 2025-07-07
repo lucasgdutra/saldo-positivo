@@ -156,9 +156,14 @@ export class ExpenseRepository {
 
     return result.map((item: GroupByResultItem) => {
       // Converte o valor Decimal ou null para number
-      const totalAmount = item._sum.amount instanceof Decimal
-        ? item._sum.amount.toNumber()
-        : (item._sum.amount ?? 0);
+      let totalAmount: number;
+      if (item._sum.amount instanceof Decimal) {
+        totalAmount = Number(item._sum.amount.toNumber());
+      } else if (item._sum.amount !== null) {
+        totalAmount = Number(item._sum.amount);
+      } else {
+        totalAmount = 0;
+      }
 
       return {
         categoryId: item.categoryId ?? 'unknown', // Trata categoria nula

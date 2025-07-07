@@ -165,13 +165,14 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
     return (
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+          <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
             <Pie
-              data={reportData.expensesByCategory}
+              data={reportData.expensesByCategory.filter(item => item.currentAmount > 0)}
               cx="50%"
               cy="50%"
               labelLine={false}
               outerRadius={80}
+              innerRadius={0}
               fill="#8884d8"
               dataKey="currentAmount"
               nameKey="categoryName"
@@ -179,9 +180,9 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
                 `${categoryName}: ${(percent * 100).toFixed(0)}%`
               }
             >
-              {reportData.expensesByCategory.map((entry: CategoryExpense, index: number) => (
+              {reportData.expensesByCategory.filter(item => item.currentAmount > 0).map((entry: CategoryExpense, index: number) => (
                 <Cell
-                  key={`cell-${entry.categoryId}`}
+                  key={`cell-${entry.categoryId}-${index}`}
                   fill={COLORS[index % COLORS.length]}
                 />
               ))}
@@ -210,16 +211,22 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={reportData.expenses}
+            data={reportData.expenses.filter(item => item.amount > 0)}
             margin={{
               top: 20,
               right: 30,
               left: 20,
-              bottom: 5,
+              bottom: 60,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" />
+            <XAxis 
+              dataKey="label" 
+              angle={-45}
+              textAnchor="end"
+              height={60}
+              interval={0}
+            />
             <YAxis
               tickFormatter={(value) =>
                 new Intl.NumberFormat("pt-BR", {

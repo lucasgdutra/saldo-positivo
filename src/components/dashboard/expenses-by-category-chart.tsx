@@ -103,25 +103,34 @@ export function ExpensesByCategoryChart({
             {" "}e adicione suas primeiras transações.
           </p>
         </div>
+      ) : chartData.filter(item => item.value > 0).length === 0 ? (
+        <div className="h-80 w-full flex flex-col items-center justify-center p-6 text-center border rounded-lg">
+          <h3 className="text-lg font-medium mb-2">Todas as despesas têm valor zero</h3>
+          <p className="text-muted-foreground">
+            Não há dados significativos para exibir no gráfico.
+          </p>
+        </div>
       ) : (
         <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
               <Pie
-                data={chartData}
+                data={chartData.filter(item => item.value > 0)}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
                 outerRadius={80}
+                innerRadius={0}
                 fill="#8884d8"
                 dataKey="value"
+                nameKey="name"
                 label={({ name, percent }) =>
                   `${name}: ${(percent * 100).toFixed(0)}%`
                 }
               >
-                {chartData.map((entry, index) => (
+                {chartData.filter(item => item.value > 0).map((entry, index) => (
                   <Cell
-                    key={`cell-${entry.name}`}
+                    key={`cell-${entry.name}-${index}`}
                     fill={COLORS[index % COLORS.length]}
                   />
                 ))}
