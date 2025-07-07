@@ -76,10 +76,10 @@ class ExpenseService {
       const newExpense = await expenseRepoTx.create(createData);
       console.log(`ExpenseService (TX): Despesa ID ${newExpense.id} criada.`);
 
-      // 2. Atualiza o saldo do usuário (subtrai o valor da despesa)
-      console.log(`ExpenseService (TX): Atualizando saldo do usuário ${userId} (subtraindo ${expenseAmount}).`);
+      // 2. Atualiza o saldo do usuário (recalcula totais)
+      console.log(`ExpenseService (TX): Atualizando saldo do usuário ${userId}.`);
       // Passa 'tx' para garantir que a atualização do saldo ocorra na mesma transação
-      await this.userService.updateUserBalance(userId, expenseAmount, 'subtract', tx);
+      await this.userService.updateUserBalance(userId, tx);
       console.log(`ExpenseService (TX): Saldo do usuário ${userId} atualizado.`);
 
       // Retorna a despesa criada (pode incluir a categoria dependendo do repo)
@@ -228,18 +228,11 @@ class ExpenseService {
       const updatedExpense = await expenseRepoTx.update(id, updateData);
       console.log(`ExpenseService (TX): Despesa ${id} atualizada. Novo valor: ${updatedExpense.amount}.`);
 
-      // 3. Calcula a diferença e ajusta o saldo do usuário
+      // 3. Atualiza o saldo do usuário (recalcula totais se houve mudança no valor)
       if (newAmount !== undefined && !newAmount.equals(oldAmount)) {
-        const difference = newAmount.sub(oldAmount); // difference > 0 se aumentou, < 0 se diminuiu
-        console.log(`ExpenseService (TX): Diferença de valor: ${difference}. Ajustando saldo do usuário ${userId}.`);
-        if (difference.isPositive()) {
-          // Se o novo valor é maior, subtrai a diferença do saldo
-          await this.userService.updateUserBalance(userId, difference, 'subtract', tx);
-        } else {
-          // Se o novo valor é menor, adiciona a diferença (que é negativa, então adiciona o valor absoluto) ao saldo
-          await this.userService.updateUserBalance(userId, difference.abs(), 'add', tx);
-        }
-         console.log(`ExpenseService (TX): Saldo do usuário ${userId} ajustado.`);
+        console.log(`ExpenseService (TX): Valor da despesa alterado. Recalculando saldo do usuário ${userId}.`);
+        await this.userService.updateUserBalance(userId, tx);
+        console.log(`ExpenseService (TX): Saldo do usuário ${userId} recalculado.`);
       } else {
           console.log(`ExpenseService (TX): Valor da despesa ${id} não alterado. Saldo do usuário ${userId} não precisa de ajuste.`);
       }
@@ -286,10 +279,10 @@ class ExpenseService {
       const deletedExpenseData = await expenseRepoTx.delete(id); // delete retorna o objeto deletado
       console.log(`ExpenseService (TX): Despesa ${id} deletada.`);
 
-      // 3. Atualiza o saldo do usuário (adiciona o valor da despesa de volta)
-      console.log(`ExpenseService (TX): Atualizando saldo do usuário ${userId} (adicionando ${amountToDelete}).`);
-      await this.userService.updateUserBalance(userId, amountToDelete, 'add', tx);
-      console.log(`ExpenseService (TX): Saldo do usuário ${userId} atualizado.`);
+      // 3. Atualiza o saldo do usuário (recalcula totais)
+      console.log(`ExpenseService (TX): Recalculando saldo do usuário ${userId} após deleção.`);
+      await this.userService.updateUserBalance(userId, tx);
+      console.log(`ExpenseService (TX): Saldo do usuário ${userId} recalculado.`);
 
       // Retorna o objeto que foi deletado (sem a categoria, pois o repo delete não inclui)
       return deletedExpenseData;

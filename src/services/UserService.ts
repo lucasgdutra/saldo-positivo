@@ -109,72 +109,66 @@ class UserService {
   }
 
   /**
-   * Atualiza o saldo do usuário adicionando ou subtraindo um valor.
+   * Atualiza o saldo do usuário recalculando totais de receitas e despesas.
    * Método interno usado por ExpenseService e RevenueService.
    * @param userId - O ID do usuário.
-   * @param amount - O valor a ser adicionado (positivo para receita, negativo para despesa). Deve ser positivo.
-   * @param operationType - 'add' ou 'subtract'.
+   * @param tx - Cliente de transação opcional.
    * @returns O objeto do usuário atualizado.
-   * @throws Error se o usuário não for encontrado, se o valor for inválido ou se a atualização do saldo falhar.
+   * @throws Error se o usuário não for encontrado ou se a atualização do saldo falhar.
    */
   async updateUserBalance(
     userId: string,
-    amount: Decimal,
-    operationType: 'add' | 'subtract',
-    // Usa o tipo inferido para o parâmetro opcional tx
     tx?: ExtendedTransactionClient
   ): Promise<User> {
-    // Validação do amount
-    if (amount.isNaN() || !amount.isFinite() || amount.isNegative()) {
-      console.error(`UserService: Valor inválido fornecido para atualização de saldo: ${amount}. O valor deve ser positivo.`);
-      throw new Error('Valor inválido para atualização de saldo. O valor deve ser positivo.');
-    }
-
-    console.log(`UserService: Atualizando saldo para usuário ID: ${userId}, Valor: ${amount}, Operação: ${operationType}, Dentro da transação: ${!!tx}`);
+    console.log(`UserService: Recalculando saldo para usuário ID: ${userId}, Dentro da transação: ${!!tx}`);
 
     // Define a função interna que realiza a lógica de atualização
-    // Aceita apenas o tipo específico do cliente de transação inferido
     const updateLogic = async (client: ExtendedTransactionClient): Promise<User> => {
-      // Instancia o repositório com o cliente de transação (UserRepository aceita 'any')
+      // Importa repositórios necessários
+      const { RevenueRepository } = await import('../repositories/RevenueRepository');
+      const { ExpenseRepository } = await import('../repositories/ExpenseRepository');
+      
       const userRepo = new UserRepository(client);
+      const revenueRepo = new RevenueRepository(client);
+      const expenseRepo = new ExpenseRepository(client);
 
-      // 1. Buscar o saldo atual
-      const currentBalance = await userRepo.getBalance(userId);
-      let currentAmount = new Decimal(0);
-      if (currentBalance) {
-        currentAmount = currentBalance.totalAmount;
-        console.log(`UserService (updateLogic): Saldo atual de ${userId}: ${currentAmount}`);
-      } else {
-        console.warn(`UserService (updateLogic): Saldo não encontrado para ${userId}. Criando balance inicial.`);
-      }
+      // 1. Buscar todas as receitas e despesas
+      const allRevenues: Revenue[] = await revenueRepo.findByUserId(userId);
+      const allExpenses: Expense[] = await expenseRepo.findByUserId(userId);
 
-      // 2. Calcular o novo saldo
-      let newAmount: Decimal;
-      if (operationType === 'add') {
-        newAmount = currentAmount.add(amount);
-        console.log(`UserService (updateLogic): Novo saldo calculado (adição) para ${userId}: ${newAmount}`);
-      } else {
-        newAmount = currentAmount.sub(amount);
-        console.log(`UserService (updateLogic): Novo saldo calculado (subtração) para ${userId}: ${newAmount}`);
-      }
+      // 2. Calcular o total de receitas e despesas
+      const totalRevenue = allRevenues.reduce((sum: Decimal, revenue: Revenue) => sum.add(new Decimal(revenue.amount)), new Decimal(0));
+      const totalExpense = allExpenses.reduce((sum: Decimal, expense: Expense) => sum.add(new Decimal(expense.amount)), new Decimal(0));
 
-      // 3. Atualizar ou criar o saldo
+      // 3. Calcular o novo saldo
+      const newCalculatedBalance = totalRevenue.sub(totalExpense);
+      
+      console.log(`UserService (updateLogic): Totais recalculados para ${userId}: Receitas=${totalRevenue}, Despesas=${totalExpense}, Saldo=${newCalculatedBalance}`);
+
+      // 4. Buscar o objeto Balance atual
+      let currentBalance = await userRepo.getBalance(userId);
+
+      // 5. Atualizar ou criar o objeto Balance
       if (!currentBalance) {
-        // Cria um novo registro de balance se não existir
-        await client.balance.create({
+        console.warn(`UserService (updateLogic): Objeto Balance não encontrado para ${userId}. Criando um novo.`);
+        currentBalance = await client.balance.create({
           data: {
             userId: userId,
-            totalAmount: newAmount,
-            totalRevenues: operationType === 'add' ? amount : new Decimal(0),
-            totalExpenses: operationType === 'subtract' ? amount : new Decimal(0),
+            totalAmount: newCalculatedBalance,
+            totalRevenues: totalRevenue,
+            totalExpenses: totalExpense,
             referenceMonth: new Date(),
           }
         });
-        console.log(`UserService (updateLogic): Novo balance criado para ${userId}. Valor inicial: ${newAmount}`);
+        console.log(`UserService (updateLogic): Novo objeto Balance criado para ${userId}.`);
       } else {
         // Atualiza o balance existente
-        await userRepo.updateBalancePartial(userId, { totalAmount: newAmount.toNumber() });
-        console.log(`UserService (updateLogic): Saldo atualizado para ${userId}. Novo valor: ${newAmount}`);
+        await userRepo.updateBalancePartial(userId, { 
+          totalAmount: newCalculatedBalance.toNumber(),
+          totalRevenues: totalRevenue.toNumber(),
+          totalExpenses: totalExpense.toNumber()
+        });
+        console.log(`UserService (updateLogic): Balance atualizado para ${userId}.`);
       }
 
       // 4. Retornar o usuário atualizado (sem o saldo)

@@ -63,11 +63,10 @@ class RevenueService {
       const newRevenue = await revenueRepoTx.create(createData);
       console.log(`RevenueService (TX): Receita ID ${newRevenue.id} criada.`);
 
-      // 2. Atualiza o saldo do usuário (adiciona o valor da receita) usando a instância principal
-      //    e passando o cliente de transação 'tx'
-      console.log(`RevenueService (TX): Atualizando saldo do usuário ${userId} (adicionando ${revenueAmount}).`);
-      await this.userService.updateUserBalance(userId, revenueAmount, 'add', tx); // Passa tx aqui
-      console.log(`RevenueService (TX): Saldo do usuário ${userId} atualizado.`);
+      // 2. Atualiza o saldo do usuário (recalcula totais)
+      console.log(`RevenueService (TX): Recalculando saldo do usuário ${userId}.`);
+      await this.userService.updateUserBalance(userId, tx); // Passa tx aqui
+      console.log(`RevenueService (TX): Saldo do usuário ${userId} recalculado.`);
 
       return newRevenue;
     });
@@ -178,19 +177,11 @@ class RevenueService {
       const updatedRevenue = await revenueRepoTx.update(id, updateData);
       console.log(`RevenueService (TX): Receita ${id} atualizada. Novo valor: ${updatedRevenue.amount}.`);
 
-      // 3. Calcula a diferença e ajusta o saldo do usuário
-      // Apenas ajusta se o valor foi alterado
+      // 3. Atualiza o saldo do usuário (recalcula totais se houve mudança no valor)
       if (newAmount !== undefined && !newAmount.equals(oldAmount)) {
-        const difference = newAmount.sub(oldAmount);
-        console.log(`RevenueService (TX): Diferença de valor: ${difference}. Ajustando saldo do usuário ${userId}.`);
-        if (difference.isPositive()) {
-          // Se o novo valor é maior, adiciona a diferença, passando tx
-          await this.userService.updateUserBalance(userId, difference, 'add', tx);
-        } else {
-          // Se o novo valor é menor, subtrai a diferença (valor absoluto), passando tx
-          await this.userService.updateUserBalance(userId, difference.abs(), 'subtract', tx);
-        }
-         console.log(`RevenueService (TX): Saldo do usuário ${userId} ajustado.`);
+        console.log(`RevenueService (TX): Valor da receita alterado. Recalculando saldo do usuário ${userId}.`);
+        await this.userService.updateUserBalance(userId, tx);
+        console.log(`RevenueService (TX): Saldo do usuário ${userId} recalculado.`);
       } else {
           console.log(`RevenueService (TX): Valor da receita ${id} não alterado. Saldo do usuário ${userId} não precisa de ajuste.`);
       }
@@ -232,10 +223,10 @@ class RevenueService {
       await revenueRepoTx.delete(id);
       console.log(`RevenueService (TX): Receita ${id} deletada.`);
 
-      // 3. Atualiza o saldo do usuário (subtrai o valor da receita), passando tx
-      console.log(`RevenueService (TX): Atualizando saldo do usuário ${userId} (subtraindo ${amountToDelete}).`);
-      await this.userService.updateUserBalance(userId, amountToDelete, 'subtract', tx);
-      console.log(`RevenueService (TX): Saldo do usuário ${userId} atualizado.`);
+      // 3. Atualiza o saldo do usuário (recalcula totais)
+      console.log(`RevenueService (TX): Recalculando saldo do usuário ${userId} após deleção.`);
+      await this.userService.updateUserBalance(userId, tx);
+      console.log(`RevenueService (TX): Saldo do usuário ${userId} recalculado.`);
 
       return revenueToDelete; // Retorna o objeto que foi deletado
     });
