@@ -85,8 +85,22 @@ export class AuthService {
       // como marcar o usuário para tentar criar as categorias depois.
     }
 
+    // 6. Criar balance inicial para o novo usuário
+    try {
+      await this.userRepository.upsertBalance(user.id, {
+        totalAmount: 0,
+        totalRevenues: 0,
+        totalExpenses: 0,
+        referenceMonth: new Date(),
+      });
+      console.log(`Balance inicial criado para o usuário ${user.id}`);
+    } catch (error) {
+      // Log do erro na criação do balance, mas não impede o registro
+      console.error(`Erro ao criar balance inicial para o usuário ${user.id}:`, error);
+    }
 
-    // 6. Retornar usuário sem a senha
+
+    // 7. Retornar usuário sem a senha
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }

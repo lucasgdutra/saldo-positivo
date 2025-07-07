@@ -145,7 +145,7 @@ class UserService {
         currentAmount = currentBalance.totalAmount;
         console.log(`UserService (updateLogic): Saldo atual de ${userId}: ${currentAmount}`);
       } else {
-        console.warn(`UserService (updateLogic): Saldo não encontrado para ${userId}. Assumindo 0.`);
+        console.warn(`UserService (updateLogic): Saldo não encontrado para ${userId}. Criando balance inicial.`);
       }
 
       // 2. Calcular o novo saldo
@@ -158,9 +158,24 @@ class UserService {
         console.log(`UserService (updateLogic): Novo saldo calculado (subtração) para ${userId}: ${newAmount}`);
       }
 
-      // 3. Atualizar o saldo
-      await userRepo.updateBalancePartial(userId, { totalAmount: newAmount.toNumber() });
-      console.log(`UserService (updateLogic): Saldo atualizado para ${userId}. Novo valor: ${newAmount}`);
+      // 3. Atualizar ou criar o saldo
+      if (!currentBalance) {
+        // Cria um novo registro de balance se não existir
+        await client.balance.create({
+          data: {
+            userId: userId,
+            totalAmount: newAmount,
+            totalRevenues: operationType === 'add' ? amount : new Decimal(0),
+            totalExpenses: operationType === 'subtract' ? amount : new Decimal(0),
+            referenceMonth: new Date(),
+          }
+        });
+        console.log(`UserService (updateLogic): Novo balance criado para ${userId}. Valor inicial: ${newAmount}`);
+      } else {
+        // Atualiza o balance existente
+        await userRepo.updateBalancePartial(userId, { totalAmount: newAmount.toNumber() });
+        console.log(`UserService (updateLogic): Saldo atualizado para ${userId}. Novo valor: ${newAmount}`);
+      }
 
       // 4. Retornar o usuário atualizado (sem o saldo)
       const finalUser = await userRepo.findById(userId);

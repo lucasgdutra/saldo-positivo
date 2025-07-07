@@ -1,5 +1,5 @@
 // src/services/ExpenseService.ts
-import { PrismaClient, Expense, Prisma, Category } from '@prisma/client';
+import { Expense, Prisma, Category } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { ExpenseRepository } from '../repositories/ExpenseRepository';
 import UserService from './UserService';
