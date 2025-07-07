@@ -47,41 +47,43 @@ export function MainNav() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<nav className="flex items-center justify-between w-full px-4 md:px-0">
-			{/* Logo */}
-			<div className="flex items-center space-x-2">
+		<nav className="flex items-center w-full px-4 lg:px-0">
+			{/* Logo - Always at start */}
+			<div className="flex items-center space-x-2 flex-shrink-0">
 				<Image
 					src="/images/logo.jpg"
 					alt="Saldo Positivo Logo"
-					width={40}
-					height={40}
+					width={32}
+					height={32}
 					className="rounded-lg"
 				/>
-				<span className="hidden sm:block text-xl font-bold text-blue-600">
+				<span className="hidden lg:block text-lg font-bold text-blue-600">
 					Saldo Positivo
 				</span>
 			</div>
 			
-			{/* Desktop Navigation */}
-			<div className="hidden md:flex items-center space-x-6">
-				{routes.map((route) => (
-					<Link
-						key={route.href}
-						href={route.href}
-						className={cn(
-							"text-sm font-medium transition-colors hover:text-primary",
-							pathname === route.href
-								? "text-primary font-semibold border-b-2 border-primary"
-								: "text-muted-foreground",
-						)}
-					>
-						{route.label}
-					</Link>
-				))}
+			{/* Desktop Navigation - Centered */}
+			<div className="hidden lg:flex items-center justify-center flex-1">
+				<div className="flex items-center space-x-6">
+					{routes.map((route) => (
+						<Link
+							key={route.href}
+							href={route.href}
+							className={cn(
+								"text-sm font-medium transition-colors hover:text-primary whitespace-nowrap",
+								pathname === route.href
+									? "text-primary font-semibold border-b-2 border-primary"
+									: "text-muted-foreground",
+							)}
+						>
+							{route.label}
+						</Link>
+					))}
+				</div>
 			</div>
 
-			{/* User Info and Logout - Desktop */}
-			<div className="hidden md:flex items-center space-x-4 ml-auto">
+			{/* User Info and Logout - Desktop - Always at end */}
+			<div className="hidden lg:flex items-center space-x-3 flex-shrink-0">
 				{session?.user?.name && (
 					<span className="text-sm font-medium text-muted-foreground">
 						{session.user.name}
@@ -97,8 +99,8 @@ export function MainNav() {
 				</Button>
 			</div>
 
-			{/* Mobile Navigation Trigger */}
-			<div className="md:hidden flex items-center">
+			{/* Mobile Navigation Trigger - Collapse earlier on tablets */}
+			<div className="lg:hidden flex items-center ml-auto">
 				<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
 					<SheetTrigger asChild>
 						<Button variant="outline" size="icon">
