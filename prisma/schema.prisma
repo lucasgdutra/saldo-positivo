@@ -8,12 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid()) @db.Uuid
-  email     String    @unique
-  password  String
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                    String    @id @default(uuid()) @db.Uuid
+  email                 String    @unique
+  password              String
+  name                  String
+  salaryRange           String?
+  usageMotivation       String?
+  customMotivation      String?
+  financialGoals        String?
+  hasDebts              Boolean?
+  monthlyIncome         String?
+  familySize            Int?
+  financialExperience   String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   categories Category[]
   expenses   Expense[]

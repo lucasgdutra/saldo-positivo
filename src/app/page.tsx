@@ -48,7 +48,7 @@ export default function Home() {
 							</p>
 							<div className="mt-8 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
 								<Link
-									href="#auth"
+									href="/cadastro"
 									className="rounded-md bg-blue-600 px-6 py-3 text-center text-white hover:bg-blue-700"
 								>
 									Começar Agora
@@ -166,8 +166,7 @@ export default function Home() {
 										Acesse sua conta
 									</h2>
 									<p className="mt-2 text-gray-600">
-										Entre ou crie uma conta para começar a gerenciar suas
-										finanças
+										Entre na sua conta para gerenciar suas finanças
 									</p>
 								</div>
 								<AuthForm />
