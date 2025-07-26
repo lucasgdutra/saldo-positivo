@@ -3,7 +3,7 @@ import { ProfileRepository, ProfileUpdateData } from '../repositories/ProfileRep
 import { db as prismaInstance, PrismaClientWithExtensions } from '@/lib/db';
 import bcrypt from 'bcrypt';
 
-export interface ProfileData extends Omit<User, 'password'> {}
+export type ProfileData = Omit<User, 'password'>;
 
 export interface ProfileStats {
   totalExpenses: number;
