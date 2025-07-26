@@ -17,6 +17,7 @@ import {
 	SheetClose,
 } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { UserMenu } from "@/components/layout/user-menu";
 
 const routes = [
 	{
@@ -82,25 +83,14 @@ export function MainNav() {
 				</div>
 			</div>
 
-			{/* User Info and Logout - Desktop - Always at end */}
-			<div className="hidden lg:flex items-center space-x-3 flex-shrink-0">
-				{session?.user?.name && (
-					<span className="text-sm font-medium text-muted-foreground">
-						{session.user.name}
-					</span>
-				)}
-				<Button
-					variant="ghost"
-					size="sm"
-					onClick={() => signOut({ callbackUrl: "/" })}
-					className="text-sm font-medium text-muted-foreground hover:text-primary"
-				>
-					Sair
-				</Button>
+			{/* User Menu - Desktop - Always at end */}
+			<div className="hidden lg:flex items-center flex-shrink-0">
+				<UserMenu />
 			</div>
 
-			{/* Mobile Navigation Trigger - Collapse earlier on tablets */}
-			<div className="lg:hidden flex items-center ml-auto">
+			{/* Mobile Navigation and User Menu */}
+			<div className="lg:hidden flex items-center ml-auto space-x-2">
+				<UserMenu />
 				<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
 					<SheetTrigger asChild>
 						<Button variant="outline" size="icon">
@@ -129,25 +119,6 @@ export function MainNav() {
 									</Link>
 								</SheetClose>
 							))}
-							<hr className="my-4" />
-							{session?.user?.name && (
-								<span className="text-sm font-medium text-muted-foreground px-2">
-									{session.user.name}
-								</span>
-							)}
-							<SheetClose asChild>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => {
-										signOut({ callbackUrl: "/" });
-										setIsMobileMenuOpen(false);
-									}}
-									className="text-sm font-medium text-muted-foreground hover:text-primary justify-start px-2"
-								>
-									Sair
-								</Button>
-							</SheetClose>
 						</nav>
 					</SheetContent>
 				</Sheet>
