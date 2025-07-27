@@ -109,15 +109,24 @@ export function AuthForm() {
           {isLoading ? "Entrando..." : "Entrar"}
         </button>
 
-        <p className="text-center text-sm">
-          Não tem uma conta?{" "}
+        <div className="text-center space-y-2">
           <Link
-            href="/cadastro"
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            href="/esqueci-senha"
+            className="block text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            Criar conta
+            Esqueci minha senha
           </Link>
-        </p>
+          
+          <p className="text-sm">
+            Não tem uma conta?{" "}
+            <Link
+              href="/cadastro"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Criar conta
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );
