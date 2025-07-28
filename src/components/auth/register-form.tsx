@@ -14,12 +14,12 @@ const registerSchema = z.object({
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
   name: z.string().min(1, "Nome é obrigatório"),
   salaryRange: z.string().min(1, "Faixa salarial é obrigatória"),
-  usageMotivation: z.string().min(1, "Motivo de uso é obrigatório"),
+  usageMotivation: z.string().optional(),
   customMotivation: z.string().optional(),
   financialGoals: z.string().optional(),
   hasDebts: z.boolean().optional(),
   monthlyIncome: z.string().optional(),
-  familySize: z.coerce.number().min(1, "Tamanho da família deve ser pelo menos 1").optional(),
+  familySize: z.coerce.number().optional(),
   financialExperience: z.string().optional(),
 }).refine(
   (data) => {
@@ -174,7 +174,7 @@ export function RegisterForm() {
       {/* Motivo de uso */}
       <div>
         <label htmlFor="usageMotivation" className="block text-sm font-medium">
-          Por que você quer usar este aplicativo? <span className="text-red-500">*</span>
+          Por que você quer usar este aplicativo? (opcional)
         </label>
         <select
           {...register("usageMotivation")}
