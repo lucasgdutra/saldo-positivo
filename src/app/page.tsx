@@ -34,6 +34,25 @@ export default function Home() {
 					</div>
 				</header>
 
+				{/* Aviso de Projeto Acadêmico */}
+				<section className="container mx-auto px-4 py-4">
+					<div className="rounded-lg bg-yellow-50 border border-yellow-200 p-6">
+						<div className="flex items-start space-x-3">
+							<div>
+								<h3 className="text-lg font-semibold text-yellow-800 mb-2">
+									⚠️ Projeto Acadêmico
+								</h3>
+								<p className="text-yellow-700">
+									<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema desenvolvido exclusivamente para fins acadêmicos
+									como projeto de faculdade. Esta plataforma não foi criada para uso real por usuários e não deve ser
+									utilizada para gerenciar informações financeiras reais. Todos os dados inseridos são fictícios e
+									destinados apenas para demonstração e avaliação acadêmica.
+								</p>
+							</div>
+						</div>
+					</div>
+				</section>
+
 				{/* Hero Section */}
 				<section className="container mx-auto px-4 py-16">
 					<div className="grid grid-cols-1 gap-12 md:grid-cols-2">
