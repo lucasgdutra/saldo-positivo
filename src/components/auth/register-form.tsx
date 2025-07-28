@@ -8,6 +8,8 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+const VALOR_SALARIO_MINIMO = 1518.00;
+
 // Schema para registro
 const registerSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -158,12 +160,12 @@ export function RegisterForm() {
           className="mt-1 block w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Selecione sua faixa salarial</option>
-          <option value="ate-1-salario">Até 1 salário mínimo (R$ 1.412)</option>
-          <option value="1-a-2-salarios">1 a 2 salários mínimos (R$ 1.412 - R$ 2.824)</option>
-          <option value="2-a-3-salarios">2 a 3 salários mínimos (R$ 2.824 - R$ 4.236)</option>
-          <option value="3-a-5-salarios">3 a 5 salários mínimos (R$ 4.236 - R$ 7.060)</option>
-          <option value="5-a-10-salarios">5 a 10 salários mínimos (R$ 7.060 - R$ 14.120)</option>
-          <option value="acima-10-salarios">Acima de 10 salários mínimos (R$ 14.120+)</option>
+          <option value="ate-1-salario">Até 1 salário mínimo (R$ {VALOR_SALARIO_MINIMO.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</option>
+          <option value="1-a-2-salarios">1 a 2 salários mínimos (R$ {VALOR_SALARIO_MINIMO.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ {(VALOR_SALARIO_MINIMO * 2).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</option>
+          <option value="2-a-3-salarios">2 a 3 salários mínimos (R$ {(VALOR_SALARIO_MINIMO * 2).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ {(VALOR_SALARIO_MINIMO * 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</option>
+          <option value="3-a-5-salarios">3 a 5 salários mínimos (R$ {(VALOR_SALARIO_MINIMO * 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ {(VALOR_SALARIO_MINIMO * 5).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</option>
+          <option value="5-a-10-salarios">5 a 10 salários mínimos (R$ {(VALOR_SALARIO_MINIMO * 5).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - R$ {(VALOR_SALARIO_MINIMO * 10).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</option>
+          <option value="acima-10-salarios">Acima de 10 salários mínimos (R$ {(VALOR_SALARIO_MINIMO * 10).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}+)</option>
           <option value="nao-informar">Prefiro não informar</option>
         </select>
         {errors.salaryRange && (
