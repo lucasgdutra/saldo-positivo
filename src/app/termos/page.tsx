@@ -86,7 +86,7 @@ export default function TermosPage() {
 									4. Limitações de Responsabilidade
 								</h2>
 								<p>
-									O Saldo Positivo é fornecido "como está". Não garantimos que 
+									O Saldo Positivo é fornecido &quot;como está&quot;. Não garantimos que 
 									o serviço será ininterrupto ou livre de erros. Você usa o 
 									serviço por sua conta e risco.
 								</p>
