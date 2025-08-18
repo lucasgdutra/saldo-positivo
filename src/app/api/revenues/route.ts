@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     console.error("[REVENUES_POST_ERROR]", error);
     
     if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify({ error: "Dados inválidos", details: error.errors }), {
+      return new NextResponse(JSON.stringify({ error: "Dados inválidos", details: error.issues }), {
         status: 422,
       });
     }
@@ -150,7 +150,7 @@ export async function PUT(req: NextRequest) {
     console.error("[REVENUES_PUT_ERROR]", error);
     
     if (error instanceof z.ZodError) {
-      return new NextResponse(JSON.stringify({ error: "Dados inválidos", details: error.errors }), {
+      return new NextResponse(JSON.stringify({ error: "Dados inválidos", details: error.message }), {
         status: 422,
       });
     }

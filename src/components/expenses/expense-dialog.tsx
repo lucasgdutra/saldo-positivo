@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver as  zodResolver} from "@hookform/resolvers/standard-schema";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { ExpenseFormSchema, type ExpenseFormData } from "@/lib/validations";
@@ -79,6 +79,7 @@ export function ExpenseDialog({
       date: formatDateForInput(new Date()),
       categoryId: "",
     },
+    mode: "all"
   });
 
   // Atualizar o formulário quando initialData mudar

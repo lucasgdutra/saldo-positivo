@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver as  zodResolver} from "@hookform/resolvers/standard-schema";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";

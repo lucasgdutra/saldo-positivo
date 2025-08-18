@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       // Erro de validação lançado pelo AuthService
       return NextResponse.json(
-        { error: "Dados inválidos", details: error.errors },
+        { error: "Dados inválidos", details: error.issues },
         { status: 400 }
       );
     }

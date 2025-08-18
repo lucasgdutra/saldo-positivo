@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const validation = forgotPasswordSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'E-mail inválido', details: validation.error.errors },
+        { error: 'E-mail inválido', details: validation.error.issues },
         { status: 400 }
       );
     }

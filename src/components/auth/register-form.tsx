@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver as  zodResolver} from "@hookform/resolvers/standard-schema";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UserRegistrationFormSchema, type UserRegistrationFormData } from "@/lib/validations";
@@ -20,7 +20,7 @@ export function RegisterForm() {
     watch,
   } = useForm<UserRegistrationFormData>({
     resolver: zodResolver(UserRegistrationFormSchema),
-    mode: "onBlur",
+    mode: "all",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +28,7 @@ export function RegisterForm() {
   const watchUsageMotivation = watch("usageMotivation");
 
   const onSubmit = async (data: UserRegistrationFormData) => {
+    console.log("Dados do formulário:", data);
     setError(null);
     setIsLoading(true);
 
@@ -75,7 +76,6 @@ export function RegisterForm() {
       setIsLoading(false);
     }
   };
-  console.log(errors)
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 

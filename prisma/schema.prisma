@@ -30,7 +30,6 @@ model User {
   customMotivation      String?
   financialGoals        String?
   hasDebts              Boolean?
-  monthlyIncome         String?
   familySize            Int?
   financialExperience   String?
   createdAt             DateTime  @default(now())

@@ -58,6 +58,7 @@ export const ResetPasswordApiSchema = z.object({
 export const CreateCategoryApiSchema = CategoryInputSchema.omit({
   user: true,
   expenses: true,
+  userId: true,
 }).extend({
   name: z.string().min(1, 'Category name is required'),
 });
@@ -71,7 +72,7 @@ export const CreateExpenseApiSchema = ExpenseInputSchema.omit({
 }).extend({
   amount: DecimalValidation.flexible('valor da despesa'),
   description: z.string().optional(),
-  date: z.string().datetime().or(z.date()).transform(val => 
+  date: z.string().datetime().or(z.date()).transform(val =>
     typeof val === 'string' ? new Date(val) : val
   ),
   categoryId: z.string().uuid('Category ID must be a valid UUID'),
@@ -85,7 +86,7 @@ export const CreateRevenueApiSchema = RevenueInputSchema.omit({
 }).extend({
   amount: DecimalValidation.flexible('valor da receita'),
   description: z.string().optional(),
-  date: z.string().datetime().or(z.date()).transform(val => 
+  date: z.string().datetime().or(z.date()).transform(val =>
     typeof val === 'string' ? new Date(val) : val
   ),
 });
@@ -99,7 +100,7 @@ export const CreateBalanceApiSchema = BalanceInputSchema.omit({
   totalAmount: DecimalValidation.flexible('valor total'),
   totalRevenues: DecimalValidation.flexible('total de receitas'),
   totalExpenses: DecimalValidation.flexible('total de despesas'),
-  referenceMonth: z.string().datetime().or(z.date()).transform(val => 
+  referenceMonth: z.string().datetime().or(z.date()).transform(val =>
     typeof val === 'string' ? new Date(val) : val
   ),
 });
@@ -115,10 +116,10 @@ export const PaginationQuerySchema = z.object({
 });
 
 export const DateRangeQuerySchema = z.object({
-  startDate: z.string().datetime().or(z.date()).transform(val => 
+  startDate: z.string().datetime().or(z.date()).transform(val =>
     typeof val === 'string' ? new Date(val) : val
   ).optional(),
-  endDate: z.string().datetime().or(z.date()).transform(val => 
+  endDate: z.string().datetime().or(z.date()).transform(val =>
     typeof val === 'string' ? new Date(val) : val
   ).optional(),
 });

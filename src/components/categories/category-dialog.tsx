@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/standard-schema";
 import { useState, useEffect } from "react";
 import { CategoryFormSchema, type CategoryFormData } from "@/lib/validations";
 
@@ -32,8 +32,9 @@ export function CategoryDialog({
     defaultValues: {
       name: "",
     },
+    mode: "all"
   });
-  
+
   // Atualizar o formulário quando initialData mudar
   useEffect(() => {
     if (initialData) {
@@ -61,7 +62,7 @@ export function CategoryDialog({
   };
 
   if (!isOpen) return null;
-
+  console.log(errors)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white p-6">

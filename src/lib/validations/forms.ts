@@ -82,6 +82,7 @@ export type ResetPasswordFormData = z.infer<typeof ResetPasswordFormSchema>;
 export const CategoryFormSchema = CategoryInputSchema.omit({
   user: true,
   expenses: true,
+  userId: true
 }).extend({
   name: z.string().min(1, 'Nome da categoria é obrigatório'),
 });
