@@ -2,6 +2,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator zod {
+  provider                         = "prisma-zod-generator"
+  output                          = "../src/schemas"
+  createInputTypes                = false
+  createModelTypes                = true
+  addInputTypeValidation          = false
+  addIncludeType                  = false
+  addSelectType                   = false
+  useMultipleFiles                = true
+  writeBarrelFiles                = true
+  createOptionalDefaultValuesTypes = true
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

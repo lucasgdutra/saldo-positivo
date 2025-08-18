@@ -2,16 +2,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import * as z from "zod";
 import CategoryService from "@/services/CategoryService"; // Importar o serviço
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { CreateCategoryApiSchema } from "@/lib/validations";
+import { z } from "zod";
 
 // Instanciar o serviço
 const categoryService = new CategoryService();
-
-const categorySchema = z.object({
-  name: z.string().min(1, "Nome da categoria é obrigatório"),
-});
 
 export async function GET() {
   try {
@@ -44,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name } = categorySchema.parse(body);
+    const { name } = CreateCategoryApiSchema.parse(body);
 
     // Usar o serviço para criar a categoria
     const categoria = await categoryService.createCategory({
@@ -97,7 +94,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name } = categorySchema.parse(body);
+    const { name } = CreateCategoryApiSchema.parse(body);
 
     // Usar o serviço para atualizar a categoria
     const categoria = await categoryService.updateCategory(

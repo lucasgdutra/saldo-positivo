@@ -2,14 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useState, useEffect } from "react";
-
-const categorySchema = z.object({
-  name: z.string().min(1, "Nome da categoria é obrigatório"),
-});
-
-type CategoryFormData = z.infer<typeof categorySchema>;
+import { CategoryFormSchema, type CategoryFormData } from "@/lib/validations";
 
 interface CategoryDialogProps {
   isOpen: boolean;
@@ -34,7 +28,7 @@ export function CategoryDialog({
     formState: { errors },
     reset,
   } = useForm<CategoryFormData>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(CategoryFormSchema),
     defaultValues: {
       name: "",
     },

@@ -2,19 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-
-const revenueSchema = z.object({
-  amount: z.number().positive("O valor deve ser positivo"),
-  description: z.string().optional(),
-  date: z.string().refine((date) => !Number.isNaN(Date.parse(date)), {
-    message: "Data inválida",
-  }),
-});
-
-type RevenueFormData = z.infer<typeof revenueSchema>;
+import { RevenueFormSchema, type RevenueFormData } from "@/lib/validations";
 
 interface RevenueDialogProps {
   isOpen: boolean;
@@ -35,16 +25,16 @@ export function RevenueDialog({
   initialData,
 }: RevenueDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Formatar a data para o formato YYYY-MM-DD para o input date (usando UTC)
   const formatDateForInput = useCallback((date: Date | null): string => {
-  	if (!date) return "";
-  	const d = new Date(date);
-  	// Usar métodos UTC para garantir que o dia original seja mantido
-  	const year = d.getUTCFullYear();
-  	const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
-  	const day = String(d.getUTCDate()).padStart(2, '0');
-  	return `${year}-${month}-${day}`;
+    if (!date) return "";
+    const d = new Date(date);
+    // Usar métodos UTC para garantir que o dia original seja mantido
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }, []);
 
   const {
@@ -53,14 +43,14 @@ export function RevenueDialog({
     formState: { errors },
     reset,
   } = useForm<RevenueFormData>({
-    resolver: zodResolver(revenueSchema),
+    resolver: zodResolver(RevenueFormSchema),
     defaultValues: {
       amount: 0,
       description: "",
       date: formatDateForInput(new Date()),
     },
   });
-  
+
   // Atualizar o formulário quando initialData mudar
   useEffect(() => {
     if (initialData) {
@@ -121,7 +111,7 @@ export function RevenueDialog({
               <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="description" className="block text-sm font-medium">
               Descrição
@@ -138,7 +128,7 @@ export function RevenueDialog({
               <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="date" className="block text-sm font-medium">
               Data
@@ -154,7 +144,7 @@ export function RevenueDialog({
               <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
             )}
           </div>
-          
+
           <div className="flex justify-end gap-2">
             <button
               type="button"

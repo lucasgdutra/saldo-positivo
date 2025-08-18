@@ -1,37 +1,8 @@
 import { hash } from "bcrypt";
-import * as z from "zod";
 import { UserRepository } from "@/repositories/UserRepository";
 import { CategoryRepository } from "@/repositories/CategoryRepository";
-import { User } from "@prisma/client"; // Assumindo que o tipo User vem do Prisma
-
-// Schema de validação movido para o Service
-const userSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  name: z.string().min(1, "Nome é obrigatório"),
-  salaryRange: z.string().min(1, "Faixa salarial é obrigatória"),
-  usageMotivation: z.string().min(1, "Motivo de uso é obrigatório"),
-  customMotivation: z.string().optional(),
-  financialGoals: z.string().optional(),
-  hasDebts: z.boolean().optional(),
-  monthlyIncome: z.string().optional(),
-  familySize: z.coerce.number().min(1, "Tamanho da família deve ser pelo menos 1").optional(),
-  financialExperience: z.string().optional(),
-}).refine(
-  (data) => {
-    if (data.usageMotivation === "outro" && !data.customMotivation) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: "Especifique o motivo personalizado",
-    path: ["customMotivation"],
-  }
-);
-
-// Tipo para os dados de entrada do registro
-type RegisterUserData = z.infer<typeof userSchema>;
+import { User } from "@prisma/client";
+import { CreateUserApiSchema, type CreateUserApiData } from "@/lib/validations";
 
 // Lista de categorias padrão movida para o Service
 const DEFAULT_CATEGORIES = [
@@ -73,9 +44,9 @@ export class AuthService {
     }
   }
 
-  async register(data: RegisterUserData): Promise<Omit<User, 'password'>> {
+  async register(data: CreateUserApiData): Promise<Omit<User, 'password'>> {
     // 1. Validar os dados de entrada
-    const validatedData = userSchema.parse(data);
+    const validatedData = CreateUserApiSchema.parse(data);
     const { 
       email, 
       password, 

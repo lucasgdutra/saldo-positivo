@@ -227,3 +227,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Disable Edge Password Eye Peek */
+input::-ms-reveal {
+  display: none;
+}

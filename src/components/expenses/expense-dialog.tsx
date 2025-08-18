@@ -2,20 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-
-const expenseSchema = z.object({
-  amount: z.number().positive("O valor deve ser positivo"),
-  description: z.string().optional(),
-  date: z.string().refine((date) => !Number.isNaN(Date.parse(date)), {
-    message: "Data inválida",
-  }),
-  categoryId: z.string().min(1, "Categoria é obrigatória"),
-});
-
-type ExpenseFormData = z.infer<typeof expenseSchema>;
+import { ExpenseFormSchema, type ExpenseFormData } from "@/lib/validations";
 
 interface Category {
   id: string;
@@ -46,16 +35,16 @@ export function ExpenseDialog({
 }: ExpenseDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   // Formatar a data para o formato YYYY-MM-DD para o input date (usando UTC)
   const formatDateForInput = useCallback((date: Date | null): string => {
-  	if (!date) return "";
-  	const d = new Date(date);
-  	// Usar métodos UTC para garantir que o dia original seja mantido
-  	const year = d.getUTCFullYear();
-  	const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
-  	const day = String(d.getUTCDate()).padStart(2, '0');
-  	return `${year}-${month}-${day}`;
+    if (!date) return "";
+    const d = new Date(date);
+    // Usar métodos UTC para garantir que o dia original seja mantido
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth é 0-indexado
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }, []);
 
   // Buscar categorias
@@ -83,7 +72,7 @@ export function ExpenseDialog({
     formState: { errors },
     reset,
   } = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema),
+    resolver: zodResolver(ExpenseFormSchema),
     defaultValues: {
       amount: 0,
       description: "",
@@ -91,7 +80,7 @@ export function ExpenseDialog({
       categoryId: "",
     },
   });
-  
+
   // Atualizar o formulário quando initialData mudar
   useEffect(() => {
     if (initialData) {
@@ -128,7 +117,6 @@ export function ExpenseDialog({
   };
 
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white p-6">
@@ -154,7 +142,7 @@ export function ExpenseDialog({
               <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="description" className="block text-sm font-medium">
               Descrição
@@ -171,7 +159,7 @@ export function ExpenseDialog({
               <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="categoryId" className="block text-sm font-medium">
               Categoria
@@ -193,7 +181,7 @@ export function ExpenseDialog({
               <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="date" className="block text-sm font-medium">
               Data
@@ -209,7 +197,7 @@ export function ExpenseDialog({
               <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
             )}
           </div>
-          
+
           <div className="flex justify-end gap-2">
             <button
               type="button"

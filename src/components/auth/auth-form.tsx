@@ -4,18 +4,11 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-
-// Esquema para login
-const loginSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { UserLoginFormSchema, type UserLoginFormData } from "@/lib/validations";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function AuthForm() {
   const searchParams = useSearchParams();
@@ -24,15 +17,15 @@ export function AuthForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<UserLoginFormData>({
+    resolver: zodResolver(UserLoginFormSchema),
     mode: "onBlur",
   });
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: UserLoginFormData) => {
     setError(null);
     setIsLoading(true);
 
@@ -83,14 +76,10 @@ export function AuthForm() {
           <label htmlFor="password" className="block text-sm font-medium">
             Senha
           </label>
-          <input
+          <PasswordInput
             {...register("password")}
-            type="password"
-            className="mt-1 block w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            error={errors.password?.message}
           />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-          )}
         </div>
 
         {error && (

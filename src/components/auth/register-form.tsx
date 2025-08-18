@@ -4,39 +4,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { UserRegistrationFormSchema, type UserRegistrationFormData } from "@/lib/validations";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const VALOR_SALARIO_MINIMO = 1518.00;
-
-// Schema para registro
-const registerSchema = z.object({
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  name: z.string().min(1, "Nome é obrigatório"),
-  salaryRange: z.string().min(1, "Faixa salarial é obrigatória"),
-  usageMotivation: z.string().optional(),
-  customMotivation: z.string().optional(),
-  financialGoals: z.string().optional(),
-  hasDebts: z.boolean().optional(),
-  monthlyIncome: z.string().optional(),
-  familySize: z.coerce.number().optional(),
-  financialExperience: z.string().optional(),
-}).refine(
-  (data) => {
-    if (data.usageMotivation === "outro" && !data.customMotivation) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: "Especifique o motivo personalizado",
-    path: ["customMotivation"],
-  }
-);
-
-type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const router = useRouter();
@@ -45,8 +18,8 @@ export function RegisterForm() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<UserRegistrationFormData>({
+    resolver: zodResolver(UserRegistrationFormSchema),
     mode: "onBlur",
   });
 
@@ -54,7 +27,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const watchUsageMotivation = watch("usageMotivation");
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (data: UserRegistrationFormData) => {
     setError(null);
     setIsLoading(true);
 
@@ -102,9 +75,10 @@ export function RegisterForm() {
       setIsLoading(false);
     }
   };
-
+  console.log(errors)
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
       {/* Nome completo */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium">
@@ -140,15 +114,22 @@ export function RegisterForm() {
         <label htmlFor="password" className="block text-sm font-medium">
           Senha
         </label>
-        <input
+        <PasswordInput
           {...register("password")}
-          type="password"
-          className="mt-1 block w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          error={errors.password?.message}
         />
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-        )}
       </div>
+      {/*Confirmação Senha */}
+      <div>
+        <label htmlFor="confirmPassword" className="block text-sm font-medium">
+          Confirmação Senha
+        </label>
+        <PasswordInput
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
+        />
+      </div>
+
 
       {/* Faixa Salarial */}
       <div>

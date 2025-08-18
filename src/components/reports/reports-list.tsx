@@ -222,7 +222,7 @@ export function ReportsList({ initialCategories }: ReportsListProps) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="label" 
-              angle={-45}
+              angle={-30}
               textAnchor="end"
               height={60}
               interval={0}

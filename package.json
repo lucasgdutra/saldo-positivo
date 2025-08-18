@@ -55,6 +55,7 @@
     "eslint-config-next": "15.1.7",
     "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.5.6",
+    "prisma-zod-generator": "^1.12.4",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.1"
