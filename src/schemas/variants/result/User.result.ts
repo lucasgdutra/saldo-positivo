@@ -10,7 +10,6 @@ export const UserResultSchema = z.object({
     customMotivation: z.string().nullable(),
     financialGoals: z.string().nullable(),
     hasDebts: z.boolean().nullable(),
-    monthlyIncome: z.string().nullable(),
     familySize: z.number().int().nullable(),
     financialExperience: z.string().nullable(),
     createdAt: z.date(),

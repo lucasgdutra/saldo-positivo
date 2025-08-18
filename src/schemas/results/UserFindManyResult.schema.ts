@@ -10,7 +10,6 @@ export const UserFindManyResultSchema = z.object({
   customMotivation: z.string().optional(),
   financialGoals: z.string().optional(),
   hasDebts: z.boolean().optional(),
-  monthlyIncome: z.string().optional(),
   familySize: z.number().int().optional(),
   financialExperience: z.string().optional(),
   createdAt: z.date(),

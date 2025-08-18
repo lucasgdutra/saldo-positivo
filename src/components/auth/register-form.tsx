@@ -48,7 +48,6 @@ export function RegisterForm() {
           customMotivation: data.customMotivation,
           financialGoals: data.financialGoals,
           hasDebts: data.hasDebts,
-          monthlyIncome: data.monthlyIncome,
           familySize: data.familySize,
           financialExperience: data.financialExperience,
         }),

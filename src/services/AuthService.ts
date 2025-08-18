@@ -56,7 +56,6 @@ export class AuthService {
       customMotivation, 
       financialGoals, 
       hasDebts, 
-      monthlyIncome, 
       familySize, 
       financialExperience 
     } = validatedData;
@@ -80,7 +79,6 @@ export class AuthService {
       customMotivation,
       financialGoals,
       hasDebts,
-      monthlyIncome,
       familySize,
       financialExperience,
     });

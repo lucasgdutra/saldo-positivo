@@ -9,7 +9,6 @@ export const UserInputSchema = z.object({
     customMotivation: z.string().optional().nullable(),
     financialGoals: z.string().optional().nullable(),
     hasDebts: z.boolean().optional().nullable(),
-    monthlyIncome: z.string().optional().nullable(),
     familySize: z.number().int().optional().nullable(),
     financialExperience: z.string().optional().nullable(),
     categories: z.array(z.unknown()),
