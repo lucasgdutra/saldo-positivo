@@ -60,11 +60,41 @@ graph TB
 
 ## Funcionalidades
 
-- Visualizar um dashboard com resumo financeiro
-- Registrar e gerenciar receitas e despesas
-- Categorizar transações financeiras
-- Gerar relatórios detalhados por período e categoria
-- Acompanhar o histórico de saldo ao longo do tempo
+### Autenticação
+- Registro de novos usuários
+- Login com email e senha
+- Recuperação de senha por email
+- Redefinição de senha
+- Proteção de rotas para usuários autenticados
+
+### Dashboard
+- Resumo financeiro (saldo atual, receitas e despesas)
+- Gráfico de histórico de saldo
+- Gráfico de despesas por categoria
+- Lista de transações recentes
+
+### Gerenciamento de Despesas
+- Adicionar, editar e excluir despesas
+- Categorização de despesas
+- Visualização em lista com filtros
+
+### Gerenciamento de Receitas
+- Adicionar, editar e excluir receitas
+- Visualização em lista
+
+### Gerenciamento de Categorias
+- Adicionar, editar e excluir categorias para despesas
+- Visualização de despesas por categoria
+
+### Relatórios
+- Relatórios de despesas por período
+- Relatórios de despesas por categoria
+- Comparação com períodos anteriores
+- Visualização em gráficos e tabelas
+
+### Perfil do Usuário
+- Visualização e edição de dados pessoais
+- Estatísticas de uso da aplicação
 
 ## Tecnologias Utilizadas
 
@@ -203,43 +233,6 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 - `/src/schemas` - Schemas Zod gerados automaticamente
 - `/src/types` - Definições de tipos TypeScript
 
-## Funcionalidades
-
-### Autenticação
-- Registro de novos usuários
-- Login com email e senha
-- Recuperação de senha por email
-- Redefinição de senha
-- Proteção de rotas para usuários autenticados
-
-### Dashboard
-- Resumo financeiro (saldo atual, receitas e despesas)
-- Gráfico de histórico de saldo
-- Gráfico de despesas por categoria
-- Lista de transações recentes
-
-### Gerenciamento de Despesas
-- Adicionar, editar e excluir despesas
-- Categorização de despesas
-- Visualização em lista com filtros
-
-### Gerenciamento de Receitas
-- Adicionar, editar e excluir receitas
-- Visualização em lista
-
-### Gerenciamento de Categorias
-- Adicionar, editar e excluir categorias para despesas
-- Visualização de despesas por categoria
-
-### Relatórios
-- Relatórios de despesas por período
-- Relatórios de despesas por categoria
-- Comparação com períodos anteriores
-- Visualização em gráficos e tabelas
-
-### Perfil do Usuário
-- Visualização e edição de dados pessoais
-- Estatísticas de uso da aplicação
 
 ## Implantação
 
