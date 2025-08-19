@@ -15,7 +15,8 @@
     "test:debug": "SKIP_WEBKIT=true playwright test --debug",
     "test:report": "playwright show-report",
     "test:chrome": "playwright test --project=chromium",
-    "test:firefox": "playwright test --project=firefox"
+    "test:firefox": "playwright test --project=firefox",
+    "test:screenshot": "playwright test tests/screenshots.spec.ts --project=chromium"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
