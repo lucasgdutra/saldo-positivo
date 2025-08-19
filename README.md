@@ -225,11 +225,10 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 
 ### Gerenciamento de Receitas
 - Adicionar, editar e excluir receitas
-- Visualização em lista com filtros
+- Visualização em lista
 
 ### Gerenciamento de Categorias
 - Adicionar, editar e excluir categorias para despesas
-- Associação de cores às categorias
 - Visualização de despesas por categoria
 
 ### Relatórios
@@ -241,7 +240,6 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 ### Perfil do Usuário
 - Visualização e edição de dados pessoais
 - Estatísticas de uso da aplicação
-- Histórico de atividades
 
 ## Implantação
 
