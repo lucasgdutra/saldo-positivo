@@ -6,6 +6,60 @@ Sistema de controle de finanças pessoais desenvolvido com Next.js, Prisma e Pos
 
 O Saldo Positivo é uma aplicação web completa para gerenciamento financeiro pessoal, permitindo aos usuários:
 
+## 🚀 Demo Online
+
+Acesse a versão de demonstração da aplicação: **[www.saldopositivo.space](https://www.saldopositivo.space)**
+
+A demo está hospedada na Vercel e utiliza:
+- **Banco de Dados**: PostgreSQL hospedado no Prisma.io
+- **Envio de E-mails**: Serviço Resend.com para recuperação de senha
+
+### Arquitetura de Plataformas
+
+```mermaid
+graph TB
+    User["👤 Usuário<br/>saldopositivo.space"]
+    
+    subgraph "Frontend & Deploy"
+        Vercel[🚀 Vercel<br/>Hosting & CDN]
+        NextJS[⚛️ Next.js 15.2.1<br/>React 19.1.1]
+        API[🔗 API Routes<br/>Serverless]
+    end
+    
+    subgraph "Banco de Dados"
+        PrismaIO[🗄️ Prisma.io<br/>PostgreSQL]
+        Prisma[⚙️ Prisma ORM<br/>Type Safety]
+    end
+    
+    subgraph "Serviços"
+        Resend[📧 Resend.com<br/>E-mails]
+        Analytics[📊 Vercel Analytics<br/>Monitoring]
+    end
+    
+    User --> Vercel
+    Vercel --> NextJS
+    NextJS --> API
+    API --> Resend
+    API --> Prisma
+    Prisma --> PrismaIO
+    Vercel --> Analytics
+    
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef vercelClass fill:#000,color:#fff,stroke:#333,stroke-width:2px
+    classDef reactClass fill:#61dafb,stroke:#21759b,stroke-width:2px
+    classDef databaseClass fill:#336791,color:#fff,stroke:#1a472a,stroke-width:2px
+    classDef serviceClass fill:#ff6b6b,color:#fff,stroke:#c92a2a,stroke-width:2px
+    
+    class User userClass
+    class Vercel,Analytics vercelClass
+    class NextJS,API reactClass
+    class PrismaIO,Prisma databaseClass
+    class NextAuth,Resend serviceClass
+```
+
+
+## Funcionalidades
+
 - Visualizar um dashboard com resumo financeiro
 - Registrar e gerenciar receitas e despesas
 - Categorizar transações financeiras
@@ -14,16 +68,19 @@ O Saldo Positivo é uma aplicação web completa para gerenciamento financeiro p
 
 ## Tecnologias Utilizadas
 
-- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Recharts
+- **Frontend**: Next.js 15.2.1 (App Router), React 19.1.1, Tailwind CSS 4.1.12, Recharts
 - **Backend**: API Routes do Next.js
 - **Banco de Dados**: PostgreSQL
-- **ORM**: Prisma
-- **Autenticação**: NextAuth.js
+- **ORM**: Prisma 6.14.0
+- **Autenticação**: NextAuth.js 4.24.11
+- **Validação**: Zod 4.0.17
+- **UI Components**: Radix UI, Lucide React
 - **Containerização**: Docker e Docker Compose
+- **Análise**: Vercel Analytics & Speed Insights
 
 ## Requisitos
 
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- [Node.js](https://nodejs.org/) (versão 20 ou superior)
 - [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) (para o banco de dados PostgreSQL)
 - [pnpm](https://pnpm.io/) (recomendado) ou npm/yarn
 
@@ -90,6 +147,7 @@ yarn install
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/saldo_positivo"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="seu-segredo-aqui-substitua-em-producao"
+RESEND_API_KEY="sua-chave-resend-para-emails" # Opcional, para recuperação de senha
 ```
 
 ## Desenvolvimento
@@ -104,7 +162,16 @@ npm run dev
 yarn dev
 ```
 
+> **Nota**: O projeto utiliza Turbopack para desenvolvimento mais rápido.
+
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
+
+### Scripts Disponíveis
+
+- `pnpm dev` - Inicia o servidor de desenvolvimento com Turbopack
+- `pnpm build` - Constrói a aplicação para produção
+- `pnpm start` - Inicia o servidor de produção
+- `pnpm lint` - Executa verificação de linting
 
 ## Estrutura do Projeto
 
@@ -118,6 +185,8 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
   - `/receitas` - Gerenciamento de receitas
   - `/categorias` - Gerenciamento de categorias
   - `/relatorios` - Geração de relatórios
+  - `/perfil` - Página de perfil do usuário
+  - `/apresentacao` - Página de apresentação
 - `/src/components` - Componentes React reutilizáveis
   - `/auth` - Componentes de autenticação
   - `/dashboard` - Componentes do dashboard
@@ -129,6 +198,9 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
   - `/ui` - Componentes de UI genéricos
 - `/src/lib` - Utilitários e configurações
 - `/src/providers` - Provedores de contexto React
+- `/src/repositories` - Camada de acesso a dados
+- `/src/services` - Lógica de negócio
+- `/src/schemas` - Schemas Zod gerados automaticamente
 - `/src/types` - Definições de tipos TypeScript
 
 ## Funcionalidades
@@ -136,6 +208,8 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 ### Autenticação
 - Registro de novos usuários
 - Login com email e senha
+- Recuperação de senha por email
+- Redefinição de senha
 - Proteção de rotas para usuários autenticados
 
 ### Dashboard
@@ -156,6 +230,7 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 ### Gerenciamento de Categorias
 - Adicionar, editar e excluir categorias para despesas
 - Associação de cores às categorias
+- Visualização de despesas por categoria
 
 ### Relatórios
 - Relatórios de despesas por período
@@ -163,18 +238,68 @@ Acesse [http://localhost:3000](http://localhost:3000) no seu navegador para ver 
 - Comparação com períodos anteriores
 - Visualização em gráficos e tabelas
 
+### Perfil do Usuário
+- Visualização e edição de dados pessoais
+- Estatísticas de uso da aplicação
+- Histórico de atividades
+
 ## Implantação
 
-Para implantar em produção, recomenda-se usar a [Vercel](https://vercel.com/new) ou outro serviço compatível com Next.js.
+### Produção (Configuração Atual)
 
-Para o banco de dados em produção, considere usar serviços como:
+A aplicação está atualmente implantada usando a seguinte stack de produção:
+
+#### 🚀 Hospedagem: [Vercel](https://vercel.com)
+- Serverless functions para API Routes
+- CDN global para performance otimizada
+- SSL/HTTPS automático
+- **URL de produção**: [www.saldopositivo.space](https://www.saldopositivo.space)
+
+#### 🗄️ Banco de Dados: [Prisma.io](https://www.prisma.io)
+- PostgreSQL hospedado e gerenciado
+- Connection pooling automático
+- Backup e recuperação automática
+- Monitoring integrado
+
+#### 📧 E-mails: [Resend.com](https://resend.com)
+- API moderna para envio de emails
+- Templates responsivos
+- Analytics de entrega
+- Usado para recuperação de senha
+
+### Implantação Alternativa
+
+Para implantar sua própria versão:
+
+#### 1. Hospedagem
+- **Recomendado**: [Vercel](https://vercel.com/new) (deploy com 1-click)
+- **Alternativas**: Netlify, Railway, Render
+
+#### 2. Banco de Dados
+Opções recomendadas para PostgreSQL:
+- [Prisma.io](https://www.prisma.io) (usado em produção)
 - [Neon](https://neon.tech) (PostgreSQL serverless)
-- [Supabase](https://supabase.com)
-- [Railway](https://railway.app)
+- [Supabase](https://supabase.com) (PostgreSQL + Backend-as-a-Service)
+- [Railway](https://railway.app) (PostgreSQL simples)
+
+#### 3. Envio de E-mails
+- [Resend.com](https://resend.com) (usado em produção)
+- [SendGrid](https://sendgrid.com)
+- [Mailgun](https://www.mailgun.com)
+
+### Variáveis de Ambiente em Produção
+
+Configure as seguintes variáveis no painel da Vercel ou sua plataforma escolhida:
+
+```bash
+DATABASE_URL="postgresql://user:password@host:port/database"
+NEXTAUTH_URL="https://www.saldopositivo.space"
+NEXTAUTH_SECRET="sua-chave-secreta-super-segura"
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxx"
+```
 
 ## Documentação Adicional
 
 Para mais informações sobre o projeto, consulte:
-- [Documentação de Estudo do Código](./docs/estudo-codigo.md)
 - [Documentação de Requisitos](./docs/Entrega2/index.md)
 - [Diagramas do Sistema](./docs/Entrega2/)

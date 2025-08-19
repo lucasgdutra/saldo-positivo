@@ -1,0 +1,57 @@
+@startuml Diagrama de Plataformas - Saldo Positivo
+
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v15.0/dist
+!include AWSPUML/AWSCommon.puml
+
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam rectangle {
+    BackgroundColor #F8F9FA
+    BorderColor #DEE2E6
+    RoundCorner 10
+}
+
+title **Diagrama de Plataformas - Saldo Positivo**
+
+actor "Usuário" as user #87CEEB
+
+rectangle "Frontend" as frontend {
+    component "Next.js 15.2.1\nReact 19.1.1\nTailwind CSS" as nextjs #61DAFB
+    component "Vercel\nHosting & Deploy" as vercel #000000
+}
+
+rectangle "Backend & API" as backend {
+    component "Next.js API Routes\nServerless Functions" as api #61DAFB
+    component "NextAuth.js\nAutenticação" as auth #9333EA
+}
+
+rectangle "Banco de Dados" as database {
+    component "PostgreSQL\nPrisma.io Hosting" as postgres #336791
+    component "Prisma ORM\nZod Validation" as prisma #2D3748
+}
+
+rectangle "Serviços Externos" as external {
+    component "Resend.com\nEnvio de E-mails" as resend #FF6B6B
+    component "Vercel Analytics\n& Speed Insights" as analytics #000000
+}
+
+rectangle "Monitoramento" as monitoring {
+    component "Vercel Logs\n& Metrics" as logs #000000
+}
+
+' Conexões
+user --> nextjs : "Acessa aplicação\nwww.saldopositivo.space"
+nextjs --> vercel : "Deploy & CDN"
+nextjs --> api : "API Calls"
+api --> auth : "Autenticação"
+api --> prisma : "Database Queries"
+prisma --> postgres : "SQL Queries"
+auth --> resend : "Reset Password\nEmails"
+vercel --> analytics : "Usage Analytics"
+vercel --> logs : "Application Logs"
+
+note right of vercel : "Hospedagem principal\nDeploy automático\nCDN global"
+note right of postgres : "Banco gerenciado\nBackup automático\nConnection pooling"
+note right of resend : "Templates de email\nDelivery garantido\nAnalytics de email"
+
+@enduml
