@@ -7,7 +7,15 @@
     "build": "prisma generate --no-engine && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --no-engine"
+    "postinstall": "prisma generate --no-engine",
+    "test": "SKIP_WEBKIT=true playwright test",
+    "test:all": "playwright test",
+    "test:ui": "SKIP_WEBKIT=true playwright test --ui",
+    "test:headed": "SKIP_WEBKIT=true playwright test --headed",
+    "test:debug": "SKIP_WEBKIT=true playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -45,6 +53,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.54.2",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.19.11",
