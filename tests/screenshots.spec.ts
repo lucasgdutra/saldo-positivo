@@ -94,6 +94,9 @@ test.describe('Screenshots for Documentation', () => {
       // Continue if no loading elements found
     });
 
+    await page.waitForTimeout(5000);
+
+
     // Take full dashboard screenshot
     await page.screenshot({
       path: 'docs/screenshots/dashboard-full.png',
@@ -124,7 +127,7 @@ test.describe('Screenshots for Documentation', () => {
     await page.goto('/despesas');
 
     // Wait for page content to load
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(10000);
 
     // Wait for any API data to load
     await page.waitForFunction(() => {
@@ -206,8 +209,8 @@ test.describe('Screenshots for Documentation', () => {
   test('Reports page', async ({ page }) => {
     const helpers = createTestHelpers(page);
     const seedUser = helpers.getSeedUser();
-    
-   
+
+
     // Login with seed user
     await page.goto('/');
     await page.locator('#auth').scrollIntoViewIfNeeded();
@@ -237,8 +240,8 @@ test.describe('Screenshots for Documentation', () => {
   test('Profile page', async ({ page }) => {
     const helpers = createTestHelpers(page);
     const seedUser = helpers.getSeedUser();
-    
-   
+
+
     // Login with seed user
     await page.goto('/');
     await page.locator('#auth').scrollIntoViewIfNeeded();
@@ -248,6 +251,8 @@ test.describe('Screenshots for Documentation', () => {
     await page.waitForTimeout(3000);
 
     await page.goto('/perfil');
+
+    await page.waitForSelector('h1:has-text("Perfil")');
 
     // Wait for page content to load
     await page.waitForTimeout(3000);
@@ -285,8 +290,8 @@ test.describe('Screenshots for Documentation', () => {
 
     const helpers = createTestHelpers(page);
     const seedUser = helpers.getSeedUser();
-    
-   
+
+
     // Login with seed user
     await page.goto('/');
     await page.locator('#auth').scrollIntoViewIfNeeded();
@@ -294,7 +299,7 @@ test.describe('Screenshots for Documentation', () => {
     await page.fill('input[type="password"]', seedUser.password);
     await page.click('button[type="submit"]');
     await page.waitForTimeout(3000);
-    
+
     await page.goto('/dashboard');
 
     await page.waitForSelector('h1:has-text("Dashboard")', { timeout: 15000 });
@@ -309,6 +314,7 @@ test.describe('Screenshots for Documentation', () => {
     }, { timeout: 10000 }).catch(() => {
       // Continue if no loading elements found
     });
+    await page.waitForTimeout(5000);
 
     await page.screenshot({
       path: 'docs/screenshots/dashboard-mobile.png',
@@ -331,8 +337,8 @@ test.describe('Screenshots for Documentation', () => {
   test('Forms and modals', async ({ page }) => {
     const helpers = createTestHelpers(page);
     const seedUser = helpers.getSeedUser();
-    
-   
+
+
     // Login with seed user
     await page.goto('/');
     await page.locator('#auth').scrollIntoViewIfNeeded();

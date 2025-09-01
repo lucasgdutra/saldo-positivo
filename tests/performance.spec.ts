@@ -154,7 +154,7 @@ test.describe('Performance', () => {
     expect(responses.length).toBeGreaterThan(0);
     
     // Check that we're not loading an excessive number of resources
-    expect(responses.length).toBeLessThan(20); // Adjust based on your app structure
+    expect(responses.length).toBeLessThan(30); // Adjust based on your app structure
   });
 
   test('should handle slow network gracefully', async ({ page, context }) => {

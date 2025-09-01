@@ -20,7 +20,7 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL('/cadastro');
     
     // Check page heading
-    await expect(page.locator('h1, h2').first()).toContainText(/Cadastro|Criar conta|Registrar/i);
+    await expect(page.locator('h2').first()).toContainText(/Criar sua conta/i);
   });
 
   test('should navigate to forgot password page', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL('/esqueci-senha');
     
     // Check page content
-    await expect(page.locator('h1, h2').first()).toContainText(/Esqueci|senha|recuperar/i);
+    await expect(page.locator('h2').first()).toContainText(/Esqueci|senha|recuperar/i);
   });
 
   test('should show validation errors for empty login form', async ({ page }) => {

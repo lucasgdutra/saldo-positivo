@@ -15,11 +15,10 @@ test.describe('Dashboard with Full Historical Data', () => {
     await page.fill('input[type="email"]', seedUser.email);
     await page.fill('input[type="password"]', seedUser.password);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(3000);
     
-    // Navigate to dashboard
-    await page.goto('/dashboard');
-    await page.waitForTimeout(3000);
+    // Wait for redirect to dashboard
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForTimeout(2000);
     
     // Verify we're on dashboard
     await expect(page.locator('h1')).toContainText('Dashboard');
@@ -183,10 +182,9 @@ test.describe('Dashboard with Full Historical Data', () => {
     await page.fill('input[type="email"]', seedUser.email);
     await page.fill('input[type="password"]', seedUser.password);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(2000);
     
-    // Navigate to dashboard and wait for load
-    await page.goto('/dashboard');
+    // Wait for redirect to dashboard
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     await page.waitForLoadState('networkidle');
     
     const loadTime = Date.now() - startTime;
@@ -199,7 +197,7 @@ test.describe('Dashboard with Full Historical Data', () => {
     await expect(page.locator('h1')).toContainText('Dashboard');
     
     // Check for loading states (should be completed)
-    const loadingSpinners = page.locator('.animate-spin, text=Carregando');
+    const loadingSpinners = page.locator('.animate-spin, :text("Carregando")');
     const spinnerCount = await loadingSpinners.count();
     console.log(`⏳ Loading spinners still visible: ${spinnerCount}`);
     

@@ -33,6 +33,8 @@ test.describe('Seed Integration Tests', () => {
     
     // Test without auth - should redirect
     await page.goto('/dashboard');
+    //wait for url rewrite
+    await page.waitForURL('http://localhost:3000/');
     expect(page.url()).toBe('http://localhost:3000/');
     console.log('✅ Without auth: redirected to home page');
     
