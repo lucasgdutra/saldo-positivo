@@ -1,4 +1,13 @@
-- fazer bootstrap das categorias básicas ao criar usuário
-- considerar a criação de página de apresentação / landing page
-- considerar função de recuperação de senha
-- corrigir proble
+transacoes
+fluxo de caixa
+orcamento
+recorrencia
+metas
+investimentos
+contas(bancos)
+meios_pagamento(cartão, dinheiro, pix)
+categorias_de_despesa(alimentação, saúde, lazer)
+categorias_contabeis(ativo, passivo, receitas, despesas)
+
+importações de csv, ofx, open finance, etc
+exportações de relatórios
