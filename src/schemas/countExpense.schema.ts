@@ -1,10 +1,45 @@
-import type { Prisma } from '@prisma/client';
-import { z } from 'zod';
-import { ExpenseOrderByWithRelationInputObjectSchema } from './objects/ExpenseOrderByWithRelationInput.schema';
-import { ExpenseWhereInputObjectSchema } from './objects/ExpenseWhereInput.schema';
-import { ExpenseWhereUniqueInputObjectSchema } from './objects/ExpenseWhereUniqueInput.schema';
-import { ExpenseCountAggregateInputObjectSchema } from './objects/ExpenseCountAggregateInput.schema'
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { ExpenseCountAggregateInputObjectSchema } from "./objects/ExpenseCountAggregateInput.schema";
+import { ExpenseOrderByWithRelationInputObjectSchema } from "./objects/ExpenseOrderByWithRelationInput.schema";
+import { ExpenseWhereInputObjectSchema } from "./objects/ExpenseWhereInput.schema";
+import { ExpenseWhereUniqueInputObjectSchema } from "./objects/ExpenseWhereUniqueInput.schema";
 
-export const ExpenseCountSchema: z.ZodType<Prisma.ExpenseCountArgs, Prisma.ExpenseCountArgs> = z.object({ orderBy: z.union([ExpenseOrderByWithRelationInputObjectSchema, ExpenseOrderByWithRelationInputObjectSchema.array()]).optional(), where: ExpenseWhereInputObjectSchema.optional(), cursor: ExpenseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), ExpenseCountAggregateInputObjectSchema ]).optional() }).strict();
+export const ExpenseCountSchema: z.ZodType<
+	Prisma.ExpenseCountArgs,
+	Prisma.ExpenseCountArgs
+> = z
+	.object({
+		orderBy: z
+			.union([
+				ExpenseOrderByWithRelationInputObjectSchema,
+				ExpenseOrderByWithRelationInputObjectSchema.array(),
+			])
+			.optional(),
+		where: ExpenseWhereInputObjectSchema.optional(),
+		cursor: ExpenseWhereUniqueInputObjectSchema.optional(),
+		take: z.number().optional(),
+		skip: z.number().optional(),
+		select: z
+			.union([z.literal(true), ExpenseCountAggregateInputObjectSchema])
+			.optional(),
+	})
+	.strict();
 
-export const ExpenseCountZodSchema = z.object({ orderBy: z.union([ExpenseOrderByWithRelationInputObjectSchema, ExpenseOrderByWithRelationInputObjectSchema.array()]).optional(), where: ExpenseWhereInputObjectSchema.optional(), cursor: ExpenseWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), select: z.union([ z.literal(true), ExpenseCountAggregateInputObjectSchema ]).optional() }).strict();
+export const ExpenseCountZodSchema = z
+	.object({
+		orderBy: z
+			.union([
+				ExpenseOrderByWithRelationInputObjectSchema,
+				ExpenseOrderByWithRelationInputObjectSchema.array(),
+			])
+			.optional(),
+		where: ExpenseWhereInputObjectSchema.optional(),
+		cursor: ExpenseWhereUniqueInputObjectSchema.optional(),
+		take: z.number().optional(),
+		skip: z.number().optional(),
+		select: z
+			.union([z.literal(true), ExpenseCountAggregateInputObjectSchema])
+			.optional(),
+	})
+	.strict();

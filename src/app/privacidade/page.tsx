@@ -11,10 +11,7 @@ export default function PrivacidadePage() {
 							<Link href="/" className="text-2xl font-bold text-blue-600">
 								Saldo Positivo
 							</Link>
-							<Link
-								href="/"
-								className="text-gray-600 hover:text-blue-600"
-							>
+							<Link href="/" className="text-gray-600 hover:text-blue-600">
 								Voltar ao início
 							</Link>
 						</div>
@@ -31,10 +28,13 @@ export default function PrivacidadePage() {
 										⚠️ Projeto Acadêmico
 									</h3>
 									<p className="text-yellow-700">
-										<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema desenvolvido exclusivamente para fins acadêmicos 
-										como projeto de faculdade. Esta plataforma não foi criada para uso real por usuários e não deve ser 
-										utilizada para gerenciar informações financeiras reais. Todos os dados inseridos são fictícios e 
-										destinados apenas para demonstração e avaliação acadêmica.
+										<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema
+										desenvolvido exclusivamente para fins acadêmicos como
+										projeto de faculdade. Esta plataforma não foi criada para
+										uso real por usuários e não deve ser utilizada para
+										gerenciar informações financeiras reais. Todos os dados
+										inseridos são fictícios e destinados apenas para
+										demonstração e avaliação acadêmica.
 									</p>
 								</div>
 							</div>
@@ -64,9 +64,7 @@ export default function PrivacidadePage() {
 								<h2 className="mb-4 text-2xl font-semibold text-gray-900">
 									2. Como Usamos suas Informações
 								</h2>
-								<p className="mb-4">
-									Utilizamos suas informações para:
-								</p>
+								<p className="mb-4">Utilizamos suas informações para:</p>
 								<ul className="ml-6 list-disc space-y-2">
 									<li>Fornecer e manter nossos serviços</li>
 									<li>Processar transações e gerar relatórios</li>
@@ -80,8 +78,8 @@ export default function PrivacidadePage() {
 									3. Compartilhamento de Informações
 								</h2>
 								<p className="mb-4">
-									Não vendemos, alugamos ou compartilhamos suas informações pessoais 
-									com terceiros, exceto nas seguintes situações:
+									Não vendemos, alugamos ou compartilhamos suas informações
+									pessoais com terceiros, exceto nas seguintes situações:
 								</p>
 								<ul className="ml-6 list-disc space-y-2">
 									<li>Com seu consentimento explícito</li>
@@ -95,8 +93,8 @@ export default function PrivacidadePage() {
 									4. Segurança dos Dados
 								</h2>
 								<p>
-									Implementamos medidas de segurança técnicas e organizacionais 
-									para proteger suas informações contra acesso não autorizado, 
+									Implementamos medidas de segurança técnicas e organizacionais
+									para proteger suas informações contra acesso não autorizado,
 									alteração, divulgação ou destruição.
 								</p>
 							</section>
@@ -105,9 +103,7 @@ export default function PrivacidadePage() {
 								<h2 className="mb-4 text-2xl font-semibold text-gray-900">
 									5. Seus Direitos
 								</h2>
-								<p className="mb-4">
-									Você tem o direito de:
-								</p>
+								<p className="mb-4">Você tem o direito de:</p>
 								<ul className="ml-6 list-disc space-y-2">
 									<li>Acessar suas informações pessoais</li>
 									<li>Corrigir dados incorretos</li>
@@ -121,14 +117,21 @@ export default function PrivacidadePage() {
 									6. Contato
 								</h2>
 								<p>
-									Para questões sobre esta política de privacidade, entre em contato 
-									através da nossa página de <Link href="/contato" className="text-blue-600 hover:underline">contato</Link>.
+									Para questões sobre esta política de privacidade, entre em
+									contato através da nossa página de{" "}
+									<Link
+										href="/contato"
+										className="text-blue-600 hover:underline"
+									>
+										contato
+									</Link>
+									.
 								</p>
 							</section>
 
 							<section>
 								<p className="text-sm text-gray-500">
-									Última atualização: {new Date().toLocaleDateString('pt-BR')}
+									Última atualização: {new Date().toLocaleDateString("pt-BR")}
 								</p>
 							</section>
 						</div>

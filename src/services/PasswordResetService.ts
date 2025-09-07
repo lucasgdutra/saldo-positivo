@@ -1,59 +1,62 @@
-import { randomBytes } from 'crypto';
-import { resend, FROM_EMAIL } from '@/lib/resend';
-import { PrismaClientWithExtensions } from '@/lib/db';
+import { randomBytes } from "crypto";
+import { PrismaClientWithExtensions } from "@/lib/db";
+import { FROM_EMAIL, resend } from "@/lib/resend";
 
 export class PasswordResetService {
-  constructor(private prisma: PrismaClientWithExtensions) {}
+	constructor(private prisma: PrismaClientWithExtensions) {}
 
-  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // Find user by email
-      const user = await this.prisma.user.findUnique({
-        where: { email },
-      });
+	async requestPasswordReset(
+		email: string,
+	): Promise<{ success: boolean; message: string }> {
+		try {
+			// Find user by email
+			const user = await this.prisma.user.findUnique({
+				where: { email },
+			});
 
-      if (!user) {
-        // Don't reveal if email exists for security reasons
-        return {
-          success: true,
-          message: 'Se o e-mail existir em nossa base, você receberá instruções para redefinir sua senha.',
-        };
-      }
+			if (!user) {
+				// Don't reveal if email exists for security reasons
+				return {
+					success: true,
+					message:
+						"Se o e-mail existir em nossa base, você receberá instruções para redefinir sua senha.",
+				};
+			}
 
-      // Generate secure random token
-      const token = randomBytes(32).toString('hex');
-      
-      // Set expiration for 1 hour from now
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+			// Generate secure random token
+			const token = randomBytes(32).toString("hex");
 
-      // Invalidate any existing tokens for this user
-      await this.prisma.passwordResetToken.updateMany({
-        where: {
-          userId: user.id,
-          used: false,
-        },
-        data: {
-          used: true,
-        },
-      });
+			// Set expiration for 1 hour from now
+			const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
-      // Create new password reset token
-      await this.prisma.passwordResetToken.create({
-        data: {
-          token,
-          userId: user.id,
-          expiresAt,
-        },
-      });
+			// Invalidate any existing tokens for this user
+			await this.prisma.passwordResetToken.updateMany({
+				where: {
+					userId: user.id,
+					used: false,
+				},
+				data: {
+					used: true,
+				},
+			});
 
-      // Send password reset email
-      const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/redefinir-senha?token=${token}`;
-      
-      await resend.emails.send({
-        from: FROM_EMAIL,
-        to: [email],
-        subject: 'Redefinir senha - Saldo Positivo',
-        html: `
+			// Create new password reset token
+			await this.prisma.passwordResetToken.create({
+				data: {
+					token,
+					userId: user.id,
+					expiresAt,
+				},
+			});
+
+			// Send password reset email
+			const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/redefinir-senha?token=${token}`;
+
+			await resend.emails.send({
+				from: FROM_EMAIL,
+				to: [email],
+				subject: "Redefinir senha - Saldo Positivo",
+				html: `
           <!DOCTYPE html>
           <html>
             <head>
@@ -99,102 +102,110 @@ export class PasswordResetService {
             </body>
           </html>
         `,
-      });
+			});
 
-      console.log(`Password reset email sent to ${email}`);
+			console.log(`Password reset email sent to ${email}`);
 
-      return {
-        success: true,
-        message: 'Se o e-mail existir em nossa base, você receberá instruções para redefinir sua senha.',
-      };
-    } catch (error) {
-      console.error('Error in password reset request:', error);
-      throw new Error('Erro interno do servidor');
-    }
-  }
+			return {
+				success: true,
+				message:
+					"Se o e-mail existir em nossa base, você receberá instruções para redefinir sua senha.",
+			};
+		} catch (error) {
+			console.error("Error in password reset request:", error);
+			throw new Error("Erro interno do servidor");
+		}
+	}
 
-  async validateToken(token: string): Promise<{ valid: boolean; userId?: string; message: string }> {
-    try {
-      const resetToken = await this.prisma.passwordResetToken.findUnique({
-        where: { token },
-        include: { user: true },
-      });
+	async validateToken(
+		token: string,
+	): Promise<{ valid: boolean; userId?: string; message: string }> {
+		try {
+			const resetToken = await this.prisma.passwordResetToken.findUnique({
+				where: { token },
+				include: { user: true },
+			});
 
-      if (!resetToken) {
-        return {
-          valid: false,
-          message: 'Token inválido',
-        };
-      }
+			if (!resetToken) {
+				return {
+					valid: false,
+					message: "Token inválido",
+				};
+			}
 
-      if (resetToken.used) {
-        return {
-          valid: false,
-          message: 'Este token já foi utilizado',
-        };
-      }
+			if (resetToken.used) {
+				return {
+					valid: false,
+					message: "Este token já foi utilizado",
+				};
+			}
 
-      if (new Date() > resetToken.expiresAt) {
-        return {
-          valid: false,
-          message: 'Token expirado',
-        };
-      }
+			if (new Date() > resetToken.expiresAt) {
+				return {
+					valid: false,
+					message: "Token expirado",
+				};
+			}
 
-      return {
-        valid: true,
-        userId: resetToken.userId,
-        message: 'Token válido',
-      };
-    } catch (error) {
-      console.error('Error validating token:', error);
-      return {
-        valid: false,
-        message: 'Erro ao validar token',
-      };
-    }
-  }
+			return {
+				valid: true,
+				userId: resetToken.userId,
+				message: "Token válido",
+			};
+		} catch (error) {
+			console.error("Error validating token:", error);
+			return {
+				valid: false,
+				message: "Erro ao validar token",
+			};
+		}
+	}
 
-  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
-    try {
-      // Validate token first
-      const tokenValidation = await this.validateToken(token);
-      
-      if (!tokenValidation.valid || !tokenValidation.userId) {
-        return {
-          success: false,
-          message: tokenValidation.message,
-        };
-      }
+	async resetPassword(
+		token: string,
+		newPassword: string,
+	): Promise<{ success: boolean; message: string }> {
+		try {
+			// Validate token first
+			const tokenValidation = await this.validateToken(token);
 
-      // Hash the new password
-      const bcrypt = await import('bcrypt');
-      const hashedPassword = await bcrypt.hash(newPassword, 12);
+			if (!tokenValidation.valid || !tokenValidation.userId) {
+				return {
+					success: false,
+					message: tokenValidation.message,
+				};
+			}
 
-      // Update user password and mark token as used
-      await this.prisma.$transaction([
-        this.prisma.user.update({
-          where: { id: tokenValidation.userId },
-          data: { password: hashedPassword },
-        }),
-        this.prisma.passwordResetToken.update({
-          where: { token },
-          data: { used: true },
-        }),
-      ]);
+			// Hash the new password
+			const bcrypt = await import("bcrypt");
+			const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-      console.log(`Password reset successful for user ${tokenValidation.userId}`);
+			// Update user password and mark token as used
+			await this.prisma.$transaction([
+				this.prisma.user.update({
+					where: { id: tokenValidation.userId },
+					data: { password: hashedPassword },
+				}),
+				this.prisma.passwordResetToken.update({
+					where: { token },
+					data: { used: true },
+				}),
+			]);
 
-      return {
-        success: true,
-        message: 'Senha redefinida com sucesso',
-      };
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      return {
-        success: false,
-        message: 'Erro ao redefinir senha',
-      };
-    }
-  }
+			console.log(
+				`Password reset successful for user ${tokenValidation.userId}`,
+			);
+
+			return {
+				success: true,
+				message: "Senha redefinida com sucesso",
+			};
+		} catch (error) {
+			console.error("Error resetting password:", error);
+			return {
+				success: false,
+				message: "Erro ao redefinir senha",
+			};
+		}
+	}
 }

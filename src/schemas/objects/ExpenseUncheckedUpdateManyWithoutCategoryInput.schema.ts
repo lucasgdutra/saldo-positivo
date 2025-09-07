@@ -1,19 +1,66 @@
-import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
-import { DecimalFieldUpdateOperationsInputObjectSchema } from './DecimalFieldUpdateOperationsInput.schema';
-import { NullableStringFieldUpdateOperationsInputObjectSchema } from './NullableStringFieldUpdateOperationsInput.schema';
-import { DateTimeFieldUpdateOperationsInputObjectSchema } from './DateTimeFieldUpdateOperationsInput.schema';
-import { StringFieldUpdateOperationsInputObjectSchema } from './StringFieldUpdateOperationsInput.schema'
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { DateTimeFieldUpdateOperationsInputObjectSchema } from "./DateTimeFieldUpdateOperationsInput.schema";
+import { DecimalFieldUpdateOperationsInputObjectSchema } from "./DecimalFieldUpdateOperationsInput.schema";
+import { NullableStringFieldUpdateOperationsInputObjectSchema } from "./NullableStringFieldUpdateOperationsInput.schema";
+import { StringFieldUpdateOperationsInputObjectSchema } from "./StringFieldUpdateOperationsInput.schema";
 
-export const ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema: z.ZodType<Prisma.ExpenseUncheckedUpdateManyWithoutCategoryInput, Prisma.ExpenseUncheckedUpdateManyWithoutCategoryInput> = z.object({
-  amount: z.union([z.number(), z.lazy(() => DecimalFieldUpdateOperationsInputObjectSchema)]).optional(),
-  description: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).nullish(),
-  date: z.union([z.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
-  userId: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional()
-}).strict();
-export const ExpenseUncheckedUpdateManyWithoutCategoryInputObjectZodSchema = z.object({
-  amount: z.union([z.number(), z.lazy(() => DecimalFieldUpdateOperationsInputObjectSchema)]).optional(),
-  description: z.union([z.string(), z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema)]).nullish(),
-  date: z.union([z.date(), z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema)]).optional(),
-  userId: z.union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputObjectSchema)]).optional()
-}).strict();
+export const ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema: z.ZodType<
+	Prisma.ExpenseUncheckedUpdateManyWithoutCategoryInput,
+	Prisma.ExpenseUncheckedUpdateManyWithoutCategoryInput
+> = z
+	.object({
+		amount: z
+			.union([
+				z.number(),
+				z.lazy(() => DecimalFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+		description: z
+			.union([
+				z.string(),
+				z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema),
+			])
+			.nullish(),
+		date: z
+			.union([
+				z.date(),
+				z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+		userId: z
+			.union([
+				z.string(),
+				z.lazy(() => StringFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+	})
+	.strict();
+export const ExpenseUncheckedUpdateManyWithoutCategoryInputObjectZodSchema = z
+	.object({
+		amount: z
+			.union([
+				z.number(),
+				z.lazy(() => DecimalFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+		description: z
+			.union([
+				z.string(),
+				z.lazy(() => NullableStringFieldUpdateOperationsInputObjectSchema),
+			])
+			.nullish(),
+		date: z
+			.union([
+				z.date(),
+				z.lazy(() => DateTimeFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+		userId: z
+			.union([
+				z.string(),
+				z.lazy(() => StringFieldUpdateOperationsInputObjectSchema),
+			])
+			.optional(),
+	})
+	.strict();

@@ -1,10 +1,10 @@
 "use client"; // Adicionar "use client" para usar hooks
 
-import { useEffect } from "react"; // Importar useEffect
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation"; // Importar hooks de navegação
-import { toast } from "sonner"; // Importar toast
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation"; // Importar hooks de navegação
+import { useEffect } from "react"; // Importar useEffect
+import { toast } from "sonner"; // Importar toast
 import { AuthForm } from "@/components/auth/auth-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
@@ -23,7 +23,9 @@ export default function Home() {
 								height={48}
 								className="rounded-lg"
 							/>
-							<h1 className="text-3xl font-bold text-blue-600">Saldo Positivo</h1>
+							<h1 className="text-3xl font-bold text-blue-600">
+								Saldo Positivo
+							</h1>
 						</div>
 						<Link
 							href="#auth"
@@ -43,9 +45,11 @@ export default function Home() {
 									⚠️ Projeto Acadêmico
 								</h3>
 								<p className="text-yellow-700">
-									<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema desenvolvido exclusivamente para fins acadêmicos
-									como projeto de faculdade. Esta plataforma não foi criada para uso real por usuários e não deve ser
-									utilizada para gerenciar informações financeiras reais. Todos os dados inseridos são fictícios e
+									<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema
+									desenvolvido exclusivamente para fins acadêmicos como projeto
+									de faculdade. Esta plataforma não foi criada para uso real por
+									usuários e não deve ser utilizada para gerenciar informações
+									financeiras reais. Todos os dados inseridos são fictícios e
 									destinados apenas para demonstração e avaliação acadêmica.
 								</p>
 							</div>

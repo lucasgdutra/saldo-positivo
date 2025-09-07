@@ -1,3 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const CategoryScalarFieldEnumSchema = z.enum(['id', 'name', 'userId', 'createdAt', 'updatedAt'])
+export const CategoryScalarFieldEnumSchema = z.enum([
+	"id",
+	"name",
+	"userId",
+	"createdAt",
+	"updatedAt",
+]);

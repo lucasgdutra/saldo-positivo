@@ -1,10 +1,10 @@
-import { AuthGuard } from "@/components/auth/auth-guard";
-import { AppLayout } from "@/components/layout/app-layout";
-import { ExpensesList } from "@/components/expenses/expenses-list";
-import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { AuthGuard } from "@/components/auth/auth-guard";
+import { ExpensesList } from "@/components/expenses/expenses-list";
+import { AppLayout } from "@/components/layout/app-layout";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 export default async function DespesasPage() {
 	const session = await getServerSession(authOptions);

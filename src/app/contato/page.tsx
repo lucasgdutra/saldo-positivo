@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { AuthGuard } from "@/components/auth/auth-guard";
+import { useState } from "react";
 import { toast } from "sonner";
+import { AuthGuard } from "@/components/auth/auth-guard";
 
 export default function ContatoPage() {
 	const [formData, setFormData] = useState({
@@ -15,10 +15,12 @@ export default function ContatoPage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+		>,
 	) => {
 		const { name, value } = e.target;
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			[name]: value,
 		}));
@@ -30,9 +32,11 @@ export default function ContatoPage() {
 
 		try {
 			// Simular envio do formulário
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
+			toast.success(
+				"Mensagem enviada com sucesso! Entraremos em contato em breve.",
+			);
 			setFormData({
 				nome: "",
 				email: "",
@@ -55,10 +59,7 @@ export default function ContatoPage() {
 							<Link href="/" className="text-2xl font-bold text-blue-600">
 								Saldo Positivo
 							</Link>
-							<Link
-								href="/"
-								className="text-gray-600 hover:text-blue-600"
-							>
+							<Link href="/" className="text-gray-600 hover:text-blue-600">
 								Voltar ao início
 							</Link>
 						</div>
@@ -75,10 +76,13 @@ export default function ContatoPage() {
 										⚠️ Projeto Acadêmico
 									</h3>
 									<p className="text-yellow-700">
-										<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema desenvolvido exclusivamente para fins acadêmicos
-										como projeto de faculdade. Esta plataforma não foi criada para uso real por usuários e não deve ser
-										utilizada para gerenciar informações financeiras reais. Este formulário de contato é apenas demonstrativo
-										e não enviará mensagens reais.
+										<strong>ATENÇÃO:</strong> O Saldo Positivo é um sistema
+										desenvolvido exclusivamente para fins acadêmicos como
+										projeto de faculdade. Esta plataforma não foi criada para
+										uso real por usuários e não deve ser utilizada para
+										gerenciar informações financeiras reais. Este formulário de
+										contato é apenas demonstrativo e não enviará mensagens
+										reais.
 									</p>
 								</div>
 							</div>
@@ -134,8 +138,12 @@ export default function ContatoPage() {
 											</svg>
 										</div>
 										<div>
-											<h3 className="font-semibold text-gray-900">Horário de Atendimento</h3>
-											<p className="text-gray-600">Segunda a Sexta, 9h às 18h</p>
+											<h3 className="font-semibold text-gray-900">
+												Horário de Atendimento
+											</h3>
+											<p className="text-gray-600">
+												Segunda a Sexta, 9h às 18h
+											</p>
 										</div>
 									</div>
 
@@ -171,7 +179,10 @@ export default function ContatoPage() {
 
 									<form onSubmit={handleSubmit} className="space-y-6">
 										<div>
-											<label htmlFor="nome" className="block text-sm font-medium text-gray-700">
+											<label
+												htmlFor="nome"
+												className="block text-sm font-medium text-gray-700"
+											>
 												Nome Completo
 											</label>
 											<input
@@ -186,7 +197,10 @@ export default function ContatoPage() {
 										</div>
 
 										<div>
-											<label htmlFor="email" className="block text-sm font-medium text-gray-700">
+											<label
+												htmlFor="email"
+												className="block text-sm font-medium text-gray-700"
+											>
 												Email
 											</label>
 											<input
@@ -201,7 +215,10 @@ export default function ContatoPage() {
 										</div>
 
 										<div>
-											<label htmlFor="assunto" className="block text-sm font-medium text-gray-700">
+											<label
+												htmlFor="assunto"
+												className="block text-sm font-medium text-gray-700"
+											>
 												Assunto
 											</label>
 											<select
@@ -214,7 +231,9 @@ export default function ContatoPage() {
 											>
 												<option value="">Selecione um assunto</option>
 												<option value="suporte">Suporte Técnico</option>
-												<option value="duvida">Dúvida sobre Funcionalidades</option>
+												<option value="duvida">
+													Dúvida sobre Funcionalidades
+												</option>
 												<option value="sugestao">Sugestão de Melhoria</option>
 												<option value="problema">Relatar Problema</option>
 												<option value="outro">Outro</option>
@@ -222,7 +241,10 @@ export default function ContatoPage() {
 										</div>
 
 										<div>
-											<label htmlFor="mensagem" className="block text-sm font-medium text-gray-700">
+											<label
+												htmlFor="mensagem"
+												className="block text-sm font-medium text-gray-700"
+											>
 												Mensagem
 											</label>
 											<textarea

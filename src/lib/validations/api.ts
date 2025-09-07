@@ -1,151 +1,174 @@
-import { z } from 'zod';
-import { UserInputSchema } from '../../schemas/variants/input/User.input';
-import { CategoryInputSchema } from '../../schemas/variants/input/Category.input';
-import { ExpenseInputSchema } from '../../schemas/variants/input/Expense.input';
-import { RevenueInputSchema } from '../../schemas/variants/input/Revenue.input';
-import { BalanceInputSchema } from '../../schemas/variants/input/Balance.input';
-import { DecimalValidation } from './decimal';
+import { z } from "zod";
+import { BalanceInputSchema } from "../../schemas/variants/input/Balance.input";
+import { CategoryInputSchema } from "../../schemas/variants/input/Category.input";
+import { ExpenseInputSchema } from "../../schemas/variants/input/Expense.input";
+import { RevenueInputSchema } from "../../schemas/variants/input/Revenue.input";
+import { UserInputSchema } from "../../schemas/variants/input/User.input";
+import { DecimalValidation } from "./decimal";
 
 // API Request Schemas
 
 // User API Schemas
 const BaseUserApiSchema = UserInputSchema.omit({
-  categories: true,
-  expenses: true,
-  revenues: true,
-  balance: true,
-  passwordResetTokens: true,
+	categories: true,
+	expenses: true,
+	revenues: true,
+	balance: true,
+	passwordResetTokens: true,
 }).extend({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
-  name: z.string().min(1, 'Nome é obrigatório'),
-  salaryRange: z.string().min(1, 'Faixa salarial é obrigatória'),
+	email: z.string().email("E-mail inválido"),
+	password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+	name: z.string().min(1, "Nome é obrigatório"),
+	salaryRange: z.string().min(1, "Faixa salarial é obrigatória"),
 });
 
 export const CreateUserApiSchema = BaseUserApiSchema.refine(
-  (data) => {
-    if (data.usageMotivation === "outro" && !data.customMotivation) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: "Especifique o motivo personalizado",
-    path: ["customMotivation"],
-  }
+	(data) => {
+		if (data.usageMotivation === "outro" && !data.customMotivation) {
+			return false;
+		}
+		return true;
+	},
+	{
+		message: "Especifique o motivo personalizado",
+		path: ["customMotivation"],
+	},
 );
 
 export const UpdateUserApiSchema = BaseUserApiSchema.omit({
-  password: true,
+	password: true,
 }).partial();
 
 export const LoginApiSchema = z.object({
-  email: z.string().email('Email must be valid'),
-  password: z.string().min(1, 'Password is required'),
+	email: z.string().email("Email must be valid"),
+	password: z.string().min(1, "Password is required"),
 });
 
 // Password Reset API Schemas
 export const ForgotPasswordApiSchema = z.object({
-  email: z.string().email('Email must be valid'),
+	email: z.string().email("Email must be valid"),
 });
 
 export const ResetPasswordApiSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+	token: z.string().min(1, "Token is required"),
+	password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 // Category API Schemas
 export const CreateCategoryApiSchema = CategoryInputSchema.omit({
-  user: true,
-  expenses: true,
-  userId: true,
+	user: true,
+	expenses: true,
+	userId: true,
 }).extend({
-  name: z.string().min(1, 'Category name is required'),
+	name: z.string().min(1, "Category name is required"),
 });
 
 export const UpdateCategoryApiSchema = CreateCategoryApiSchema.partial();
 
 // Expense API Schemas
 export const CreateExpenseApiSchema = ExpenseInputSchema.omit({
-  user: true,
-  category: true,
+	user: true,
+	category: true,
 }).extend({
-  amount: DecimalValidation.flexible('valor da despesa'),
-  description: z.string().optional(),
-  date: z.string().datetime().or(z.date()).transform(val =>
-    typeof val === 'string' ? new Date(val) : val
-  ),
-  categoryId: z.string().uuid('Category ID must be a valid UUID'),
+	amount: DecimalValidation.flexible("valor da despesa"),
+	description: z.string().optional(),
+	date: z
+		.string()
+		.datetime()
+		.or(z.date())
+		.transform((val) => (typeof val === "string" ? new Date(val) : val)),
+	categoryId: z.string().uuid("Category ID must be a valid UUID"),
 });
 
 export const UpdateExpenseApiSchema = CreateExpenseApiSchema.partial();
 
 // Revenue API Schemas
 export const CreateRevenueApiSchema = RevenueInputSchema.omit({
-  user: true,
+	user: true,
 }).extend({
-  amount: DecimalValidation.flexible('valor da receita'),
-  description: z.string().optional(),
-  date: z.string().datetime().or(z.date()).transform(val =>
-    typeof val === 'string' ? new Date(val) : val
-  ),
+	amount: DecimalValidation.flexible("valor da receita"),
+	description: z.string().optional(),
+	date: z
+		.string()
+		.datetime()
+		.or(z.date())
+		.transform((val) => (typeof val === "string" ? new Date(val) : val)),
 });
 
 export const UpdateRevenueApiSchema = CreateRevenueApiSchema.partial();
 
 // Balance API Schemas
 export const CreateBalanceApiSchema = BalanceInputSchema.omit({
-  user: true,
+	user: true,
 }).extend({
-  totalAmount: DecimalValidation.flexible('valor total'),
-  totalRevenues: DecimalValidation.flexible('total de receitas'),
-  totalExpenses: DecimalValidation.flexible('total de despesas'),
-  referenceMonth: z.string().datetime().or(z.date()).transform(val =>
-    typeof val === 'string' ? new Date(val) : val
-  ),
+	totalAmount: DecimalValidation.flexible("valor total"),
+	totalRevenues: DecimalValidation.flexible("total de receitas"),
+	totalExpenses: DecimalValidation.flexible("total de despesas"),
+	referenceMonth: z
+		.string()
+		.datetime()
+		.or(z.date())
+		.transform((val) => (typeof val === "string" ? new Date(val) : val)),
 });
 
 export const UpdateBalanceApiSchema = CreateBalanceApiSchema.partial();
 
 // Query Parameter Schemas
 export const PaginationQuerySchema = z.object({
-  page: z.string().regex(/^\d+$/).transform(val => parseInt(val, 10)).optional(),
-  limit: z.string().regex(/^\d+$/).transform(val => parseInt(val, 10)).optional(),
-  orderBy: z.string().optional(),
-  order: z.enum(['asc', 'desc']).optional(),
+	page: z
+		.string()
+		.regex(/^\d+$/)
+		.transform((val) => parseInt(val, 10))
+		.optional(),
+	limit: z
+		.string()
+		.regex(/^\d+$/)
+		.transform((val) => parseInt(val, 10))
+		.optional(),
+	orderBy: z.string().optional(),
+	order: z.enum(["asc", "desc"]).optional(),
 });
 
 export const DateRangeQuerySchema = z.object({
-  startDate: z.string().datetime().or(z.date()).transform(val =>
-    typeof val === 'string' ? new Date(val) : val
-  ).optional(),
-  endDate: z.string().datetime().or(z.date()).transform(val =>
-    typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+	startDate: z
+		.string()
+		.datetime()
+		.or(z.date())
+		.transform((val) => (typeof val === "string" ? new Date(val) : val))
+		.optional(),
+	endDate: z
+		.string()
+		.datetime()
+		.or(z.date())
+		.transform((val) => (typeof val === "string" ? new Date(val) : val))
+		.optional(),
 });
 
-export const ExpenseQuerySchema = PaginationQuerySchema.merge(DateRangeQuerySchema).extend({
-  categoryId: z.string().uuid().optional(),
+export const ExpenseQuerySchema = PaginationQuerySchema.merge(
+	DateRangeQuerySchema,
+).extend({
+	categoryId: z.string().uuid().optional(),
 });
 
-export const RevenueQuerySchema = PaginationQuerySchema.merge(DateRangeQuerySchema);
+export const RevenueQuerySchema =
+	PaginationQuerySchema.merge(DateRangeQuerySchema);
 
 // API Response Schemas
 export const ApiSuccessResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.unknown(),
-  message: z.string().optional(),
+	success: z.literal(true),
+	data: z.unknown(),
+	message: z.string().optional(),
 });
 
 export const ApiErrorResponseSchema = z.object({
-  success: z.literal(false),
-  error: z.string(),
-  details: z.unknown().optional(),
+	success: z.literal(false),
+	error: z.string(),
+	details: z.unknown().optional(),
 });
 
 export const ApiResponseSchema = z.union([
-  ApiSuccessResponseSchema,
-  ApiErrorResponseSchema,
+	ApiSuccessResponseSchema,
+	ApiErrorResponseSchema,
 ]);
 
 // Type exports for API schemas

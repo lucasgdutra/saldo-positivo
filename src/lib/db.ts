@@ -6,13 +6,13 @@ export type PrismaClientWithExtensions = ReturnType<typeof getPrismaClient>;
 
 // Função para criar o cliente Prisma com extensões
 function getPrismaClient() {
-  return new PrismaClient({
-    log: ["query"],
-  }).$extends(withAccelerate());
+	return new PrismaClient({
+		log: ["query"],
+	}).$extends(withAccelerate());
 }
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientWithExtensions | undefined;
+	prisma: PrismaClientWithExtensions | undefined;
 };
 
 export const db = globalForPrisma.prisma ?? getPrismaClient();

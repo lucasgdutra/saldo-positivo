@@ -1,23 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Menu } from "lucide-react";
 import Image from "next/image";
-
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import { UserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
 import {
 	Sheet,
+	SheetClose,
 	SheetContent,
 	SheetTitle,
 	SheetTrigger,
-	SheetClose,
 } from "@/components/ui/sheet";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { UserMenu } from "@/components/layout/user-menu";
+import { cn } from "@/lib/utils";
 
 const routes = [
 	{
@@ -62,7 +61,7 @@ export function MainNav() {
 					Saldo Positivo
 				</span>
 			</div>
-			
+
 			{/* Desktop Navigation - Centered */}
 			<div className="hidden lg:flex items-center justify-center flex-1">
 				<div className="flex items-center space-x-6">

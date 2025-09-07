@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner"; // Adicionado
-import { ExpenseDialog } from "./expense-dialog";
 import { formatCurrency } from "@/lib/utils";
+import { ExpenseDialog } from "./expense-dialog";
 
 interface Category {
 	id: string;
