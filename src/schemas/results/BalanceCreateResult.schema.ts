@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { z } from 'zod';
 export const BalanceCreateResultSchema = z.object({
-	id: z.string(),
-	totalAmount: z.number(),
-	totalRevenues: z.number(),
-	totalExpenses: z.number(),
-	referenceMonth: z.date(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-	userId: z.string(),
-	user: z.unknown(),
+  id: z.string(),
+  totalAmount: z.number(),
+  totalRevenues: z.number(),
+  totalExpenses: z.number(),
+  referenceMonth: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  userId: z.string(),
+  user: z.unknown()
 });

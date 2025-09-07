@@ -1,36 +1,17 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { CategoryCreateNestedOneWithoutExpensesInputObjectSchema } from "./CategoryCreateNestedOneWithoutExpensesInput.schema";
-import { UserCreateNestedOneWithoutExpensesInputObjectSchema } from "./UserCreateNestedOneWithoutExpensesInput.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { UserCreateNestedOneWithoutExpensesInputObjectSchema } from './UserCreateNestedOneWithoutExpensesInput.schema';
+import { CategoryCreateNestedOneWithoutExpensesInputObjectSchema } from './CategoryCreateNestedOneWithoutExpensesInput.schema'
 
-export const ExpenseCreateInputObjectSchema: z.ZodType<
-	Prisma.ExpenseCreateInput,
-	Prisma.ExpenseCreateInput
-> = z
-	.object({
-		id: z.string().optional(),
-		amount: z.number(),
-		description: z.string().nullish(),
-		date: z.date(),
-		createdAt: z.date().optional(),
-		updatedAt: z.date().optional(),
-		user: z.lazy(() => UserCreateNestedOneWithoutExpensesInputObjectSchema),
-		category: z.lazy(
-			() => CategoryCreateNestedOneWithoutExpensesInputObjectSchema,
-		),
-	})
-	.strict();
-export const ExpenseCreateInputObjectZodSchema = z
-	.object({
-		id: z.string().optional(),
-		amount: z.number(),
-		description: z.string().nullish(),
-		date: z.date(),
-		createdAt: z.date().optional(),
-		updatedAt: z.date().optional(),
-		user: z.lazy(() => UserCreateNestedOneWithoutExpensesInputObjectSchema),
-		category: z.lazy(
-			() => CategoryCreateNestedOneWithoutExpensesInputObjectSchema,
-		),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  id: z.string().optional(),
+  amount: z.number(),
+  description: z.string().nullish(),
+  date: z.date(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  user: z.lazy(() => UserCreateNestedOneWithoutExpensesInputObjectSchema),
+  category: z.lazy(() => CategoryCreateNestedOneWithoutExpensesInputObjectSchema)
+}).strict();
+export const ExpenseCreateInputObjectSchema: z.ZodType<Prisma.ExpenseCreateInput> = makeSchema() as unknown as z.ZodType<Prisma.ExpenseCreateInput>;
+export const ExpenseCreateInputObjectZodSchema = makeSchema();

@@ -1,25 +1,10 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { RevenueCreateManyUserInputObjectSchema } from "./RevenueCreateManyUserInput.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { RevenueCreateManyUserInputObjectSchema } from './RevenueCreateManyUserInput.schema'
 
-export const RevenueCreateManyUserInputEnvelopeObjectSchema: z.ZodType<
-	Prisma.RevenueCreateManyUserInputEnvelope,
-	Prisma.RevenueCreateManyUserInputEnvelope
-> = z
-	.object({
-		data: z.union([
-			z.lazy(() => RevenueCreateManyUserInputObjectSchema),
-			z.lazy(() => RevenueCreateManyUserInputObjectSchema).array(),
-		]),
-		skipDuplicates: z.boolean().optional(),
-	})
-	.strict();
-export const RevenueCreateManyUserInputEnvelopeObjectZodSchema = z
-	.object({
-		data: z.union([
-			z.lazy(() => RevenueCreateManyUserInputObjectSchema),
-			z.lazy(() => RevenueCreateManyUserInputObjectSchema).array(),
-		]),
-		skipDuplicates: z.boolean().optional(),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  data: z.union([z.lazy(() => RevenueCreateManyUserInputObjectSchema), z.lazy(() => RevenueCreateManyUserInputObjectSchema).array()]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+export const RevenueCreateManyUserInputEnvelopeObjectSchema: z.ZodType<Prisma.RevenueCreateManyUserInputEnvelope> = makeSchema() as unknown as z.ZodType<Prisma.RevenueCreateManyUserInputEnvelope>;
+export const RevenueCreateManyUserInputEnvelopeObjectZodSchema = makeSchema();

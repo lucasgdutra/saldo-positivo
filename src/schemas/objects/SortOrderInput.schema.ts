@@ -1,20 +1,11 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { NullsOrderSchema } from "../enums/NullsOrder.schema";
-import { SortOrderSchema } from "../enums/SortOrder.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { SortOrderSchema } from '../enums/SortOrder.schema';
+import { NullsOrderSchema } from '../enums/NullsOrder.schema'
 
-export const SortOrderInputObjectSchema: z.ZodType<
-	Prisma.SortOrderInput,
-	Prisma.SortOrderInput
-> = z
-	.object({
-		sort: SortOrderSchema,
-		nulls: NullsOrderSchema.optional(),
-	})
-	.strict();
-export const SortOrderInputObjectZodSchema = z
-	.object({
-		sort: SortOrderSchema,
-		nulls: NullsOrderSchema.optional(),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  sort: SortOrderSchema,
+  nulls: NullsOrderSchema.optional()
+}).strict();
+export const SortOrderInputObjectSchema: z.ZodType<Prisma.SortOrderInput> = makeSchema() as unknown as z.ZodType<Prisma.SortOrderInput>;
+export const SortOrderInputObjectZodSchema = makeSchema();

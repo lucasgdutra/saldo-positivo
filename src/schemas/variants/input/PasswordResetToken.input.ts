@@ -1,15 +1,14 @@
-import { z } from "zod";
-// prettier-ignore
-export const PasswordResetTokenInputSchema = z
-	.object({
-		token: z.string(),
-		userId: z.string(),
-		expiresAt: z.date(),
-		used: z.boolean(),
-		user: z.unknown(),
-	})
-	.strict();
+import { z } from 'zod';
 
-export type PasswordResetTokenInputType = z.infer<
-	typeof PasswordResetTokenInputSchema
->;
+// prettier-ignore
+export const PasswordResetTokenInputSchema = z.object({
+    id: z.string(),
+    token: z.string(),
+    userId: z.string(),
+    expiresAt: z.date(),
+    used: z.boolean(),
+    createdAt: z.date(),
+    user: z.unknown()
+}).strict();
+
+export type PasswordResetTokenInputType = z.infer<typeof PasswordResetTokenInputSchema>;

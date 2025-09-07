@@ -1,14 +1,9 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { UserCountOutputTypeSelectObjectSchema } from "./UserCountOutputTypeSelect.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { UserCountOutputTypeSelectObjectSchema } from './UserCountOutputTypeSelect.schema'
 
-export const UserCountOutputTypeArgsObjectSchema = z
-	.object({
-		select: z.lazy(() => UserCountOutputTypeSelectObjectSchema).optional(),
-	})
-	.strict();
-export const UserCountOutputTypeArgsObjectZodSchema = z
-	.object({
-		select: z.lazy(() => UserCountOutputTypeSelectObjectSchema).optional(),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  select: z.lazy(() => UserCountOutputTypeSelectObjectSchema).optional()
+}).strict();
+export const UserCountOutputTypeArgsObjectSchema = makeSchema();
+export const UserCountOutputTypeArgsObjectZodSchema = makeSchema();

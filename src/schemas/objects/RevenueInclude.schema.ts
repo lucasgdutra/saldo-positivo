@@ -1,17 +1,9 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { UserArgsObjectSchema } from "./UserArgs.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { UserArgsObjectSchema } from './UserArgs.schema'
 
-export const RevenueIncludeObjectSchema: z.ZodType<
-	Prisma.RevenueInclude,
-	Prisma.RevenueInclude
-> = z
-	.object({
-		user: z.union([z.boolean(), z.lazy(() => UserArgsObjectSchema)]).optional(),
-	})
-	.strict();
-export const RevenueIncludeObjectZodSchema = z
-	.object({
-		user: z.union([z.boolean(), z.lazy(() => UserArgsObjectSchema)]).optional(),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  user: z.union([z.boolean(), z.lazy(() => UserArgsObjectSchema)]).optional()
+}).strict();
+export const RevenueIncludeObjectSchema: z.ZodType<Prisma.RevenueInclude> = makeSchema() as unknown as z.ZodType<Prisma.RevenueInclude>;
+export const RevenueIncludeObjectZodSchema = makeSchema();

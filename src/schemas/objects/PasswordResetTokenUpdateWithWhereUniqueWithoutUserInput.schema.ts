@@ -1,32 +1,12 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { PasswordResetTokenUncheckedUpdateWithoutUserInputObjectSchema } from "./PasswordResetTokenUncheckedUpdateWithoutUserInput.schema";
-import { PasswordResetTokenUpdateWithoutUserInputObjectSchema } from "./PasswordResetTokenUpdateWithoutUserInput.schema";
-import { PasswordResetTokenWhereUniqueInputObjectSchema } from "./PasswordResetTokenWhereUniqueInput.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { PasswordResetTokenWhereUniqueInputObjectSchema } from './PasswordResetTokenWhereUniqueInput.schema';
+import { PasswordResetTokenUpdateWithoutUserInputObjectSchema } from './PasswordResetTokenUpdateWithoutUserInput.schema';
+import { PasswordResetTokenUncheckedUpdateWithoutUserInputObjectSchema } from './PasswordResetTokenUncheckedUpdateWithoutUserInput.schema'
 
-export const PasswordResetTokenUpdateWithWhereUniqueWithoutUserInputObjectSchema: z.ZodType<
-	Prisma.PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput,
-	Prisma.PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput
-> = z
-	.object({
-		where: z.lazy(() => PasswordResetTokenWhereUniqueInputObjectSchema),
-		data: z.union([
-			z.lazy(() => PasswordResetTokenUpdateWithoutUserInputObjectSchema),
-			z.lazy(
-				() => PasswordResetTokenUncheckedUpdateWithoutUserInputObjectSchema,
-			),
-		]),
-	})
-	.strict();
-export const PasswordResetTokenUpdateWithWhereUniqueWithoutUserInputObjectZodSchema =
-	z
-		.object({
-			where: z.lazy(() => PasswordResetTokenWhereUniqueInputObjectSchema),
-			data: z.union([
-				z.lazy(() => PasswordResetTokenUpdateWithoutUserInputObjectSchema),
-				z.lazy(
-					() => PasswordResetTokenUncheckedUpdateWithoutUserInputObjectSchema,
-				),
-			]),
-		})
-		.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  where: z.lazy(() => PasswordResetTokenWhereUniqueInputObjectSchema),
+  data: z.union([z.lazy(() => PasswordResetTokenUpdateWithoutUserInputObjectSchema), z.lazy(() => PasswordResetTokenUncheckedUpdateWithoutUserInputObjectSchema)])
+}).strict();
+export const PasswordResetTokenUpdateWithWhereUniqueWithoutUserInputObjectSchema: z.ZodType<Prisma.PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput> = makeSchema() as unknown as z.ZodType<Prisma.PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput>;
+export const PasswordResetTokenUpdateWithWhereUniqueWithoutUserInputObjectZodSchema = makeSchema();

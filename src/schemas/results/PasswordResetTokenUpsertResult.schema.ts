@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 export const PasswordResetTokenUpsertResultSchema = z.object({
-	id: z.string(),
-	token: z.string(),
-	userId: z.string(),
-	expiresAt: z.date(),
-	used: z.boolean(),
-	createdAt: z.date(),
-	user: z.unknown(),
+  id: z.string(),
+  token: z.string(),
+  userId: z.string(),
+  expiresAt: z.date(),
+  used: z.boolean(),
+  createdAt: z.date(),
+  user: z.unknown()
 });

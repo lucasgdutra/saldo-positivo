@@ -1,27 +1,12 @@
-import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { ExpenseScalarWhereInputObjectSchema } from "./ExpenseScalarWhereInput.schema";
-import { ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema } from "./ExpenseUncheckedUpdateManyWithoutCategoryInput.schema";
-import { ExpenseUpdateManyMutationInputObjectSchema } from "./ExpenseUpdateManyMutationInput.schema";
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+import { ExpenseScalarWhereInputObjectSchema } from './ExpenseScalarWhereInput.schema';
+import { ExpenseUpdateManyMutationInputObjectSchema } from './ExpenseUpdateManyMutationInput.schema';
+import { ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema } from './ExpenseUncheckedUpdateManyWithoutCategoryInput.schema'
 
-export const ExpenseUpdateManyWithWhereWithoutCategoryInputObjectSchema: z.ZodType<
-	Prisma.ExpenseUpdateManyWithWhereWithoutCategoryInput,
-	Prisma.ExpenseUpdateManyWithWhereWithoutCategoryInput
-> = z
-	.object({
-		where: z.lazy(() => ExpenseScalarWhereInputObjectSchema),
-		data: z.union([
-			z.lazy(() => ExpenseUpdateManyMutationInputObjectSchema),
-			z.lazy(() => ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema),
-		]),
-	})
-	.strict();
-export const ExpenseUpdateManyWithWhereWithoutCategoryInputObjectZodSchema = z
-	.object({
-		where: z.lazy(() => ExpenseScalarWhereInputObjectSchema),
-		data: z.union([
-			z.lazy(() => ExpenseUpdateManyMutationInputObjectSchema),
-			z.lazy(() => ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema),
-		]),
-	})
-	.strict();
+const makeSchema = (): z.ZodObject<any> => z.object({
+  where: z.lazy(() => ExpenseScalarWhereInputObjectSchema),
+  data: z.union([z.lazy(() => ExpenseUpdateManyMutationInputObjectSchema), z.lazy(() => ExpenseUncheckedUpdateManyWithoutCategoryInputObjectSchema)])
+}).strict();
+export const ExpenseUpdateManyWithWhereWithoutCategoryInputObjectSchema: z.ZodType<Prisma.ExpenseUpdateManyWithWhereWithoutCategoryInput> = makeSchema() as unknown as z.ZodType<Prisma.ExpenseUpdateManyWithWhereWithoutCategoryInput>;
+export const ExpenseUpdateManyWithWhereWithoutCategoryInputObjectZodSchema = makeSchema();
