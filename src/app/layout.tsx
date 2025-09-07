@@ -1,6 +1,6 @@
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner"; // Importar Toaster
 import { AuthProvider } from "@/providers/auth-provider";
@@ -20,10 +20,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "Saldo Positivo",
 	description: "Sistema de controle de despesas pessoais",
-	viewport: "width=device-width, initial-scale=1",
 	keywords: ["controle financeiro", "despesas", "receitas", "relatórios"],
 	authors: [{ name: "Saldo Positivo" }],
 };
+
+export const viewport: Viewport = {
+	width: "device-width, initial-scale=1",
+}
 
 export default function RootLayout({
 	children,
