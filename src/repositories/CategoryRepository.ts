@@ -70,11 +70,13 @@ export class CategoryRepository {
 		userId: string,
 		data: Prisma.CategoryUpdateInput,
 	): Promise<Category> {
-		// Garante que apenas o nome pode ser atualizado e que a categoria pertence ao usuário
+		// Garante que a categoria pertence ao usuário e permite atualizar nome, cor e ícone
 		return this.prisma.category.update({
 			where: { id, userId },
 			data: {
-				name: data.name, // Permite apenas a atualização do nome
+				name: data.name,
+				color: data.color,
+				icon: data.icon,
 			},
 		});
 	}

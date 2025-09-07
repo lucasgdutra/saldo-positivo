@@ -68,28 +68,76 @@ async function main() {
 	await prisma.category.deleteMany({ where: { userId: user.id } });
 	console.log(`✅ Cleaned existing financial data`);
 
-	// 2. Create comprehensive expense categories
-	const categoryNames = [
-		"Alimentação",
-		"Transporte",
-		"Lazer",
-		"Saúde",
-		"Educação",
-		"Casa & Moradia",
-		"Investimentos",
-		"Roupas & Acessórios",
-		"Tecnologia",
-		"Viagens",
-		"Presente & Doações",
-		"Serviços Financeiros",
+	// 2. Create comprehensive expense categories with colors and icons
+	const categoryData = [
+		{
+			name: "Alimentação",
+			color: "#10B981", // Green
+			icon: "utensils",
+		},
+		{
+			name: "Transporte",
+			color: "#3B82F6", // Blue
+			icon: "car",
+		},
+		{
+			name: "Lazer",
+			color: "#8B5CF6", // Purple
+			icon: "gamepad-2",
+		},
+		{
+			name: "Saúde",
+			color: "#EF4444", // Red
+			icon: "heart",
+		},
+		{
+			name: "Educação",
+			color: "#F59E0B", // Yellow
+			icon: "graduation-cap",
+		},
+		{
+			name: "Casa & Moradia",
+			color: "#06B6D4", // Cyan
+			icon: "home",
+		},
+		{
+			name: "Investimentos",
+			color: "#059669", // Dark Green
+			icon: "trending-up",
+		},
+		{
+			name: "Roupas & Acessórios",
+			color: "#EC4899", // Pink
+			icon: "shirt",
+		},
+		{
+			name: "Tecnologia",
+			color: "#6B7280", // Gray
+			icon: "phone",
+		},
+		{
+			name: "Viagens",
+			color: "#7C3AED", // Dark Purple
+			icon: "plane",
+		},
+		{
+			name: "Presente & Doações",
+			color: "#F97316", // Orange
+			icon: "gift",
+		},
+		{
+			name: "Serviços Financeiros",
+			color: "#0891B2", // Dark Cyan
+			icon: "credit-card",
+		},
 	];
 
 	const categories: any[] = [];
-	for (const categoryName of categoryNames) {
+	for (const categoryInfo of categoryData) {
 		// Try to find existing category first
 		let category = await prisma.category.findFirst({
 			where: {
-				name: categoryName,
+				name: categoryInfo.name,
 				userId: user.id,
 			},
 		});
@@ -97,13 +145,27 @@ async function main() {
 		if (!category) {
 			category = await prisma.category.create({
 				data: {
-					name: categoryName,
+					name: categoryInfo.name,
+					color: categoryInfo.color,
+					icon: categoryInfo.icon,
 					userId: user.id,
 				},
 			});
-			console.log(`📂 Created category: ${categoryName}`);
+			console.log(`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`);
 		} else {
-			console.log(`📂 Found existing category: ${categoryName}`);
+			// Update existing category with color and icon if they don't have them
+			if (!category.color || !category.icon) {
+				category = await prisma.category.update({
+					where: { id: category.id },
+					data: {
+						color: categoryInfo.color,
+						icon: categoryInfo.icon,
+					},
+				});
+				console.log(`📂 Updated existing category: ${categoryInfo.name} with color and icon`);
+			} else {
+				console.log(`📂 Found existing category: ${categoryInfo.name}`);
+			}
 		}
 
 		categories.push(category);
@@ -214,6 +276,60 @@ async function main() {
 			"Certificação",
 			"Workshop/Palestra",
 			"E-learning",
+		],
+		Investimentos: [
+			"Ações",
+			"Tesouro Direto",
+			"CDB/LCI/LCA",
+			"Fundos de investimento",
+			"Criptomoedas",
+			"Corretagem",
+			"Taxa de custódia",
+		],
+		"Roupas & Acessórios": [
+			"Roupas",
+			"Sapatos",
+			"Bolsas",
+			"Acessórios",
+			"Cosméticos",
+			"Perfume",
+			"Joias",
+		],
+		Tecnologia: [
+			"Celular",
+			"Computador",
+			"Software",
+			"Aplicativos",
+			"Gadgets",
+			"Eletrônicos",
+			"Manutenção tech",
+		],
+		Viagens: [
+			"Passagem aérea",
+			"Hospedagem",
+			"Aluguel carro",
+			"Turismo",
+			"Alimentação viagem",
+			"Seguro viagem",
+			"Souvenirs",
+		],
+		"Presente & Doações": [
+			"Presentes",
+			"Flores",
+			"Cartões",
+			"Doações",
+			"Caridade",
+			"Dízimo",
+			"Ajuda familiar",
+		],
+		"Serviços Financeiros": [
+			"Taxa bancária",
+			"Anuidade cartão",
+			"Juros/Multas",
+			"Contabilidade",
+			"Seguro de vida",
+			"Previdência",
+			"Empréstimo",
 		],
 	};
 

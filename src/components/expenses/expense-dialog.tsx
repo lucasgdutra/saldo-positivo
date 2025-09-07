@@ -5,12 +5,18 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type ExpenseFormData, ExpenseFormSchema } from "@/lib/validations";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface Category {
 	id: string;
 	name: string;
-	color: string | undefined;
+	color?: string | undefined;
 	userId: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 interface ExpenseDialogProps {
@@ -125,114 +131,136 @@ export function ExpenseDialog({
 			setIsLoading(false);
 		}
 	};
+	if (errors != null && Object.keys(errors).length > 0) {
+		console.log(errors);
+	}
 
-	if (!isOpen) return null;
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-			<div className="w-full max-w-md rounded-lg bg-white p-6">
-				<h2 className="text-lg font-medium">
-					{initialData ? "Editar Despesa" : "Nova Despesa"}
-				</h2>
-				<form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
-					<div>
-						<label htmlFor="amount" className="block text-sm font-medium">
-							Valor (R$)
-						</label>
-						<input
-							{...register("amount", { valueAsNumber: true })}
-							type="number"
-							id="amount"
-							step="0.01"
-							min="0.01"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
-							placeholder="0,00"
-							disabled={isLoading}
-						/>
-						{errors.amount && (
-							<p className="mt-1 text-sm text-red-600">
-								{errors.amount.message}
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>
+						{initialData ? "Editar Despesa" : "Nova Despesa"}
+					</DialogTitle>
+				</DialogHeader>
+				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+					<fieldset disabled={isLoading} className="space-y-4">
+						<legend className="sr-only">Dados da despesa</legend>
+
+						<div className="space-y-2">
+							<Label htmlFor="amount">Valor (R$) *</Label>
+							<Input
+								{...register("amount", { valueAsNumber: true })}
+								type="number"
+								id="amount"
+								step="0.01"
+								min="0.01"
+								required
+								aria-describedby={errors.amount ? "amount-error" : "amount-help"}
+								aria-invalid={errors.amount ? "true" : "false"}
+								placeholder="0,00"
+								disabled={isLoading}
+							/>
+							<p id="amount-help" className="text-xs text-muted-foreground">
+								Digite o valor em reais (ex: 29,90)
 							</p>
-						)}
-					</div>
+							{errors.amount && (
+								<p id="amount-error" role="alert" className="text-sm text-destructive">
+									<span className="sr-only">Erro:</span> {errors.amount.message}
+								</p>
+							)}
+						</div>
 
-					<div>
-						<label htmlFor="description" className="block text-sm font-medium">
-							Descrição
-						</label>
-						<input
-							{...register("description")}
-							type="text"
-							id="description"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
-							placeholder="Ex: Aluguel, Mercado, etc."
-							disabled={isLoading}
-						/>
-						{errors.description && (
-							<p className="mt-1 text-sm text-red-600">
-								{errors.description.message}
+						<div className="space-y-2">
+							<Label htmlFor="description">Descrição</Label>
+							<Input
+								{...register("description")}
+								type="text"
+								id="description"
+								maxLength={100}
+								aria-describedby={errors.description ? "description-error" : "description-help"}
+								aria-invalid={errors.description ? "true" : "false"}
+								placeholder="Ex: Aluguel, Mercado, etc."
+								disabled={isLoading}
+							/>
+							<p id="description-help" className="text-xs text-muted-foreground">
+								Descreva brevemente a despesa (opcional)
 							</p>
-						)}
-					</div>
+							{errors.description && (
+								<p id="description-error" role="alert" className="text-sm text-destructive">
+									<span className="sr-only">Erro:</span> {errors.description.message}
+								</p>
+							)}
+						</div>
 
-					<div>
-						<label htmlFor="categoryId" className="block text-sm font-medium">
-							Categoria
-						</label>
-						<select
-							{...register("categoryId")}
-							id="categoryId"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
-							disabled={isLoading}
-						>
-							<option value="">Selecione uma categoria</option>
-							{categories.map((category) => (
-								<option key={category.id} value={category.id}>
-									{category.name}
-								</option>
-							))}
-						</select>
-						{errors.categoryId && (
-							<p className="mt-1 text-sm text-red-600">
-								{errors.categoryId.message}
+						<div className="space-y-2">
+							<Label htmlFor="categoryId">Categoria *</Label>
+							<select
+								{...register("categoryId")}
+								id="categoryId"
+								required
+								aria-describedby={errors.categoryId ? "category-error" : "category-help"}
+								aria-invalid={errors.categoryId ? "true" : "false"}
+								className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+								disabled={isLoading}
+							>
+								<option value="">Selecione uma categoria</option>
+								{categories.map((category) => (
+									<option key={category.id} value={category.id}>
+										{category.name}
+									</option>
+								))}
+							</select>
+							<p id="category-help" className="text-xs text-muted-foreground">
+								Escolha a categoria que melhor classifica esta despesa
 							</p>
-						)}
-					</div>
+							{errors.categoryId && (
+								<p id="category-error" role="alert" className="text-sm text-destructive">
+									<span className="sr-only">Erro:</span> {errors.categoryId.message}
+								</p>
+							)}
+						</div>
 
-					<div>
-						<label htmlFor="date" className="block text-sm font-medium">
-							Data
-						</label>
-						<input
-							{...register("date")}
-							type="date"
-							id="date"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
-							disabled={isLoading}
-						/>
-						{errors.date && (
-							<p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
-						)}
-					</div>
+						<div className="space-y-2">
+							<Label htmlFor="date">Data *</Label>
+							<Input
+								{...register("date")}
+								type="date"
+								id="date"
+								required
+								aria-describedby={errors.date ? "date-error" : "date-help"}
+								aria-invalid={errors.date ? "true" : "false"}
+								disabled={isLoading}
+							/>
+							<p id="date-help" className="text-xs text-muted-foreground">
+								Data em que a despesa foi realizada
+							</p>
+							{errors.date && (
+								<p id="date-error" role="alert" className="text-sm text-destructive">
+									<span className="sr-only">Erro:</span> {errors.date.message}
+								</p>
+							)}
+						</div>
+					</fieldset>
 
-					<div className="flex justify-end gap-2">
-						<button
+					<DialogFooter className="pt-4 border-t">
+						<Button
 							type="button"
+							variant="outline"
 							onClick={onClose}
-							className="rounded-lg border px-4 py-2 hover:bg-gray-50"
 							disabled={isLoading}
 						>
 							Cancelar
-						</button>
-						<button
+						</Button>
+						<Button
 							type="submit"
-							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
 							disabled={isLoading}
 						>
-							{isLoading ? "Salvando..." : "Salvar"}
-						</button>
-					</div>
+							{isLoading ? "Salvando..." : (initialData ? "Atualizar" : "Salvar")}
+						</Button>
+					</DialogFooter>
 				</form>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

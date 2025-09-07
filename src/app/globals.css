@@ -232,3 +232,66 @@
 input::-ms-reveal {
 	display: none;
 }
+
+/* HCI Design Principles & Accessibility Enhancements */
+
+/* Skip to content link - accessibility */
+.sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+.sr-only.focus\:not-sr-only:focus {
+	position: static !important;
+	width: auto !important;
+	height: auto !important;
+	padding: 1rem !important;
+	margin: 0 !important;
+	overflow: visible !important;
+	clip: auto !important;
+	white-space: normal !important;
+}
+
+/* Loading states - system status visibility */
+@keyframes shimmer {
+	0% { background-position: -200px 0; }
+	100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton {
+	background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+	background-size: 200px 100%;
+	animation: shimmer 1.2s ease-in-out infinite;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	:root {
+		--border: hsl(0 0% 0%);
+		--ring: hsl(0 0% 0%);
+	}
+	
+	.dark {
+		--border: hsl(0 0% 100%);
+		--ring: hsl(0 0% 100%);
+	}
+}

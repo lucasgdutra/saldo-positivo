@@ -50,29 +50,63 @@ async function main() {
 	await prisma.category.deleteMany({ where: { userId: user.id } });
 	await prisma.balance.deleteMany({ where: { userId: user.id } });
 
-	// 2. Create categories
-	const categoryNames = [
-		"Alimentação",
-		"Transporte",
-		"Lazer",
-		"Saúde",
-		"Educação",
-		"Casa & Moradia",
-		"Investimentos",
-		"Roupas & Acessórios",
+	// 2. Create categories with colors and icons
+	const categoryData = [
+		{
+			name: "Alimentação",
+			color: "#10B981", // Green
+			icon: "utensils",
+		},
+		{
+			name: "Transporte",
+			color: "#3B82F6", // Blue
+			icon: "car",
+		},
+		{
+			name: "Lazer",
+			color: "#8B5CF6", // Purple
+			icon: "gamepad-2",
+		},
+		{
+			name: "Saúde",
+			color: "#EF4444", // Red
+			icon: "heart",
+		},
+		{
+			name: "Educação",
+			color: "#F59E0B", // Yellow
+			icon: "graduation-cap",
+		},
+		{
+			name: "Casa & Moradia",
+			color: "#06B6D4", // Cyan
+			icon: "home",
+		},
+		{
+			name: "Investimentos",
+			color: "#059669", // Dark Green
+			icon: "trending-up",
+		},
+		{
+			name: "Roupas & Acessórios",
+			color: "#EC4899", // Pink
+			icon: "shirt",
+		},
 	];
 
 	const categories: any[] = [];
-	for (const categoryName of categoryNames) {
+	for (const categoryInfo of categoryData) {
 		const category = await prisma.category.create({
 			data: {
-				name: categoryName,
+				name: categoryInfo.name,
+				color: categoryInfo.color,
+				icon: categoryInfo.icon,
 				userId: user.id,
 			},
 		});
 		categories.push(category);
 	}
-	console.log(`📂 Created ${categories.length} categories`);
+	console.log(`📂 Created ${categories.length} categories with colors and icons`);
 
 	// 3. Helper functions
 	function randomBetween(min: number, max: number): number {
@@ -111,7 +145,7 @@ async function main() {
 
 	// 4. Generate data for Jan 2024 to Aug 2025 (20 months)
 	const startDate = new Date(2024, 0, 1);
-	const endDate = new Date(2025, 7, 31);
+	const endDate = new Date();
 
 	let currentDate = new Date(startDate);
 	let totalRevenues = new Decimal(0);

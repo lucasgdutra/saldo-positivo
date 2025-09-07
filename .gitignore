@@ -46,3 +46,5 @@ next-env.d.ts
 external_docs/*
 docs_embeddings/*
 .env*.local
+
+.env.local

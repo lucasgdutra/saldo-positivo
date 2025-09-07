@@ -5,6 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type RevenueFormData, RevenueFormSchema } from "@/lib/validations";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface RevenueDialogProps {
 	isOpen: boolean;
@@ -94,90 +98,83 @@ export function RevenueDialog({
 		}
 	};
 
-	if (!isOpen) return null;
-
+	if (errors != null && Object.keys(errors).length > 0) {
+		console.log(errors);
+	}
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-			<div className="w-full max-w-md rounded-lg bg-white p-6">
-				<h2 className="text-lg font-medium">
-					{initialData ? "Editar Receita" : "Nova Receita"}
-				</h2>
-				<form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
-					<div>
-						<label htmlFor="amount" className="block text-sm font-medium">
-							Valor (R$)
-						</label>
-						<input
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>
+						{initialData ? "Editar Receita" : "Nova Receita"}
+					</DialogTitle>
+				</DialogHeader>
+				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+					<div className="space-y-2">
+						<Label htmlFor="amount">Valor (R$)</Label>
+						<Input
 							{...register("amount", { valueAsNumber: true })}
 							type="number"
 							id="amount"
 							step="0.01"
 							min="0.01"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
 							placeholder="0,00"
 							disabled={isLoading}
 						/>
 						{errors.amount && (
-							<p className="mt-1 text-sm text-red-600">
+							<p className="text-sm text-destructive">
 								{errors.amount.message}
 							</p>
 						)}
 					</div>
 
-					<div>
-						<label htmlFor="description" className="block text-sm font-medium">
-							Descrição
-						</label>
-						<input
+					<div className="space-y-2">
+						<Label htmlFor="description">Descrição</Label>
+						<Input
 							{...register("description")}
 							type="text"
 							id="description"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
 							placeholder="Ex: Salário, Freelance, etc."
 							disabled={isLoading}
 						/>
 						{errors.description && (
-							<p className="mt-1 text-sm text-red-600">
+							<p className="text-sm text-destructive">
 								{errors.description.message}
 							</p>
 						)}
 					</div>
 
-					<div>
-						<label htmlFor="date" className="block text-sm font-medium">
-							Data
-						</label>
-						<input
+					<div className="space-y-2">
+						<Label htmlFor="date">Data</Label>
+						<Input
 							{...register("date")}
 							type="date"
 							id="date"
-							className="mt-1 block w-full rounded-md border px-3 py-2"
 							disabled={isLoading}
 						/>
 						{errors.date && (
-							<p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+							<p className="text-sm text-destructive">{errors.date.message}</p>
 						)}
 					</div>
 
-					<div className="flex justify-end gap-2">
-						<button
+					<DialogFooter>
+						<Button
 							type="button"
+							variant="outline"
 							onClick={onClose}
-							className="rounded-lg border px-4 py-2 hover:bg-gray-50"
 							disabled={isLoading}
 						>
 							Cancelar
-						</button>
-						<button
+						</Button>
+						<Button
 							type="submit"
-							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
 							disabled={isLoading}
 						>
 							{isLoading ? "Salvando..." : "Salvar"}
-						</button>
-					</div>
+						</Button>
+					</DialogFooter>
 				</form>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

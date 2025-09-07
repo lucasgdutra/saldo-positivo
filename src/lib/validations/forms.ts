@@ -90,17 +90,25 @@ export const CategoryFormSchema = CategoryInputSchema.omit({
 	user: true,
 	expenses: true,
 	userId: true,
+	createdAt: true,
+	updatedAt: true,
+	id: true,
 }).extend({
 	name: z.string().min(1, "Nome da categoria é obrigatório"),
+	color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve estar no formato hexadecimal"),
+	icon: z.string().min(1, "Ícone é obrigatório"),
 });
 
 export type CategoryFormData = z.infer<typeof CategoryFormSchema>;
 
 // Expense Form Schema
 export const ExpenseFormSchema = ExpenseInputSchema.omit({
+	id: true,
 	user: true,
 	userId: true,
 	category: true,
+	createdAt: true,
+	updatedAt: true
 }).extend({
 	amount: DecimalValidation.number("valor da despesa"),
 	description: z.string().optional(),
@@ -114,8 +122,11 @@ export type ExpenseFormData = z.infer<typeof ExpenseFormSchema>;
 
 // Revenue Form Schema
 export const RevenueFormSchema = RevenueInputSchema.omit({
+	id: true,
 	user: true,
 	userId: true,
+	createdAt: true,
+	updatedAt: true,
 }).extend({
 	amount: DecimalValidation.number("valor da receita"),
 	description: z.string().optional(),

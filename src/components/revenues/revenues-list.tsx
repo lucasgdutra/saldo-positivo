@@ -1,5 +1,6 @@
 "use client";
 
+import { Pencil, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,6 +25,9 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
 	const [revenues, setRevenues] = useState<Revenue[]>(initialRevenues);
+	const [startDate, setStartDate] = useState<string>("");
+	const [endDate, setEndDate] = useState<string>("");
+	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
 	const handleOpenDialog = (revenue?: Revenue) => {
@@ -107,6 +111,48 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
 		}
 	};
 
+	// Função para buscar receitas com filtros
+	const fetchFilteredRevenues = async () => {
+		try {
+			setIsLoading(true);
+
+			// Construir a URL com os parâmetros de filtro
+			let url = "/api/revenues";
+			const params = new URLSearchParams();
+
+			if (startDate) {
+				params.append("startDate", startDate);
+			}
+
+			if (endDate) {
+				params.append("endDate", endDate);
+			}
+
+			if (params.toString()) {
+				url += `?${params.toString()}`;
+			}
+
+			const response = await fetch(url);
+
+			if (!response.ok) throw new Error("Erro ao buscar receitas");
+
+			const data = await response.json();
+			setRevenues(data);
+		} catch (error) {
+			console.error("Erro ao buscar receitas filtradas:", error);
+			alert("Erro ao buscar receitas. Tente novamente.");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	// Função para limpar os filtros
+	const clearFilters = () => {
+		setStartDate("");
+		setEndDate("");
+		setRevenues(initialRevenues);
+	};
+
 	// Função para formatar a data (mantendo o dia UTC original)
 	const formatDate = (date: Date) => {
 		return new Date(date).toLocaleDateString("pt-BR", { timeZone: "UTC" });
@@ -129,6 +175,61 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
 					>
 						Nova Receita
 					</button>
+				</div>
+
+				{/* Filtros */}
+				<div className="rounded-lg border p-4 mb-4">
+					<h2 className="text-lg font-medium mb-3">Filtros</h2>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+						<div>
+							<label
+								htmlFor="startDate"
+								className="block text-sm font-medium mb-1"
+							>
+								Data Inicial
+							</label>
+							<input
+								type="date"
+								id="startDate"
+								value={startDate}
+								onChange={(e) => setStartDate(e.target.value)}
+								className="w-full rounded-md border px-3 py-2"
+							/>
+						</div>
+						<div>
+							<label
+								htmlFor="endDate"
+								className="block text-sm font-medium mb-1"
+							>
+								Data Final
+							</label>
+							<input
+								type="date"
+								id="endDate"
+								value={endDate}
+								onChange={(e) => setEndDate(e.target.value)}
+								className="w-full rounded-md border px-3 py-2"
+							/>
+						</div>
+					</div>
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={clearFilters}
+							className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+							disabled={isLoading}
+						>
+							Limpar
+						</button>
+						<button
+							type="button"
+							onClick={fetchFilteredRevenues}
+							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50"
+							disabled={isLoading}
+						>
+							{isLoading ? "Filtrando..." : "Filtrar"}
+						</button>
+					</div>
 				</div>
 
 				<div className="rounded-lg border">
@@ -161,17 +262,21 @@ export function RevenuesList({ initialRevenues }: RevenuesListProps) {
 										</div>
 										<div className="flex items-center gap-2">
 											<button
-												className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
+												className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-blue-600 transition-colors"
 												type="button"
 												onClick={() => handleOpenDialog(receita)}
+												aria-label={`Editar receita de ${formatCurrency(receita.amount)}`}
 											>
+												<Pencil className="h-4 w-4" />
 												Editar
 											</button>
 											<button
-												className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
+												className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
 												type="button"
 												onClick={() => handleDeleteRevenue(receita.id)}
+												aria-label={`Excluir receita de ${formatCurrency(receita.amount)}`}
 											>
+												<X className="h-4 w-4" />
 												Excluir
 											</button>
 										</div>

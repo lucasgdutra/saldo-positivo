@@ -45,11 +45,13 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json();
-		const { name } = CreateCategoryApiSchema.parse(body);
+		const { name, color, icon } = CreateCategoryApiSchema.parse(body);
 
 		// Usar o serviço para criar a categoria
 		const categoria = await categoryService.createCategory({
 			name,
+			color,
+			icon,
 			userId: session.user.id,
 		});
 
@@ -105,13 +107,13 @@ export async function PUT(req: NextRequest) {
 		}
 
 		const body = await req.json();
-		const { name } = CreateCategoryApiSchema.parse(body);
+		const { name, color, icon } = CreateCategoryApiSchema.parse(body);
 
 		// Usar o serviço para atualizar a categoria
 		const categoria = await categoryService.updateCategory(
 			id,
 			session.user.id,
-			{ name },
+			{ name, color, icon },
 		);
 
 		// O serviço lança erro se não encontrar ou não pertencer ao usuário

@@ -1,10 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CategoryDialog } from "./category-dialog";
+import { CategoryDialog } from "../categories/category-dialog";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Category {
 	id: string;
@@ -16,17 +19,28 @@ interface Category {
 	updatedAt: Date;
 }
 
-interface CategoriesListProps {
+interface CategoryManagementModalProps {
+	isOpen: boolean;
+	onClose: () => void;
 	initialCategories: Category[];
 }
 
-export function CategoriesList({ initialCategories }: CategoriesListProps) {
+export function CategoryManagementModal({
+	isOpen,
+	onClose,
+	initialCategories,
+}: CategoryManagementModalProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState<Category | null>(
 		null,
 	);
 	const [categorias, setCategorias] = useState<Category[]>(initialCategories);
 	const router = useRouter();
+
+	// Update categories when initial data changes
+	useEffect(() => {
+		setCategorias(initialCategories);
+	}, [initialCategories]);
 
 	const handleOpenDialog = (categoria?: Category) => {
 		setSelectedCategory(categoria || null);
@@ -41,7 +55,7 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 	const handleSaveCategory = async (data: { name: string; color: string; icon: string }) => {
 		try {
 			if (selectedCategory) {
-				// Editar categoria existente
+				// Edit existing category
 				const response = await fetch(
 					`/api/categorias?id=${selectedCategory.id}`,
 					{
@@ -62,7 +76,7 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 					),
 				);
 			} else {
-				// Criar nova categoria
+				// Create new category
 				const response = await fetch("/api/categorias", {
 					method: "POST",
 					headers: {
@@ -96,10 +110,9 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 
 				setCategorias((prev) => prev.filter((cat) => cat.id !== id));
 				router.refresh();
-				toast.success("Categoria excluída com sucesso!"); // Toast de sucesso para exclusão
+				toast.success("Categoria excluída com sucesso!");
 			} catch (error) {
 				console.error("Erro ao excluir categoria:", error);
-				// Substituir alert por toast.error
 				const errorMessage =
 					error instanceof Error ? error.message : "Erro desconhecido";
 				toast.error(`Erro ao excluir categoria: ${errorMessage}`);
@@ -109,72 +122,79 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 
 	return (
 		<>
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold">Categorias</h1>
-						<p className="text-muted-foreground">
-							Gerencie as categorias das suas despesas
-						</p>
-					</div>
-					<button
-						className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90"
-						type="button"
-						onClick={() => handleOpenDialog()}
-					>
-						Nova Categoria
-					</button>
-				</div>
+			<Dialog open={isOpen} onOpenChange={onClose}>
+				<DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+					<DialogHeader>
+						<div className="flex items-center justify-between">
+							<div>
+								<DialogTitle>Gerenciar Categorias</DialogTitle>
+								<CardDescription className="mt-2">
+									Gerencie as categorias das suas despesas
+								</CardDescription>
+							</div>
+							<Button
+								onClick={() => handleOpenDialog()}
+							>
+								Nova Categoria
+							</Button>
+						</div>
+					</DialogHeader>
 
-				<div className="rounded-lg border">
-					<div className="p-4">
-						<div className="grid gap-4">
+					<div className="flex-1 overflow-y-auto mt-4">
+						<div className="space-y-3">
 							{categorias.length === 0 ? (
-								<p className="text-center text-muted-foreground">
-									Nenhuma categoria cadastrada.
-								</p>
+								<div className="text-center py-8 text-muted-foreground">
+									<p>Nenhuma categoria cadastrada.</p>
+								</div>
 							) : (
 								categorias.map((categoria) => {
 									const IconComponent = getCategoryIcon(categoria.icon);
-
 									return (
-										<div
-											key={categoria.id}
-											className="flex items-center justify-between rounded-lg border p-4"
-										>
-											<div className="flex items-center gap-3">
-												<div
-													className="w-10 h-10 rounded-full flex items-center justify-center"
-													style={{ backgroundColor: categoria.color }}
-												>
-													<IconComponent className="w-5 h-5 text-white" />
+										<Card key={categoria.id}>
+											<CardContent className="p-4">
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-3">
+														<div
+															className="w-10 h-10 rounded-full flex items-center justify-center"
+															style={{ backgroundColor: categoria.color }}
+														>
+															<IconComponent className="w-5 h-5 text-white" />
+														</div>
+														<span className="font-medium">{categoria.name}</span>
+													</div>
+													<div className="flex items-center gap-2">
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => handleOpenDialog(categoria)}
+														>
+															Editar
+														</Button>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={() => handleDeleteCategory(categoria.id)}
+															className="text-destructive hover:text-destructive"
+														>
+															Excluir
+														</Button>
+													</div>
 												</div>
-												<span className="font-medium">{categoria.name}</span>
-											</div>
-											<div className="flex items-center gap-2">
-											<button
-												className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
-												type="button"
-												onClick={() => handleOpenDialog(categoria)}
-											>
-												Editar
-											</button>
-											<button
-												className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
-												type="button"
-												onClick={() => handleDeleteCategory(categoria.id)}
-											>
-												Excluir
-											</button>
-										</div>
-									</div>
-								);
-							})
+											</CardContent>
+										</Card>
+									);
+								})
 							)}
 						</div>
 					</div>
-				</div>
-			</div>
+
+					<div className="flex justify-end mt-6 pt-4 border-t">
+						<Button variant="outline" onClick={onClose}>
+							Fechar
+						</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 
 			<CategoryDialog
 				isOpen={isDialogOpen}

@@ -51,19 +51,37 @@ async function main() {
 	await prisma.balance.deleteMany({ where: { userId: user.id } });
 	console.log(`✅ Cleaned existing financial data`);
 
-	// 2. Create categories
-	const categoryNames = ["Alimentação", "Transporte", "Lazer"];
+	// 2. Create categories with colors and icons
+	const categoryData = [
+		{
+			name: "Alimentação",
+			color: "#10B981", // Green
+			icon: "utensils",
+		},
+		{
+			name: "Transporte",
+			color: "#3B82F6", // Blue
+			icon: "car",
+		},
+		{
+			name: "Lazer",
+			color: "#8B5CF6", // Purple
+			icon: "gamepad-2",
+		},
+	];
 	const categories: any[] = [];
 
-	for (const categoryName of categoryNames) {
+	for (const categoryInfo of categoryData) {
 		const category = await prisma.category.create({
 			data: {
-				name: categoryName,
+				name: categoryInfo.name,
+				color: categoryInfo.color,
+				icon: categoryInfo.icon,
 				userId: user.id,
 			},
 		});
 		categories.push(category);
-		console.log(`📂 Created category: ${categoryName}`);
+		console.log(`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`);
 	}
 
 	// 3. Helper functions

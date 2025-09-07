@@ -60,6 +60,8 @@ model PasswordResetToken {
 model Category {
   id        String    @id @default(uuid()) @db.Uuid
   name      String
+  color     String    @default("#3B82F6") // Default blue color
+  icon      String    @default("folder") // Default folder icon
   userId    String    @db.Uuid
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

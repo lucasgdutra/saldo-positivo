@@ -18,15 +18,17 @@ class CategoryService {
 
 	/**
 	 * Cria uma nova categoria para um usuário.
-	 * @param data - Dados da categoria (nome, userId).
+	 * @param data - Dados da categoria (nome, cor, ícone, userId).
 	 * @returns A categoria criada.
 	 * @throws Error se o nome estiver vazio ou se já existir uma categoria com o mesmo nome (case-insensitive).
 	 */
 	async createCategory(data: {
 		name: string;
+		color?: string;
+		icon?: string;
 		userId: string;
 	}): Promise<Category> {
-		const { name, userId } = data;
+		const { name, color, icon, userId } = data;
 		const trimmedName = name?.trim(); // Usa optional chaining e trim
 
 		if (!trimmedName) {
@@ -58,7 +60,12 @@ class CategoryService {
 			`CategoryService: Criando categoria '${trimmedName}' para usuário ${userId}.`,
 		);
 		// O repositório espera Prisma.CategoryUncheckedCreateInput
-		return this.categoryRepository.create({ name: trimmedName, userId });
+		return this.categoryRepository.create({ 
+			name: trimmedName, 
+			color: color || "#3B82F6", 
+			icon: icon || "folder", 
+			userId 
+		});
 	}
 
 	/**
@@ -85,19 +92,19 @@ class CategoryService {
 	}
 
 	/**
-	 * Atualiza o nome de uma categoria existente.
+	 * Atualiza uma categoria existente.
 	 * @param id - O ID da categoria a ser atualizada.
 	 * @param userId - O ID do usuário proprietário.
-	 * @param data - Novos dados (apenas nome).
+	 * @param data - Novos dados (nome, cor, ícone).
 	 * @returns A categoria atualizada.
 	 * @throws Error se o nome estiver vazio, se a categoria não for encontrada, ou se já existir outra categoria com o novo nome (case-insensitive).
 	 */
 	async updateCategory(
 		id: string,
 		userId: string,
-		data: { name: string },
+		data: { name: string; color?: string; icon?: string },
 	): Promise<Category> {
-		const { name } = data;
+		const { name, color, icon } = data;
 		const trimmedName = name?.trim();
 
 		if (!trimmedName) {
@@ -141,7 +148,11 @@ class CategoryService {
 			`CategoryService: Atualizando categoria ID ${id} para usuário ${userId} com nome '${trimmedName}'.`,
 		);
 		// O repositório espera Prisma.CategoryUpdateInput
-		return this.categoryRepository.update(id, userId, { name: trimmedName });
+		const updateData: any = { name: trimmedName };
+		if (color !== undefined) updateData.color = color;
+		if (icon !== undefined) updateData.icon = icon;
+		
+		return this.categoryRepository.update(id, userId, updateData);
 	}
 
 	/**

@@ -4,6 +4,7 @@ onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - '@vercel/speed-insights'
   - bcrypt
+  - core-js
   - esbuild
   - prisma
   - sharp

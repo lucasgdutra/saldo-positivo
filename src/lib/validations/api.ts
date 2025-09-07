@@ -59,8 +59,13 @@ export const CreateCategoryApiSchema = CategoryInputSchema.omit({
 	user: true,
 	expenses: true,
 	userId: true,
+	createdAt: true,
+	updatedAt: true,
+	id: true,
 }).extend({
 	name: z.string().min(1, "Category name is required"),
+	color: z.string().regex(/^#[0-9A-F]{6}$/i, "Color must be in hexadecimal format"),
+	icon: z.string().min(1, "Icon is required"),
 });
 
 export const UpdateCategoryApiSchema = CreateCategoryApiSchema.partial();

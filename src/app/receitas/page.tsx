@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { AppLayout } from "@/components/layout/app-layout";
-import { RevenuesList } from "@/components/revenues/revenues-list";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ReceitasPageClient } from "./client";
 
 export default async function ReceitasPage() {
 	const session = await getServerSession(authOptions);
@@ -38,7 +38,7 @@ export default async function ReceitasPage() {
 	return (
 		<AuthGuard requireAuth>
 			<AppLayout>
-				<RevenuesList initialRevenues={formattedReceitas} />
+				<ReceitasPageClient initialData={formattedReceitas} />
 			</AppLayout>
 		</AuthGuard>
 	);

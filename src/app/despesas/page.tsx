@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { AuthGuard } from "@/components/auth/auth-guard";
-import { ExpensesList } from "@/components/expenses/expenses-list";
 import { AppLayout } from "@/components/layout/app-layout";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { DespesasPageClient } from "./client";
 
 export default async function DespesasPage() {
 	const session = await getServerSession(authOptions);
@@ -20,6 +20,12 @@ export default async function DespesasPage() {
 		include: {
 			category: true,
 		},
+	});
+
+	// Buscar categorias do usuário
+	const categories = await db.category.findMany({
+		where: { userId: session.user.id },
+		orderBy: { name: "asc" },
 	});
 
 	// Converter os valores Decimal para números
@@ -55,7 +61,10 @@ export default async function DespesasPage() {
 	return (
 		<AuthGuard requireAuth>
 			<AppLayout>
-				<ExpensesList initialExpenses={formattedDespesas} />
+				<DespesasPageClient
+					initialData={formattedDespesas}
+					categories={categories}
+				/>
 			</AppLayout>
 		</AuthGuard>
 	);
