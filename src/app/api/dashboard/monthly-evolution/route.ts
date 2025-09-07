@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 					lte: monthEnd,
 				},
 			};
-			
+
 			if (categoryId) {
 				expenseWhere.categoryId = categoryId;
 			}

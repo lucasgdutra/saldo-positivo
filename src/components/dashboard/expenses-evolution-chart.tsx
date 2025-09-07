@@ -24,7 +24,9 @@ interface ExpensesEvolutionChartProps {
 	selectedCategoryId?: string;
 }
 
-export function ExpensesEvolutionChart({ selectedCategoryId }: ExpensesEvolutionChartProps) {
+export function ExpensesEvolutionChart({
+	selectedCategoryId,
+}: ExpensesEvolutionChartProps) {
 	const [data, setData] = useState<MonthlyEvolutionData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,9 @@ export function ExpensesEvolutionChart({ selectedCategoryId }: ExpensesEvolution
 				params.append("categoryId", selectedCategoryId);
 			}
 
-			const response = await fetch(`/api/dashboard/monthly-evolution?${params.toString()}`);
+			const response = await fetch(
+				`/api/dashboard/monthly-evolution?${params.toString()}`,
+			);
 
 			if (!response.ok) {
 				throw new Error("Falha ao buscar dados de evolução de despesas");

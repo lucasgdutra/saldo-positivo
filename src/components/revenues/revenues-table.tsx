@@ -30,7 +30,10 @@ interface RevenuesTableProps {
 type SortField = "amount" | "date" | "description";
 type SortDirection = "asc" | "desc";
 
-export function RevenuesTable({ initialRevenues, globalFilters = {} }: RevenuesTableProps) {
+export function RevenuesTable({
+	initialRevenues,
+	globalFilters = {},
+}: RevenuesTableProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
 	const [revenues, setRevenues] = useState<Revenue[]>(
@@ -64,11 +67,16 @@ export function RevenuesTable({ initialRevenues, globalFilters = {} }: RevenuesT
 			}
 
 			// Filter by month/year
-			if (filters.selectedMonth !== undefined && filters.selectedYear !== undefined) {
+			if (
+				filters.selectedMonth !== undefined &&
+				filters.selectedYear !== undefined
+			) {
 				filtered = filtered.filter((revenue) => {
 					const revenueDate = new Date(revenue.date);
-					return revenueDate.getMonth() === filters.selectedMonth! &&
-						revenueDate.getFullYear() === filters.selectedYear!;
+					return (
+						revenueDate.getMonth() === filters.selectedMonth! &&
+						revenueDate.getFullYear() === filters.selectedYear!
+					);
 				});
 			}
 

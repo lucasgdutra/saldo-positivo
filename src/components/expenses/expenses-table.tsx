@@ -4,10 +4,10 @@ import { ChevronDown, ChevronUp, Pencil, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { getCategoryIcon } from "@/lib/category-icons";
 import { formatCurrency } from "@/lib/utils";
 import { CategoryManagementModal } from "./category-management-modal";
 import { ExpenseDialog } from "./expense-dialog";
-import { getCategoryIcon } from "@/lib/category-icons";
 
 interface Category {
 	id: string;
@@ -118,11 +118,16 @@ export function ExpensesTable({
 			}
 
 			// Filter by month/year
-			if (filters.selectedMonth !== undefined && filters.selectedYear !== undefined) {
+			if (
+				filters.selectedMonth !== undefined &&
+				filters.selectedYear !== undefined
+			) {
 				filtered = filtered.filter((expense) => {
 					const expenseDate = new Date(expense.date);
-					return expenseDate.getMonth() === filters.selectedMonth!  && 
-						   expenseDate.getFullYear() === filters.selectedYear!;
+					return (
+						expenseDate.getMonth() === filters.selectedMonth! &&
+						expenseDate.getFullYear() === filters.selectedYear!
+					);
 				});
 			}
 
@@ -308,7 +313,6 @@ export function ExpensesTable({
 		return new Date(date).toLocaleDateString("pt-BR", { timeZone: "UTC" });
 	};
 
-
 	return (
 		<>
 			<div className="space-y-6">
@@ -450,8 +454,12 @@ export function ExpensesTable({
 														style={{ backgroundColor: expense.category.color }}
 													>
 														{(() => {
-															const IconComponent = getCategoryIcon(expense.category.icon);
-															return <IconComponent className="w-3 h-3 text-white" />;
+															const IconComponent = getCategoryIcon(
+																expense.category.icon,
+															);
+															return (
+																<IconComponent className="w-3 h-3 text-white" />
+															);
 														})()}
 													</div>
 													<span className="text-sm text-gray-900">

@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CategoryDialog } from "./category-dialog";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { CategoryDialog } from "./category-dialog";
 
 interface Category {
 	id: string;
@@ -38,7 +38,11 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 		setIsDialogOpen(false);
 	};
 
-	const handleSaveCategory = async (data: { name: string; color: string; icon: string }) => {
+	const handleSaveCategory = async (data: {
+		name: string;
+		color: string;
+		icon: string;
+	}) => {
 		try {
 			if (selectedCategory) {
 				// Editar categoria existente
@@ -152,24 +156,24 @@ export function CategoriesList({ initialCategories }: CategoriesListProps) {
 												<span className="font-medium">{categoria.name}</span>
 											</div>
 											<div className="flex items-center gap-2">
-											<button
-												className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
-												type="button"
-												onClick={() => handleOpenDialog(categoria)}
-											>
-												Editar
-											</button>
-											<button
-												className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
-												type="button"
-												onClick={() => handleDeleteCategory(categoria.id)}
-											>
-												Excluir
-											</button>
+												<button
+													className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:bg-secondary"
+													type="button"
+													onClick={() => handleOpenDialog(categoria)}
+												>
+													Editar
+												</button>
+												<button
+													className="rounded-lg px-2 py-1 text-sm text-red-600 hover:bg-red-50"
+													type="button"
+													onClick={() => handleDeleteCategory(categoria.id)}
+												>
+													Excluir
+												</button>
+											</div>
 										</div>
-									</div>
-								);
-							})
+									);
+								})
 							)}
 						</div>
 					</div>

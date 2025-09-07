@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check } from "lucide-react";
+import { useState } from "react";
 
 const PREDEFINED_COLORS = [
 	"#3B82F6", // Blue

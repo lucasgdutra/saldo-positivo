@@ -1,12 +1,20 @@
-import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
-import { CategoryWhereUniqueInputObjectSchema } from './CategoryWhereUniqueInput.schema';
-import { CategoryCreateWithoutUserInputObjectSchema } from './CategoryCreateWithoutUserInput.schema';
-import { CategoryUncheckedCreateWithoutUserInputObjectSchema } from './CategoryUncheckedCreateWithoutUserInput.schema'
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { CategoryCreateWithoutUserInputObjectSchema } from "./CategoryCreateWithoutUserInput.schema";
+import { CategoryUncheckedCreateWithoutUserInputObjectSchema } from "./CategoryUncheckedCreateWithoutUserInput.schema";
+import { CategoryWhereUniqueInputObjectSchema } from "./CategoryWhereUniqueInput.schema";
 
-const makeSchema = (): z.ZodObject<any> => z.object({
-  where: z.lazy(() => CategoryWhereUniqueInputObjectSchema),
-  create: z.union([z.lazy(() => CategoryCreateWithoutUserInputObjectSchema), z.lazy(() => CategoryUncheckedCreateWithoutUserInputObjectSchema)])
-}).strict();
-export const CategoryCreateOrConnectWithoutUserInputObjectSchema: z.ZodType<Prisma.CategoryCreateOrConnectWithoutUserInput> = makeSchema() as unknown as z.ZodType<Prisma.CategoryCreateOrConnectWithoutUserInput>;
-export const CategoryCreateOrConnectWithoutUserInputObjectZodSchema = makeSchema();
+const makeSchema = (): z.ZodObject<any> =>
+	z
+		.object({
+			where: z.lazy(() => CategoryWhereUniqueInputObjectSchema),
+			create: z.union([
+				z.lazy(() => CategoryCreateWithoutUserInputObjectSchema),
+				z.lazy(() => CategoryUncheckedCreateWithoutUserInputObjectSchema),
+			]),
+		})
+		.strict();
+export const CategoryCreateOrConnectWithoutUserInputObjectSchema: z.ZodType<Prisma.CategoryCreateOrConnectWithoutUserInput> =
+	makeSchema() as unknown as z.ZodType<Prisma.CategoryCreateOrConnectWithoutUserInput>;
+export const CategoryCreateOrConnectWithoutUserInputObjectZodSchema =
+	makeSchema();

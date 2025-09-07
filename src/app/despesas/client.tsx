@@ -46,12 +46,10 @@ export function DespesasPageClient({
 							maxDate={maxDate}
 						/>
 					</div>
-					
+
 					{/* Filtro de categoria */}
 					<div>
-						<label className="block text-sm font-medium mb-1">
-							Categoria
-						</label>
+						<label className="block text-sm font-medium mb-1">Categoria</label>
 						<select
 							value={selectedCategoryId}
 							onChange={(e) => setSelectedCategoryId(e.target.value)}
@@ -98,7 +96,7 @@ export function DespesasPageClient({
 				globalFilters={{
 					selectedMonth,
 					selectedYear,
-					selectedCategoryId
+					selectedCategoryId,
 				}}
 			/>
 		</div>

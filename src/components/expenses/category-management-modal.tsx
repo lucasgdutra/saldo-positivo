@@ -3,11 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CategoryDialog } from "../categories/category-dialog";
-import { getCategoryIcon } from "@/lib/category-icons";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { getCategoryIcon } from "@/lib/category-icons";
+import { CategoryDialog } from "../categories/category-dialog";
 
 interface Category {
 	id: string;
@@ -52,7 +57,11 @@ export function CategoryManagementModal({
 		setIsDialogOpen(false);
 	};
 
-	const handleSaveCategory = async (data: { name: string; color: string; icon: string }) => {
+	const handleSaveCategory = async (data: {
+		name: string;
+		color: string;
+		icon: string;
+	}) => {
 		try {
 			if (selectedCategory) {
 				// Edit existing category
@@ -132,11 +141,7 @@ export function CategoryManagementModal({
 									Gerencie as categorias das suas despesas
 								</CardDescription>
 							</div>
-							<Button
-								onClick={() => handleOpenDialog()}
-							>
-								Nova Categoria
-							</Button>
+							<Button onClick={() => handleOpenDialog()}>Nova Categoria</Button>
 						</div>
 					</DialogHeader>
 
@@ -160,7 +165,9 @@ export function CategoryManagementModal({
 														>
 															<IconComponent className="w-5 h-5 text-white" />
 														</div>
-														<span className="font-medium">{categoria.name}</span>
+														<span className="font-medium">
+															{categoria.name}
+														</span>
 													</div>
 													<div className="flex items-center gap-2">
 														<Button

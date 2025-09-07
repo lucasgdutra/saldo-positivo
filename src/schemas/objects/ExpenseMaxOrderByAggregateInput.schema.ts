@@ -1,16 +1,20 @@
-import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
-import { SortOrderSchema } from '../enums/SortOrder.schema'
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { SortOrderSchema } from "../enums/SortOrder.schema";
 
-const makeSchema = (): z.ZodObject<any> => z.object({
-  id: SortOrderSchema.optional(),
-  amount: SortOrderSchema.optional(),
-  description: SortOrderSchema.optional(),
-  date: SortOrderSchema.optional(),
-  createdAt: SortOrderSchema.optional(),
-  updatedAt: SortOrderSchema.optional(),
-  userId: SortOrderSchema.optional(),
-  categoryId: SortOrderSchema.optional()
-}).strict();
-export const ExpenseMaxOrderByAggregateInputObjectSchema: z.ZodType<Prisma.ExpenseMaxOrderByAggregateInput> = makeSchema() as unknown as z.ZodType<Prisma.ExpenseMaxOrderByAggregateInput>;
+const makeSchema = (): z.ZodObject<any> =>
+	z
+		.object({
+			id: SortOrderSchema.optional(),
+			amount: SortOrderSchema.optional(),
+			description: SortOrderSchema.optional(),
+			date: SortOrderSchema.optional(),
+			createdAt: SortOrderSchema.optional(),
+			updatedAt: SortOrderSchema.optional(),
+			userId: SortOrderSchema.optional(),
+			categoryId: SortOrderSchema.optional(),
+		})
+		.strict();
+export const ExpenseMaxOrderByAggregateInputObjectSchema: z.ZodType<Prisma.ExpenseMaxOrderByAggregateInput> =
+	makeSchema() as unknown as z.ZodType<Prisma.ExpenseMaxOrderByAggregateInput>;
 export const ExpenseMaxOrderByAggregateInputObjectZodSchema = makeSchema();

@@ -60,7 +60,7 @@ export function ReceitasPageClient({ initialData }: { initialData: any[] }) {
 				initialRevenues={initialData}
 				globalFilters={{
 					selectedMonth,
-					selectedYear
+					selectedYear,
 				}}
 			/>
 		</div>

@@ -1,28 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import {
-	Folder,
-	ShoppingCart,
-	Home,
+	Banknote,
+	Briefcase,
 	Car,
-	Utensils,
+	Coffee,
+	CreditCard,
+	Folder,
+	Fuel,
 	Gamepad2,
+	Gift,
 	GraduationCap,
 	Heart,
+	Home,
+	Phone,
+	PiggyBank,
 	Plane,
 	Shirt,
-	Gift,
-	Coffee,
-	Fuel,
-	Phone,
-	Zap,
-	Briefcase,
-	CreditCard,
+	ShoppingCart,
 	TrendingUp,
-	Banknote,
-	PiggyBank,
+	Utensils,
+	Zap,
 } from "lucide-react";
+import { useState } from "react";
 
 const PREDEFINED_ICONS = [
 	{ name: "folder", icon: Folder, label: "Pasta" },
@@ -61,7 +61,9 @@ export function IconPicker({ value, onChange, disabled }: IconPickerProps) {
 
 	return (
 		<div className="relative">
-			<label className="block text-sm font-medium mb-2">Ícone da Categoria</label>
+			<label className="block text-sm font-medium mb-2">
+				Ícone da Categoria
+			</label>
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}

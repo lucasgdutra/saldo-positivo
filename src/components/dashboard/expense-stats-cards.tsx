@@ -37,8 +37,7 @@ export function ExpenseStatsCards({
 					params.append("year", selectedYear.toString());
 				if (selectedMonth !== undefined)
 					params.append("month", selectedMonth.toString());
-				if (selectedCategoryId)
-					params.append("categoryId", selectedCategoryId);
+				if (selectedCategoryId) params.append("categoryId", selectedCategoryId);
 
 				const response = await fetch(
 					`/api/dashboard/expense-stats?${params.toString()}`,

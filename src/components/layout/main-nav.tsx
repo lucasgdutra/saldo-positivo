@@ -43,7 +43,11 @@ export function MainNav() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 	return (
-		<nav className="flex items-center w-full px-4 lg:px-0" role="navigation" aria-label="Navegação principal">
+		<nav
+			className="flex items-center w-full px-4 lg:px-0"
+			role="navigation"
+			aria-label="Navegação principal"
+		>
 			{/* Logo - Always at start */}
 			<div className="flex items-center space-x-2 flex-shrink-0">
 				<Link href="/dashboard" className="flex items-center space-x-2 group">
@@ -78,7 +82,7 @@ export function MainNav() {
 						>
 							{route.label}
 							{pathname === route.href && (
-								<span 
+								<span
 									className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full"
 									aria-hidden="true"
 								/>
@@ -98,8 +102,8 @@ export function MainNav() {
 				<UserMenu />
 				<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
 					<SheetTrigger asChild>
-						<Button 
-							variant="outline" 
+						<Button
+							variant="outline"
 							size="icon"
 							aria-label="Abrir menu de navegação"
 							aria-expanded={isMobileMenuOpen}
@@ -112,10 +116,10 @@ export function MainNav() {
 						<SheetTitle>
 							<VisuallyHidden>Menu de Navegação</VisuallyHidden>
 						</SheetTitle>
-						<nav 
+						<nav
 							id="mobile-menu"
-							className="flex flex-col space-y-2 mt-6" 
-							role="navigation" 
+							className="flex flex-col space-y-2 mt-6"
+							role="navigation"
 							aria-label="Menu móvel"
 						>
 							{routes.map((route) => (

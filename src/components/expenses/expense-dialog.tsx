@@ -4,11 +4,17 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type ExpenseFormData, ExpenseFormSchema } from "@/lib/validations";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { type ExpenseFormData, ExpenseFormSchema } from "@/lib/validations";
 
 interface Category {
 	id: string;
@@ -143,7 +149,11 @@ export function ExpenseDialog({
 						{initialData ? "Editar Despesa" : "Nova Despesa"}
 					</DialogTitle>
 				</DialogHeader>
-				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+				<form
+					onSubmit={handleSubmit(onSubmit)}
+					className="space-y-4"
+					noValidate
+				>
 					<fieldset disabled={isLoading} className="space-y-4">
 						<legend className="sr-only">Dados da despesa</legend>
 
@@ -156,7 +166,9 @@ export function ExpenseDialog({
 								step="0.01"
 								min="0.01"
 								required
-								aria-describedby={errors.amount ? "amount-error" : "amount-help"}
+								aria-describedby={
+									errors.amount ? "amount-error" : "amount-help"
+								}
 								aria-invalid={errors.amount ? "true" : "false"}
 								placeholder="0,00"
 								disabled={isLoading}
@@ -165,7 +177,11 @@ export function ExpenseDialog({
 								Digite o valor em reais (ex: 29,90)
 							</p>
 							{errors.amount && (
-								<p id="amount-error" role="alert" className="text-sm text-destructive">
+								<p
+									id="amount-error"
+									role="alert"
+									className="text-sm text-destructive"
+								>
 									<span className="sr-only">Erro:</span> {errors.amount.message}
 								</p>
 							)}
@@ -178,17 +194,27 @@ export function ExpenseDialog({
 								type="text"
 								id="description"
 								maxLength={100}
-								aria-describedby={errors.description ? "description-error" : "description-help"}
+								aria-describedby={
+									errors.description ? "description-error" : "description-help"
+								}
 								aria-invalid={errors.description ? "true" : "false"}
 								placeholder="Ex: Aluguel, Mercado, etc."
 								disabled={isLoading}
 							/>
-							<p id="description-help" className="text-xs text-muted-foreground">
+							<p
+								id="description-help"
+								className="text-xs text-muted-foreground"
+							>
 								Descreva brevemente a despesa (opcional)
 							</p>
 							{errors.description && (
-								<p id="description-error" role="alert" className="text-sm text-destructive">
-									<span className="sr-only">Erro:</span> {errors.description.message}
+								<p
+									id="description-error"
+									role="alert"
+									className="text-sm text-destructive"
+								>
+									<span className="sr-only">Erro:</span>{" "}
+									{errors.description.message}
 								</p>
 							)}
 						</div>
@@ -199,7 +225,9 @@ export function ExpenseDialog({
 								{...register("categoryId")}
 								id="categoryId"
 								required
-								aria-describedby={errors.categoryId ? "category-error" : "category-help"}
+								aria-describedby={
+									errors.categoryId ? "category-error" : "category-help"
+								}
 								aria-invalid={errors.categoryId ? "true" : "false"}
 								className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 								disabled={isLoading}
@@ -215,8 +243,13 @@ export function ExpenseDialog({
 								Escolha a categoria que melhor classifica esta despesa
 							</p>
 							{errors.categoryId && (
-								<p id="category-error" role="alert" className="text-sm text-destructive">
-									<span className="sr-only">Erro:</span> {errors.categoryId.message}
+								<p
+									id="category-error"
+									role="alert"
+									className="text-sm text-destructive"
+								>
+									<span className="sr-only">Erro:</span>{" "}
+									{errors.categoryId.message}
 								</p>
 							)}
 						</div>
@@ -236,7 +269,11 @@ export function ExpenseDialog({
 								Data em que a despesa foi realizada
 							</p>
 							{errors.date && (
-								<p id="date-error" role="alert" className="text-sm text-destructive">
+								<p
+									id="date-error"
+									role="alert"
+									className="text-sm text-destructive"
+								>
 									<span className="sr-only">Erro:</span> {errors.date.message}
 								</p>
 							)}
@@ -252,11 +289,8 @@ export function ExpenseDialog({
 						>
 							Cancelar
 						</Button>
-						<Button
-							type="submit"
-							disabled={isLoading}
-						>
-							{isLoading ? "Salvando..." : (initialData ? "Atualizar" : "Salvar")}
+						<Button type="submit" disabled={isLoading}>
+							{isLoading ? "Salvando..." : initialData ? "Atualizar" : "Salvar"}
 						</Button>
 					</DialogFooter>
 				</form>

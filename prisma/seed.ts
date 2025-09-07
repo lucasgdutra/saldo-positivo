@@ -151,7 +151,9 @@ async function main() {
 					userId: user.id,
 				},
 			});
-			console.log(`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`);
+			console.log(
+				`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`,
+			);
 		} else {
 			// Update existing category with color and icon if they don't have them
 			if (!category.color || !category.icon) {
@@ -162,7 +164,9 @@ async function main() {
 						icon: categoryInfo.icon,
 					},
 				});
-				console.log(`📂 Updated existing category: ${categoryInfo.name} with color and icon`);
+				console.log(
+					`📂 Updated existing category: ${categoryInfo.name} with color and icon`,
+				);
 			} else {
 				console.log(`📂 Found existing category: ${categoryInfo.name}`);
 			}

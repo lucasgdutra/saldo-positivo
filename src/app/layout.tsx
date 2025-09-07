@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
 	width: "device-width, initial-scale=1",
-}
+};
 
 export default function RootLayout({
 	children,
@@ -51,9 +51,7 @@ export default function RootLayout({
 							>
 								Pular para o conteúdo principal
 							</a>
-							<main id="main-content">
-								{children}
-							</main>
+							<main id="main-content">{children}</main>
 						</div>
 						<Toaster position="top-right" expand={true} richColors />
 					</AuthProvider>

@@ -106,7 +106,9 @@ async function main() {
 		});
 		categories.push(category);
 	}
-	console.log(`📂 Created ${categories.length} categories with colors and icons`);
+	console.log(
+		`📂 Created ${categories.length} categories with colors and icons`,
+	);
 
 	// 3. Helper functions
 	function randomBetween(min: number, max: number): number {

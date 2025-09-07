@@ -81,7 +81,9 @@ async function main() {
 			},
 		});
 		categories.push(category);
-		console.log(`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`);
+		console.log(
+			`📂 Created category: ${categoryInfo.name} (${categoryInfo.color}, ${categoryInfo.icon})`,
+		);
 	}
 
 	// 3. Helper functions

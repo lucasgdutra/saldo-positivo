@@ -95,7 +95,9 @@ export const CategoryFormSchema = CategoryInputSchema.omit({
 	id: true,
 }).extend({
 	name: z.string().min(1, "Nome da categoria é obrigatório"),
-	color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve estar no formato hexadecimal"),
+	color: z
+		.string()
+		.regex(/^#[0-9A-F]{6}$/i, "Cor deve estar no formato hexadecimal"),
 	icon: z.string().min(1, "Ícone é obrigatório"),
 });
 
@@ -108,7 +110,7 @@ export const ExpenseFormSchema = ExpenseInputSchema.omit({
 	userId: true,
 	category: true,
 	createdAt: true,
-	updatedAt: true
+	updatedAt: true,
 }).extend({
 	amount: DecimalValidation.number("valor da despesa"),
 	description: z.string().optional(),

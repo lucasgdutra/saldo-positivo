@@ -60,11 +60,11 @@ class CategoryService {
 			`CategoryService: Criando categoria '${trimmedName}' para usuário ${userId}.`,
 		);
 		// O repositório espera Prisma.CategoryUncheckedCreateInput
-		return this.categoryRepository.create({ 
-			name: trimmedName, 
-			color: color || "#3B82F6", 
-			icon: icon || "folder", 
-			userId 
+		return this.categoryRepository.create({
+			name: trimmedName,
+			color: color || "#3B82F6",
+			icon: icon || "folder",
+			userId,
 		});
 	}
 
@@ -151,7 +151,7 @@ class CategoryService {
 		const updateData: any = { name: trimmedName };
 		if (color !== undefined) updateData.color = color;
 		if (icon !== undefined) updateData.icon = icon;
-		
+
 		return this.categoryRepository.update(id, userId, updateData);
 	}
 

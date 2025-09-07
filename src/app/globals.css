@@ -261,8 +261,12 @@ input::-ms-reveal {
 
 /* Loading states - system status visibility */
 @keyframes shimmer {
-	0% { background-position: -200px 0; }
-	100% { background-position: calc(200px + 100%) 0; }
+	0% {
+		background-position: -200px 0;
+	}
+	100% {
+		background-position: calc(200px + 100%) 0;
+	}
 }
 
 .skeleton {
@@ -289,7 +293,7 @@ input::-ms-reveal {
 		--border: hsl(0 0% 0%);
 		--ring: hsl(0 0% 0%);
 	}
-	
+
 	.dark {
 		--border: hsl(0 0% 100%);
 		--ring: hsl(0 0% 100%);

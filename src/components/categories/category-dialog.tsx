@@ -4,14 +4,20 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type CategoryFormData, CategoryFormSchema } from "@/lib/validations";
+import { Button } from "@/components/ui/button";
 import { ColorPicker } from "@/components/ui/color-picker";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { IconPicker } from "@/components/ui/icon-picker";
-import { getCategoryIcon } from "@/lib/category-icons";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { getCategoryIcon } from "@/lib/category-icons";
+import { type CategoryFormData, CategoryFormSchema } from "@/lib/validations";
 
 interface CategoryDialogProps {
 	isOpen: boolean;
@@ -97,8 +103,6 @@ export function CategoryDialog({
 	console.log(errors);
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-
-
 			<DialogContent className="sm:max-w-md z-[60]" style={{ zIndex: 60 }}>
 				<DialogHeader>
 					<DialogTitle>
@@ -151,7 +155,9 @@ export function CategoryDialog({
 								disabled={isLoading}
 							/>
 							{errors.color && (
-								<p className="text-sm text-destructive">{errors.color.message}</p>
+								<p className="text-sm text-destructive">
+									{errors.color.message}
+								</p>
 							)}
 						</div>
 
@@ -163,7 +169,9 @@ export function CategoryDialog({
 								disabled={isLoading}
 							/>
 							{errors.icon && (
-								<p className="text-sm text-destructive">{errors.icon.message}</p>
+								<p className="text-sm text-destructive">
+									{errors.icon.message}
+								</p>
 							)}
 						</div>
 					</div>
@@ -176,16 +184,12 @@ export function CategoryDialog({
 						>
 							Cancelar
 						</Button>
-						<Button
-							type="submit"
-							disabled={isLoading}
-						>
+						<Button type="submit" disabled={isLoading}>
 							{isLoading ? "Salvando..." : "Salvar"}
 						</Button>
 					</DialogFooter>
 				</form>
 			</DialogContent>
-
 		</Dialog>
 	);
 }

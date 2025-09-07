@@ -1,36 +1,82 @@
-import { Prisma } from '@prisma/client';
-import { z } from 'zod';
-import { RevenueIncludeObjectSchema } from './objects/RevenueInclude.schema';
-import { RevenueOrderByWithRelationInputObjectSchema } from './objects/RevenueOrderByWithRelationInput.schema';
-import { RevenueWhereInputObjectSchema } from './objects/RevenueWhereInput.schema';
-import { RevenueWhereUniqueInputObjectSchema } from './objects/RevenueWhereUniqueInput.schema';
-import { RevenueScalarFieldEnumSchema } from './enums/RevenueScalarFieldEnum.schema';
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { RevenueScalarFieldEnumSchema } from "./enums/RevenueScalarFieldEnum.schema";
+import { RevenueIncludeObjectSchema } from "./objects/RevenueInclude.schema";
+import { RevenueOrderByWithRelationInputObjectSchema } from "./objects/RevenueOrderByWithRelationInput.schema";
+import { RevenueWhereInputObjectSchema } from "./objects/RevenueWhereInput.schema";
+import { RevenueWhereUniqueInputObjectSchema } from "./objects/RevenueWhereUniqueInput.schema";
 
 // Select schema needs to be in file to prevent circular imports
 //------------------------------------------------------
 
-export const RevenueFindFirstSelectSchema: z.ZodType<Prisma.RevenueSelect> = z.object({
-    id: z.boolean().optional(),
-    amount: z.boolean().optional(),
-    description: z.boolean().optional(),
-    date: z.boolean().optional(),
-    createdAt: z.boolean().optional(),
-    updatedAt: z.boolean().optional(),
-    userId: z.boolean().optional(),
-    user: z.boolean().optional()
-  }).strict() as unknown as z.ZodType<Prisma.RevenueSelect>;
+export const RevenueFindFirstSelectSchema: z.ZodType<Prisma.RevenueSelect> = z
+	.object({
+		id: z.boolean().optional(),
+		amount: z.boolean().optional(),
+		description: z.boolean().optional(),
+		date: z.boolean().optional(),
+		createdAt: z.boolean().optional(),
+		updatedAt: z.boolean().optional(),
+		userId: z.boolean().optional(),
+		user: z.boolean().optional(),
+	})
+	.strict() as unknown as z.ZodType<Prisma.RevenueSelect>;
 
-export const RevenueFindFirstSelectZodSchema = z.object({
-    id: z.boolean().optional(),
-    amount: z.boolean().optional(),
-    description: z.boolean().optional(),
-    date: z.boolean().optional(),
-    createdAt: z.boolean().optional(),
-    updatedAt: z.boolean().optional(),
-    userId: z.boolean().optional(),
-    user: z.boolean().optional()
-  }).strict();
+export const RevenueFindFirstSelectZodSchema = z
+	.object({
+		id: z.boolean().optional(),
+		amount: z.boolean().optional(),
+		description: z.boolean().optional(),
+		date: z.boolean().optional(),
+		createdAt: z.boolean().optional(),
+		updatedAt: z.boolean().optional(),
+		userId: z.boolean().optional(),
+		user: z.boolean().optional(),
+	})
+	.strict();
 
-export const RevenueFindFirstSchema: z.ZodType<Prisma.RevenueFindFirstArgs> = z.object({ select: RevenueFindFirstSelectSchema.optional(), include: z.lazy(() => RevenueIncludeObjectSchema.optional()), orderBy: z.union([RevenueOrderByWithRelationInputObjectSchema, RevenueOrderByWithRelationInputObjectSchema.array()]).optional(), where: RevenueWhereInputObjectSchema.optional(), cursor: RevenueWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), distinct: z.union([RevenueScalarFieldEnumSchema, RevenueScalarFieldEnumSchema.array()]).optional() }).strict() as unknown as z.ZodType<Prisma.RevenueFindFirstArgs>;
+export const RevenueFindFirstSchema: z.ZodType<Prisma.RevenueFindFirstArgs> = z
+	.object({
+		select: RevenueFindFirstSelectSchema.optional(),
+		include: z.lazy(() => RevenueIncludeObjectSchema.optional()),
+		orderBy: z
+			.union([
+				RevenueOrderByWithRelationInputObjectSchema,
+				RevenueOrderByWithRelationInputObjectSchema.array(),
+			])
+			.optional(),
+		where: RevenueWhereInputObjectSchema.optional(),
+		cursor: RevenueWhereUniqueInputObjectSchema.optional(),
+		take: z.number().optional(),
+		skip: z.number().optional(),
+		distinct: z
+			.union([
+				RevenueScalarFieldEnumSchema,
+				RevenueScalarFieldEnumSchema.array(),
+			])
+			.optional(),
+	})
+	.strict() as unknown as z.ZodType<Prisma.RevenueFindFirstArgs>;
 
-export const RevenueFindFirstZodSchema = z.object({ select: RevenueFindFirstSelectSchema.optional(), include: z.lazy(() => RevenueIncludeObjectSchema.optional()), orderBy: z.union([RevenueOrderByWithRelationInputObjectSchema, RevenueOrderByWithRelationInputObjectSchema.array()]).optional(), where: RevenueWhereInputObjectSchema.optional(), cursor: RevenueWhereUniqueInputObjectSchema.optional(), take: z.number().optional(), skip: z.number().optional(), distinct: z.union([RevenueScalarFieldEnumSchema, RevenueScalarFieldEnumSchema.array()]).optional() }).strict();
+export const RevenueFindFirstZodSchema = z
+	.object({
+		select: RevenueFindFirstSelectSchema.optional(),
+		include: z.lazy(() => RevenueIncludeObjectSchema.optional()),
+		orderBy: z
+			.union([
+				RevenueOrderByWithRelationInputObjectSchema,
+				RevenueOrderByWithRelationInputObjectSchema.array(),
+			])
+			.optional(),
+		where: RevenueWhereInputObjectSchema.optional(),
+		cursor: RevenueWhereUniqueInputObjectSchema.optional(),
+		take: z.number().optional(),
+		skip: z.number().optional(),
+		distinct: z
+			.union([
+				RevenueScalarFieldEnumSchema,
+				RevenueScalarFieldEnumSchema.array(),
+			])
+			.optional(),
+	})
+	.strict();

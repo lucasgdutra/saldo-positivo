@@ -1,20 +1,36 @@
-import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
-import { UuidFilterObjectSchema } from './UuidFilter.schema';
-import { StringFilterObjectSchema } from './StringFilter.schema';
-import { DateTimeFilterObjectSchema } from './DateTimeFilter.schema';
-import { BoolFilterObjectSchema } from './BoolFilter.schema'
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { BoolFilterObjectSchema } from "./BoolFilter.schema";
+import { DateTimeFilterObjectSchema } from "./DateTimeFilter.schema";
+import { StringFilterObjectSchema } from "./StringFilter.schema";
+import { UuidFilterObjectSchema } from "./UuidFilter.schema";
 
-const makeSchema = (): z.ZodObject<any> => z.object({
-  AND: z.union([z.lazy(makeSchema), z.lazy(makeSchema).array()]).optional(),
-  OR: z.lazy(makeSchema).array().optional(),
-  NOT: z.union([z.lazy(makeSchema), z.lazy(makeSchema).array()]).optional(),
-  id: z.union([z.lazy(() => UuidFilterObjectSchema), z.string()]).optional(),
-  token: z.union([z.lazy(() => StringFilterObjectSchema), z.string()]).optional(),
-  userId: z.union([z.lazy(() => UuidFilterObjectSchema), z.string()]).optional(),
-  expiresAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.date()]).optional(),
-  used: z.union([z.lazy(() => BoolFilterObjectSchema), z.boolean()]).optional(),
-  createdAt: z.union([z.lazy(() => DateTimeFilterObjectSchema), z.date()]).optional()
-}).strict();
-export const PasswordResetTokenScalarWhereInputObjectSchema: z.ZodType<Prisma.PasswordResetTokenScalarWhereInput> = makeSchema() as unknown as z.ZodType<Prisma.PasswordResetTokenScalarWhereInput>;
+const makeSchema = (): z.ZodObject<any> =>
+	z
+		.object({
+			AND: z.union([z.lazy(makeSchema), z.lazy(makeSchema).array()]).optional(),
+			OR: z.lazy(makeSchema).array().optional(),
+			NOT: z.union([z.lazy(makeSchema), z.lazy(makeSchema).array()]).optional(),
+			id: z
+				.union([z.lazy(() => UuidFilterObjectSchema), z.string()])
+				.optional(),
+			token: z
+				.union([z.lazy(() => StringFilterObjectSchema), z.string()])
+				.optional(),
+			userId: z
+				.union([z.lazy(() => UuidFilterObjectSchema), z.string()])
+				.optional(),
+			expiresAt: z
+				.union([z.lazy(() => DateTimeFilterObjectSchema), z.date()])
+				.optional(),
+			used: z
+				.union([z.lazy(() => BoolFilterObjectSchema), z.boolean()])
+				.optional(),
+			createdAt: z
+				.union([z.lazy(() => DateTimeFilterObjectSchema), z.date()])
+				.optional(),
+		})
+		.strict();
+export const PasswordResetTokenScalarWhereInputObjectSchema: z.ZodType<Prisma.PasswordResetTokenScalarWhereInput> =
+	makeSchema() as unknown as z.ZodType<Prisma.PasswordResetTokenScalarWhereInput>;
 export const PasswordResetTokenScalarWhereInputObjectZodSchema = makeSchema();

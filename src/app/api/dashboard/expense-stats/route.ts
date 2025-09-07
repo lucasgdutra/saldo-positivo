@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 				lte: currentMonthEnd,
 			},
 		};
-		
+
 		if (categoryId) {
 			currentMonthWhere.categoryId = categoryId;
 		}
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 				lte: previousMonthEnd,
 			},
 		};
-		
+
 		if (categoryId) {
 			previousMonthWhere.categoryId = categoryId;
 		}

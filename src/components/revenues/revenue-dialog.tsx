@@ -4,11 +4,17 @@ import { standardSchemaResolver as zodResolver } from "@hookform/resolvers/stand
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type RevenueFormData, RevenueFormSchema } from "@/lib/validations";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { type RevenueFormData, RevenueFormSchema } from "@/lib/validations";
 
 interface RevenueDialogProps {
 	isOpen: boolean;
@@ -166,10 +172,7 @@ export function RevenueDialog({
 						>
 							Cancelar
 						</Button>
-						<Button
-							type="submit"
-							disabled={isLoading}
-						>
+						<Button type="submit" disabled={isLoading}>
 							{isLoading ? "Salvando..." : "Salvar"}
 						</Button>
 					</DialogFooter>
