@@ -617,6 +617,122 @@ class ExpenseService {
 			throw new Error("Erro ao buscar despesas agrupadas por categoria.");
 		}
 	}
+
+	/**
+	 * Lista despesas de um usuário com filtros, busca e ordenação aplicados no banco de dados.
+	 * @param params - Parâmetros de filtro e ordenação
+	 * @returns Uma lista de despesas filtradas e ordenadas
+	 */
+	async getExpensesWithFilters(params: {
+		userId: string;
+		startDate?: Date;
+		endDate?: Date;
+		categoryId?: string;
+		search?: string;
+		sortBy?: "amount" | "date" | "description" | "category";
+		sortOrder?: "asc" | "desc";
+		expand?: boolean;
+	}): Promise<Prisma.ExpenseGetPayload<{ include: { category: true } }>[]> {
+		const {
+			userId,
+			startDate,
+			endDate,
+			categoryId,
+			search,
+			sortBy = "date",
+			sortOrder = "desc",
+			expand = true,
+		} = params;
+
+		console.log(
+			`ExpenseService: Listando despesas com filtros para usuário ${userId}.`,
+		);
+
+		try {
+			// Build the where clause
+			const whereClause: Prisma.ExpenseWhereInput = {
+				userId: userId,
+			};
+
+			// Date range filter
+			if (startDate || endDate) {
+				whereClause.date = {};
+				if (startDate) {
+					whereClause.date.gte = startDate;
+				}
+				if (endDate) {
+					whereClause.date.lte = endDate;
+				}
+			}
+
+			// Category filter
+			if (categoryId) {
+				whereClause.categoryId = categoryId;
+			}
+
+			// Search filter
+			if (search) {
+				whereClause.OR = [
+					{
+						description: {
+							contains: search,
+							mode: "insensitive",
+						},
+					},
+					{
+						category: {
+							name: {
+								contains: search,
+								mode: "insensitive",
+							},
+						},
+					},
+				];
+			}
+
+			// Build the orderBy clause
+			let orderBy: Prisma.ExpenseOrderByWithRelationInput;
+			switch (sortBy) {
+				case "amount":
+					orderBy = { amount: sortOrder };
+					break;
+				case "date":
+					orderBy = { date: sortOrder };
+					break;
+				case "description":
+					orderBy = { description: sortOrder };
+					break;
+				case "category":
+					orderBy = { category: { name: sortOrder } };
+					break;
+				default:
+					orderBy = { date: sortOrder };
+			}
+
+			// Build the include clause based on expand parameter
+			const includeClause = expand ? { category: true } : undefined;
+
+			// Execute the query
+			const expenses = await this.prisma.expense.findMany({
+				where: whereClause,
+				orderBy: orderBy,
+				include: includeClause,
+			});
+
+			console.log(
+				`ExpenseService: ${expenses.length} despesas encontradas para ${userId}.`,
+			);
+			return expenses as Prisma.ExpenseGetPayload<{
+				include: { category: true };
+			}>[];
+		} catch (error) {
+			console.error(
+				`ExpenseService: Erro ao buscar despesas com filtros para usuário ${userId}:`,
+				error,
+			);
+			throw new Error("Erro ao buscar despesas com filtros.");
+		}
+	}
 }
 
 export default ExpenseService;

@@ -1,32 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExpenseStatsCards } from "@/components/dashboard/expense-stats-cards";
-import { ExpensesEvolutionChart } from "@/components/dashboard/expenses-evolution-chart";
-import { MonthFilter } from "@/components/dashboard/month-filter";
-import { ExpensesTable } from "@/components/expenses/expenses-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MonthFilter } from "@/components/ui/month-filter";
+import { ExpenseStatsCards } from "./_components/expense-stats-cards";
+import { ExpensesEvolutionChart } from "./_components/expenses-evolution-chart";
+import { ExpensesTable } from "./_components/expenses-table";
 
 export function DespesasPageClient({
 	initialData,
 	categories,
+	allExpenses,
 }: {
 	initialData: any[];
 	categories: any[];
+	allExpenses: { date: Date }[];
 }) {
-	const [selectedMonth, setSelectedMonth] = useState<number>();
-	const [selectedYear, setSelectedYear] = useState<number>();
+	const now = new Date();
+	const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth());
+	const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
 	const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 	const [minDate, setMinDate] = useState<Date>();
 	const [maxDate, setMaxDate] = useState<Date>();
 
 	useEffect(() => {
-		if (initialData.length > 0) {
-			const dates = initialData.map((item) => new Date(item.date));
+		if (allExpenses.length > 0) {
+			const dates = allExpenses.map((item) => new Date(item.date));
 			setMinDate(new Date(Math.min(...dates.map((d) => d.getTime()))));
 			setMaxDate(new Date(Math.max(...dates.map((d) => d.getTime()))));
 		}
-	}, [initialData]);
+	}, [allExpenses]);
 
 	const handleMonthChange = (year: number, month: number) => {
 		setSelectedYear(year);
@@ -91,7 +94,6 @@ export function DespesasPageClient({
 
 			{/* Tabela de despesas */}
 			<ExpensesTable
-				initialExpenses={initialData}
 				initialCategories={categories}
 				globalFilters={{
 					selectedMonth,

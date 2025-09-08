@@ -13,8 +13,27 @@ export default async function ReceitasPage() {
 		redirect("/");
 	}
 
+	// Buscar receitas do mês atual por padrão
+	const now = new Date();
+	const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+	const endOfMonth = new Date(
+		now.getFullYear(),
+		now.getMonth() + 1,
+		0,
+		23,
+		59,
+		59,
+		999,
+	);
+
 	const receitas = await db.revenue.findMany({
-		where: { userId: session.user.id },
+		where: {
+			userId: session.user.id,
+			date: {
+				gte: startOfMonth,
+				lte: endOfMonth,
+			},
+		},
 		orderBy: { date: "desc" },
 	});
 
@@ -29,6 +48,13 @@ export default async function ReceitasPage() {
 		updatedAt: Date;
 	}
 
+	// Buscar range de datas para o filtro (todas as receitas)
+	const allRevenues = await db.revenue.findMany({
+		where: { userId: session.user.id },
+		select: { date: true },
+		orderBy: { date: "desc" },
+	});
+
 	// Converter os valores Decimal para números
 	const formattedReceitas = receitas.map((receita: RevenueFromPrisma) => ({
 		...receita,
@@ -38,7 +64,10 @@ export default async function ReceitasPage() {
 	return (
 		<AuthGuard requireAuth>
 			<AppLayout>
-				<ReceitasPageClient initialData={formattedReceitas} />
+				<ReceitasPageClient
+					initialData={formattedReceitas}
+					allRevenues={allRevenues}
+				/>
 			</AppLayout>
 		</AuthGuard>
 	);

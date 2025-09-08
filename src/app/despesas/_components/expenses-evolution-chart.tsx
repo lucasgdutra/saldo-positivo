@@ -10,7 +10,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { DashboardErrorContainer } from "./dashboard-error";
+import { DashboardErrorContainer } from "../../dashboard/_components/dashboard-error";
 
 type MonthlyEvolutionData = {
 	month: string;
@@ -20,7 +20,13 @@ type MonthlyEvolutionData = {
 	fullDate: string;
 };
 
-export function RevenuesEvolutionChart() {
+interface ExpensesEvolutionChartProps {
+	selectedCategoryId?: string;
+}
+
+export function ExpensesEvolutionChart({
+	selectedCategoryId,
+}: ExpensesEvolutionChartProps) {
 	const [data, setData] = useState<MonthlyEvolutionData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -30,17 +36,24 @@ export function RevenuesEvolutionChart() {
 			setIsLoading(true);
 			setError(null);
 
-			const response = await fetch("/api/dashboard/monthly-evolution");
+			const params = new URLSearchParams();
+			if (selectedCategoryId) {
+				params.append("categoryId", selectedCategoryId);
+			}
+
+			const response = await fetch(
+				`/api/dashboard/monthly-evolution?${params.toString()}`,
+			);
 
 			if (!response.ok) {
-				throw new Error("Falha ao buscar dados de evolução de receitas");
+				throw new Error("Falha ao buscar dados de evolução de despesas");
 			}
 
 			const evolutionData = await response.json();
 			setData(evolutionData);
 		} catch (err) {
-			console.error("Erro ao buscar dados de evolução de receitas:", err);
-			setError("Não foi possível carregar os dados de evolução de receitas");
+			console.error("Erro ao buscar dados de evolução de despesas:", err);
+			setError("Não foi possível carregar os dados de evolução de despesas");
 			setData([]);
 		} finally {
 			setIsLoading(false);
@@ -49,13 +62,13 @@ export function RevenuesEvolutionChart() {
 
 	useEffect(() => {
 		fetchData();
-	}, []);
+	}, [selectedCategoryId]);
 
 	if (isLoading) {
 		return (
 			<div className="h-64 w-full flex items-center justify-center">
 				<div className="text-muted-foreground">
-					Carregando evolução das receitas...
+					Carregando evolução das despesas...
 				</div>
 			</div>
 		);
@@ -82,8 +95,8 @@ export function RevenuesEvolutionChart() {
 			return (
 				<div className="bg-white p-3 border rounded-lg shadow-lg">
 					<p className="font-medium mb-1">{label}</p>
-					<p className="text-green-600 text-sm">
-						Receitas: {formatCurrency(payload[0].value)}
+					<p className="text-red-600 text-sm">
+						Despesas: {formatCurrency(payload[0].value)}
 					</p>
 				</div>
 			);
@@ -91,8 +104,8 @@ export function RevenuesEvolutionChart() {
 		return null;
 	};
 
-	const totalRevenues = data.reduce((sum, item) => sum + item.revenues, 0);
-	const avgRevenues = data.length > 0 ? totalRevenues / data.length : 0;
+	const totalExpenses = data.reduce((sum, item) => sum + item.expenses, 0);
+	const avgExpenses = data.length > 0 ? totalExpenses / data.length : 0;
 
 	return (
 		<DashboardErrorContainer
@@ -102,11 +115,11 @@ export function RevenuesEvolutionChart() {
 		>
 			<div className="space-y-4">
 				<div className="flex items-center justify-between">
-					<h3 className="text-lg font-medium">Evolução das Receitas</h3>
+					<h3 className="text-lg font-medium">Evolução das Despesas</h3>
 					<div className="text-right">
 						<p className="text-sm text-muted-foreground">Média mensal</p>
-						<p className="text-sm font-medium text-green-600">
-							{formatCurrency(avgRevenues)}
+						<p className="text-sm font-medium text-red-600">
+							{formatCurrency(avgExpenses)}
 						</p>
 					</div>
 				</div>
@@ -115,13 +128,13 @@ export function RevenuesEvolutionChart() {
 					<div className="h-64 w-full flex flex-col items-center justify-center p-6 text-center border rounded-lg">
 						<p className="text-muted-foreground mb-4">
 							Ainda não há dados suficientes para mostrar a evolução das
-							receitas.
+							despesas.
 						</p>
 						<a
-							href="/receitas"
-							className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+							href="/despesas"
+							className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
 						>
-							Adicionar Receitas
+							Adicionar Despesas
 						</a>
 					</div>
 				) : (
@@ -140,7 +153,7 @@ export function RevenuesEvolutionChart() {
 								<XAxis dataKey="month" />
 								<YAxis tickFormatter={formatCompactCurrency} />
 								<Tooltip content={<CustomTooltip />} />
-								<Bar dataKey="revenues" fill="#10b981" radius={[4, 4, 0, 0]} />
+								<Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
 							</BarChart>
 						</ResponsiveContainer>
 					</div>

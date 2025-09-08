@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AuthGuard } from "@/components/auth/auth-guard";
-import { RegisterForm } from "@/components/auth/register-form";
+import { RegisterForm } from "./_components/register-form";
 
 export default function RegisterPage() {
 	return (

@@ -1,24 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MonthFilter } from "@/components/dashboard/month-filter";
-import { RevenueStatsCards } from "@/components/dashboard/revenue-stats-cards";
-import { RevenuesEvolutionChart } from "@/components/dashboard/revenues-evolution-chart";
-import { RevenuesTable } from "@/components/revenues/revenues-table";
+import { MonthFilter } from "@/components/ui/month-filter";
+import { RevenueStatsCards } from "./_components/revenue-stats-cards";
+import { RevenuesEvolutionChart } from "./_components/revenues-evolution-chart";
+import { RevenuesTable } from "./_components/revenues-table";
 
-export function ReceitasPageClient({ initialData }: { initialData: any[] }) {
-	const [selectedMonth, setSelectedMonth] = useState<number>();
-	const [selectedYear, setSelectedYear] = useState<number>();
+export function ReceitasPageClient({
+	initialData,
+	allRevenues,
+}: {
+	initialData: any[];
+	allRevenues: { date: Date }[];
+}) {
+	const now = new Date();
+	const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth());
+	const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
 	const [minDate, setMinDate] = useState<Date>();
 	const [maxDate, setMaxDate] = useState<Date>();
 
 	useEffect(() => {
-		if (initialData.length > 0) {
-			const dates = initialData.map((item) => new Date(item.date));
+		if (allRevenues.length > 0) {
+			const dates = allRevenues.map((item) => new Date(item.date));
 			setMinDate(new Date(Math.min(...dates.map((d) => d.getTime()))));
 			setMaxDate(new Date(Math.max(...dates.map((d) => d.getTime()))));
 		}
-	}, [initialData]);
+	}, [allRevenues]);
 
 	const handleMonthChange = (year: number, month: number) => {
 		setSelectedYear(year);
@@ -57,7 +64,6 @@ export function ReceitasPageClient({ initialData }: { initialData: any[] }) {
 
 			{/* Tabela de receitas */}
 			<RevenuesTable
-				initialRevenues={initialData}
 				globalFilters={{
 					selectedMonth,
 					selectedYear,

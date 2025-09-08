@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation"; // Importar hooks de navegação
 import { useEffect } from "react"; // Importar useEffect
 import { toast } from "sonner"; // Importar toast
-import { AuthForm } from "@/components/auth/auth-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
+import { AuthForm } from "./_components/auth-form";
 
 export default function Home() {
 	return (

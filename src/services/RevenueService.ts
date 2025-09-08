@@ -349,6 +349,94 @@ class RevenueService {
 			throw new Error("Erro ao buscar receitas recentes.");
 		}
 	}
+
+	/**
+	 * Lista receitas de um usuário com filtros, busca e ordenação aplicados no banco de dados.
+	 * @param params - Parâmetros de filtro e ordenação
+	 * @returns Uma lista de receitas filtradas e ordenadas
+	 */
+	async getRevenuesWithFilters(params: {
+		userId: string;
+		startDate?: Date;
+		endDate?: Date;
+		search?: string;
+		sortBy?: "amount" | "date" | "description";
+		sortOrder?: "asc" | "desc";
+		expand?: boolean;
+	}): Promise<Revenue[]> {
+		const {
+			userId,
+			startDate,
+			endDate,
+			search,
+			sortBy = "date",
+			sortOrder = "desc",
+			expand = false, // Revenues don't have relations by default
+		} = params;
+
+		console.log(
+			`RevenueService: Listando receitas com filtros para usuário ${userId}.`,
+		);
+
+		try {
+			// Build the where clause
+			const whereClause: Prisma.RevenueWhereInput = {
+				userId: userId,
+			};
+
+			// Date range filter
+			if (startDate || endDate) {
+				whereClause.date = {};
+				if (startDate) {
+					whereClause.date.gte = startDate;
+				}
+				if (endDate) {
+					whereClause.date.lte = endDate;
+				}
+			}
+
+			// Search filter
+			if (search) {
+				whereClause.description = {
+					contains: search,
+					mode: "insensitive",
+				};
+			}
+
+			// Build the orderBy clause
+			let orderBy: Prisma.RevenueOrderByWithRelationInput;
+			switch (sortBy) {
+				case "amount":
+					orderBy = { amount: sortOrder };
+					break;
+				case "date":
+					orderBy = { date: sortOrder };
+					break;
+				case "description":
+					orderBy = { description: sortOrder };
+					break;
+				default:
+					orderBy = { date: sortOrder };
+			}
+
+			// Execute the query
+			const revenues = await this.prisma.revenue.findMany({
+				where: whereClause,
+				orderBy: orderBy,
+			});
+
+			console.log(
+				`RevenueService: ${revenues.length} receitas encontradas para ${userId}.`,
+			);
+			return revenues;
+		} catch (error) {
+			console.error(
+				`RevenueService: Erro ao buscar receitas com filtros para usuário ${userId}:`,
+				error,
+			);
+			throw new Error("Erro ao buscar receitas com filtros.");
+		}
+	}
 }
 
 export default RevenueService;

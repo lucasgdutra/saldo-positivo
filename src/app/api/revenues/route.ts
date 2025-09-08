@@ -30,24 +30,23 @@ export async function GET(request: NextRequest) {
 		const searchParams = request.nextUrl.searchParams;
 		const startDate = searchParams.get("startDate");
 		const endDate = searchParams.get("endDate");
+		const search = searchParams.get("search");
+		const sortBy = searchParams.get("sortBy") || "date";
+		const sortOrder = searchParams.get("sortOrder") || "desc";
+		const expand =
+			searchParams.get("$expand") === "true" ||
+			searchParams.get("expand") === "true";
 
-		// Usar o serviço para buscar todas as receitas do usuário
-		let revenues = await revenueService.getRevenuesByUser(session.user.id);
-
-		// Aplicar filtros de data manualmente (se fornecidos)
-		// Similar à lógica de despesas, idealmente o serviço teria um método com filtros.
-		if (startDate) {
-			const start = new Date(startDate);
-			revenues = revenues.filter((rev) => rev.date >= start);
-		}
-		if (endDate) {
-			const end = new Date(endDate);
-			end.setHours(23, 59, 59, 999); // Incluir todo o dia final
-			revenues = revenues.filter((rev) => rev.date <= end);
-		}
-
-		// Ordenar por data descendente (como na implementação original)
-		revenues.sort((a, b) => b.date.getTime() - a.date.getTime());
+		// Use the new service method with database-level filtering and sorting
+		const revenues = await revenueService.getRevenuesWithFilters({
+			userId: session.user.id,
+			startDate: startDate ? new Date(startDate) : undefined,
+			endDate: endDate ? new Date(endDate) : undefined,
+			search: search || undefined,
+			sortBy: sortBy as "amount" | "date" | "description",
+			sortOrder: sortOrder as "asc" | "desc",
+			expand: expand,
+		});
 
 		// O serviço já deve retornar o amount como number
 		return NextResponse.json(revenues);

@@ -13,9 +13,27 @@ export default async function DespesasPage() {
 		redirect("/");
 	}
 
-	// Buscar todas as despesas inicialmente (sem filtros)
+	// Buscar despesas do mês atual por padrão
+	const now = new Date();
+	const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+	const endOfMonth = new Date(
+		now.getFullYear(),
+		now.getMonth() + 1,
+		0,
+		23,
+		59,
+		59,
+		999,
+	);
+
 	const despesas = await db.expense.findMany({
-		where: { userId: session.user.id },
+		where: {
+			userId: session.user.id,
+			date: {
+				gte: startOfMonth,
+				lte: endOfMonth,
+			},
+		},
 		orderBy: { date: "desc" },
 		include: {
 			category: true,
@@ -26,6 +44,13 @@ export default async function DespesasPage() {
 	const categories = await db.category.findMany({
 		where: { userId: session.user.id },
 		orderBy: { name: "asc" },
+	});
+
+	// Buscar range de datas para o filtro (todas as despesas)
+	const allExpenses = await db.expense.findMany({
+		where: { userId: session.user.id },
+		select: { date: true },
+		orderBy: { date: "desc" },
 	});
 
 	// Converter os valores Decimal para números
@@ -64,6 +89,7 @@ export default async function DespesasPage() {
 				<DespesasPageClient
 					initialData={formattedDespesas}
 					categories={categories}
+					allExpenses={allExpenses}
 				/>
 			</AppLayout>
 		</AuthGuard>

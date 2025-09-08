@@ -12,7 +12,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { getCategoryIcon } from "@/lib/category-icons";
-import { CategoryDialog } from "../categories/category-dialog";
+import { CategoryDialog } from "../../categorias/_components/category-dialog";
 
 interface Category {
 	id: string;

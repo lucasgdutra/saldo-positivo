@@ -1,9 +1,21 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Pencil, Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	ChevronDown,
+	ChevronUp,
+	Pencil,
+	RefreshCw,
+	Search,
+	X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	useCreateExpense,
+	useDeleteExpense,
+	useExpenses,
+	useUpdateExpense,
+} from "@/hooks/use-expenses";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { formatCurrency } from "@/lib/utils";
 import { CategoryManagementModal } from "./category-management-modal";
@@ -38,7 +50,6 @@ interface GlobalFilters {
 }
 
 interface ExpensesTableProps {
-	initialExpenses: Expense[];
 	initialCategories?: Category[];
 	globalFilters?: GlobalFilters;
 }
@@ -47,25 +58,84 @@ type SortField = "amount" | "date" | "description" | "category";
 type SortDirection = "asc" | "desc";
 
 export function ExpensesTable({
-	initialExpenses,
 	initialCategories = [],
 	globalFilters = {},
 }: ExpensesTableProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 	const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
-	const [expenses, setExpenses] = useState<Expense[]>(
-		initialExpenses.slice(0, 15),
-	);
-	const [allExpenses, setAllExpenses] = useState<Expense[]>(initialExpenses);
 	const [categories, setCategories] = useState<Category[]>(initialCategories);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [sortField, setSortField] = useState<SortField>("date");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-	const [hasMore, setHasMore] = useState(initialExpenses.length > 15);
 	const [page, setPage] = useState(1);
-	const router = useRouter();
 	const observerRef = useRef<IntersectionObserver>(null);
+
+	// Build query params for TanStack Query
+	const queryParams = useMemo(() => {
+		const params: {
+			startDate?: string;
+			endDate?: string;
+			categoryId?: string;
+			search?: string;
+			sortBy?: string;
+			sortOrder?: string;
+		} = {};
+
+		if (
+			globalFilters.selectedMonth !== undefined &&
+			globalFilters.selectedYear !== undefined
+		) {
+			const startOfMonth = new Date(
+				globalFilters.selectedYear,
+				globalFilters.selectedMonth,
+				1,
+			);
+			const endOfMonth = new Date(
+				globalFilters.selectedYear,
+				globalFilters.selectedMonth + 1,
+				0,
+				23,
+				59,
+				59,
+				999,
+			);
+			params.startDate = startOfMonth.toISOString();
+			params.endDate = endOfMonth.toISOString();
+		}
+
+		if (globalFilters.selectedCategoryId) {
+			params.categoryId = globalFilters.selectedCategoryId;
+		}
+
+		if (searchTerm) {
+			params.search = searchTerm;
+		}
+
+		params.sortBy = sortField;
+		params.sortOrder = sortDirection;
+		params.expand = true; // Always expand to include category data
+
+		return params;
+	}, [
+		globalFilters.selectedMonth,
+		globalFilters.selectedYear,
+		globalFilters.selectedCategoryId,
+		searchTerm,
+		sortField,
+		sortDirection,
+	]);
+
+	// Use TanStack Query hooks
+	const {
+		data: allExpenses = [],
+		isLoading,
+		error,
+		refetch,
+	} = useExpenses(queryParams);
+	const createExpenseMutation = useCreateExpense();
+	const updateExpenseMutation = useUpdateExpense();
+	const deleteExpenseMutation = useDeleteExpense();
 
 	// Fetch categories
 	useEffect(() => {
@@ -92,99 +162,20 @@ export function ExpensesTable({
 		fetchCategories();
 	}, [initialCategories]);
 
-	// Filter and sort expenses
-	const processExpenses = useCallback(
-		(
-			expenseList: Expense[],
-			search: string,
-			filters: GlobalFilters,
-			field: SortField,
-			direction: SortDirection,
-		) => {
-			let filtered = expenseList;
+	// Paginated expenses for display (server already handles filtering and sorting)
+	const expenses = useMemo(() => {
+		return allExpenses.slice(0, page * 15);
+	}, [allExpenses, page]);
 
-			// Filter by search term
-			if (search) {
-				filtered = filtered.filter((expense) =>
-					expense.description?.toLowerCase().includes(search.toLowerCase()),
-				);
-			}
+	// Check if there are more items to load
+	const hasMore = useMemo(() => {
+		return allExpenses.length > page * 15;
+	}, [allExpenses.length, page]);
 
-			// Filter by category
-			if (filters.selectedCategoryId) {
-				filtered = filtered.filter(
-					(expense) => expense.categoryId === filters.selectedCategoryId,
-				);
-			}
-
-			// Filter by month/year
-			if (
-				filters.selectedMonth !== undefined &&
-				filters.selectedYear !== undefined
-			) {
-				filtered = filtered.filter((expense) => {
-					const expenseDate = new Date(expense.date);
-					return (
-						expenseDate.getMonth() === filters.selectedMonth! &&
-						expenseDate.getFullYear() === filters.selectedYear!
-					);
-				});
-			}
-
-			return filtered.sort((a, b) => {
-				let aVal: any, bVal: any;
-
-				switch (field) {
-					case "amount":
-						aVal = a.amount;
-						bVal = b.amount;
-						break;
-					case "date":
-						aVal = new Date(a.date).getTime();
-						bVal = new Date(b.date).getTime();
-						break;
-					case "description":
-						aVal = a.description?.toLowerCase() || "";
-						bVal = b.description?.toLowerCase() || "";
-						break;
-					case "category":
-						aVal = a.category.name.toLowerCase();
-						bVal = b.category.name.toLowerCase();
-						break;
-					default:
-						return 0;
-				}
-
-				if (direction === "asc") {
-					return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-				} else {
-					return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-				}
-			});
-		},
-		[],
-	);
-
-	// Update displayed expenses when filters or sort changes
+	// Reset page when filters change
 	useEffect(() => {
-		const processed = processExpenses(
-			allExpenses,
-			searchTerm,
-			globalFilters,
-			sortField,
-			sortDirection,
-		);
-		setExpenses(processed.slice(0, page * 15));
-		setHasMore(processed.length > page * 15);
-	}, [
-		allExpenses,
-		searchTerm,
-		globalFilters,
-		sortField,
-		sortDirection,
-		page,
-		processExpenses,
-	]);
+		setPage(1);
+	}, [searchTerm, globalFilters, sortField, sortDirection]);
 
 	// Infinite scroll observer
 	const lastElementCallback = useCallback(
@@ -250,60 +241,33 @@ export function ExpensesTable({
 	}) => {
 		try {
 			if (selectedExpense) {
-				const response = await fetch(`/api/expenses?id=${selectedExpense.id}`, {
-					method: "PUT",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
+				await updateExpenseMutation.mutateAsync({
+					id: selectedExpense.id,
+					...data,
 				});
-
-				if (!response.ok) throw new Error("Erro ao atualizar despesa");
-
-				const updatedExpense = await response.json();
-				setAllExpenses((prev) =>
-					prev.map((exp) =>
-						exp.id === selectedExpense.id ? updatedExpense : exp,
-					),
-				);
+				toast.success("Despesa atualizada com sucesso!");
 			} else {
-				const response = await fetch("/api/expenses", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
-				});
-
-				if (!response.ok) throw new Error("Erro ao criar despesa");
-
-				const newExpense = await response.json();
-				setAllExpenses((prev) => [newExpense, ...prev]);
+				await createExpenseMutation.mutateAsync(data);
+				toast.success("Despesa criada com sucesso!");
 			}
-
-			router.refresh();
 			handleCloseDialog();
 		} catch (error) {
 			console.error("Erro ao salvar despesa:", error);
-			// O toast de erro já é exibido pelo ExpenseDialog
+			toast.error(
+				error instanceof Error ? error.message : "Erro ao salvar despesa",
+			);
 		}
 	};
 
 	const handleDeleteExpense = async (id: string) => {
 		if (window.confirm("Tem certeza que deseja excluir esta despesa?")) {
 			try {
-				const response = await fetch(`/api/expenses?id=${id}`, {
-					method: "DELETE",
-				});
-
-				if (!response.ok) {
-					const errorData = await response.json().catch(() => ({}));
-					throw new Error(errorData?.message || "Erro ao excluir despesa");
-				}
-
-				setAllExpenses((prev) => prev.filter((exp) => exp.id !== id));
+				await deleteExpenseMutation.mutateAsync(id);
 				toast.success("Despesa excluída com sucesso!");
-				router.refresh();
-			} catch (error: any) {
+			} catch (error) {
 				console.error("Erro ao excluir despesa:", error);
 				toast.error(
-					`Erro ao excluir despesa: ${error?.message || "Erro desconhecido"}`,
+					error instanceof Error ? error.message : "Erro ao excluir despesa",
 				);
 			}
 		}
@@ -325,6 +289,16 @@ export function ExpensesTable({
 					</div>
 					<div className="flex gap-2">
 						<button
+							className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+							type="button"
+							onClick={() => refetch()}
+							disabled={isLoading}
+						>
+							<RefreshCw
+								className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+							/>
+						</button>
+						<button
 							className="rounded-lg border px-4 py-2 hover:bg-gray-50"
 							type="button"
 							onClick={() => setIsCategoryModalOpen(true)}
@@ -332,9 +306,10 @@ export function ExpensesTable({
 							Gerenciar Categorias
 						</button>
 						<button
-							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90"
+							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:opacity-50"
 							type="button"
 							onClick={() => handleOpenDialog()}
+							disabled={isLoading}
 						>
 							Nova Despesa
 						</button>
@@ -415,7 +390,31 @@ export function ExpensesTable({
 								</tr>
 							</thead>
 							<tbody className="bg-white divide-y divide-gray-200">
-								{expenses.length === 0 ? (
+								{isLoading ? (
+									<tr>
+										<td
+											colSpan={5}
+											className="px-6 py-8 text-center text-muted-foreground"
+										>
+											<div className="flex items-center justify-center gap-2">
+												<RefreshCw className="w-4 h-4 animate-spin" />
+												Carregando despesas...
+											</div>
+										</td>
+									</tr>
+								) : error ? (
+									<tr>
+										<td
+											colSpan={5}
+											className="px-6 py-8 text-center text-red-600"
+										>
+											Erro ao carregar despesas:{" "}
+											{error instanceof Error
+												? error.message
+												: "Erro desconhecido"}
+										</td>
+									</tr>
+								) : expenses.length === 0 ? (
 									<tr>
 										<td
 											colSpan={5}

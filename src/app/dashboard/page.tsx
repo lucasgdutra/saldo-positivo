@@ -1,12 +1,13 @@
 import { AuthGuard } from "@/components/auth/auth-guard";
+import { AppLayout } from "@/components/layout/app-layout";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import CardResumo from "./_cards_resumo";
 import {
 	BalanceChart,
 	DashboardSummary,
 	ExpensesByCategoryChart,
 	RecentTransactions,
-} from "@/components/dashboard";
-import { AppLayout } from "@/components/layout/app-layout";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
+} from "./_components";
 
 export default function DashboardPage() {
 	return (
@@ -22,20 +23,7 @@ export default function DashboardPage() {
 						</div>
 
 						{/* Cards de resumo */}
-						<ErrorBoundary
-							fallback={
-								<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-									<h3 className="text-lg font-medium">
-										Erro ao carregar resumo financeiro
-									</h3>
-									<p className="mt-2 text-sm">
-										Não foi possível carregar os dados de resumo financeiro.
-									</p>
-								</div>
-							}
-						>
-							<DashboardSummary />
-						</ErrorBoundary>
+						<CardResumo />
 
 						{/* Gráficos */}
 						<div className="grid gap-6 md:grid-cols-2">

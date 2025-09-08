@@ -1,9 +1,21 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Pencil, Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	ChevronDown,
+	ChevronUp,
+	Pencil,
+	RefreshCw,
+	Search,
+	X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	useCreateRevenue,
+	useDeleteRevenue,
+	useRevenues,
+	useUpdateRevenue,
+} from "@/hooks/use-revenues";
 import { formatCurrency } from "@/lib/utils";
 import { RevenueDialog } from "./revenue-dialog";
 
@@ -23,113 +35,95 @@ interface GlobalFilters {
 }
 
 interface RevenuesTableProps {
-	initialRevenues: Revenue[];
 	globalFilters?: GlobalFilters;
 }
 
 type SortField = "amount" | "date" | "description";
 type SortDirection = "asc" | "desc";
 
-export function RevenuesTable({
-	initialRevenues,
-	globalFilters = {},
-}: RevenuesTableProps) {
+export function RevenuesTable({ globalFilters = {} }: RevenuesTableProps) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
-	const [revenues, setRevenues] = useState<Revenue[]>(
-		initialRevenues.slice(0, 15),
-	);
-	const [allRevenues, setAllRevenues] = useState<Revenue[]>(initialRevenues);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [sortField, setSortField] = useState<SortField>("date");
 	const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-	const [hasMore, setHasMore] = useState(initialRevenues.length > 15);
 	const [page, setPage] = useState(1);
-	const router = useRouter();
 	const observerRef = useRef<IntersectionObserver>(null);
 
-	// Filter and sort revenues
-	const processRevenues = useCallback(
-		(
-			revenueList: Revenue[],
-			search: string,
-			filters: GlobalFilters,
-			field: SortField,
-			direction: SortDirection,
-		) => {
-			let filtered = revenueList;
+	// Build query params for TanStack Query
+	const queryParams = useMemo(() => {
+		const params: {
+			startDate?: string;
+			endDate?: string;
+			search?: string;
+			sortBy?: string;
+			sortOrder?: string;
+		} = {};
 
-			// Filter by search term
-			if (search) {
-				filtered = filtered.filter((revenue) =>
-					revenue.description?.toLowerCase().includes(search.toLowerCase()),
-				);
-			}
+		if (
+			globalFilters.selectedMonth !== undefined &&
+			globalFilters.selectedYear !== undefined
+		) {
+			const startOfMonth = new Date(
+				globalFilters.selectedYear,
+				globalFilters.selectedMonth,
+				1,
+			);
+			const endOfMonth = new Date(
+				globalFilters.selectedYear,
+				globalFilters.selectedMonth + 1,
+				0,
+				23,
+				59,
+				59,
+				999,
+			);
+			params.startDate = startOfMonth.toISOString();
+			params.endDate = endOfMonth.toISOString();
+		}
 
-			// Filter by month/year
-			if (
-				filters.selectedMonth !== undefined &&
-				filters.selectedYear !== undefined
-			) {
-				filtered = filtered.filter((revenue) => {
-					const revenueDate = new Date(revenue.date);
-					return (
-						revenueDate.getMonth() === filters.selectedMonth! &&
-						revenueDate.getFullYear() === filters.selectedYear!
-					);
-				});
-			}
+		if (searchTerm) {
+			params.search = searchTerm;
+		}
 
-			return filtered.sort((a, b) => {
-				let aVal: any, bVal: any;
+		params.sortBy = sortField;
+		params.sortOrder = sortDirection;
+		params.expand = false; // Revenues don't have relations to expand
 
-				switch (field) {
-					case "amount":
-						aVal = a.amount;
-						bVal = b.amount;
-						break;
-					case "date":
-						aVal = new Date(a.date).getTime();
-						bVal = new Date(b.date).getTime();
-						break;
-					case "description":
-						aVal = a.description?.toLowerCase() || "";
-						bVal = b.description?.toLowerCase() || "";
-						break;
-					default:
-						return 0;
-				}
-
-				if (direction === "asc") {
-					return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-				} else {
-					return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-				}
-			});
-		},
-		[],
-	);
-
-	// Update displayed revenues when filters or sort changes
-	useEffect(() => {
-		const processed = processRevenues(
-			allRevenues,
-			searchTerm,
-			globalFilters,
-			sortField,
-			sortDirection,
-		);
-		setRevenues(processed.slice(0, page * 15));
-		setHasMore(processed.length > page * 15);
+		return params;
 	}, [
-		allRevenues,
+		globalFilters.selectedMonth,
+		globalFilters.selectedYear,
 		searchTerm,
-		globalFilters,
 		sortField,
 		sortDirection,
-		page,
-		processRevenues,
 	]);
+
+	// Use TanStack Query hooks
+	const {
+		data: allRevenues = [],
+		isLoading,
+		error,
+		refetch,
+	} = useRevenues(queryParams);
+	const createRevenueMutation = useCreateRevenue();
+	const updateRevenueMutation = useUpdateRevenue();
+	const deleteRevenueMutation = useDeleteRevenue();
+
+	// Paginated revenues for display (server already handles filtering and sorting)
+	const revenues = useMemo(() => {
+		return allRevenues.slice(0, page * 15);
+	}, [allRevenues, page]);
+
+	// Check if there are more items to load
+	const hasMore = useMemo(() => {
+		return allRevenues.length > page * 15;
+	}, [allRevenues.length, page]);
+
+	// Reset page when filters change
+	useEffect(() => {
+		setPage(1);
+	}, [searchTerm, globalFilters, sortField, sortDirection]);
 
 	// Infinite scroll observer
 	const lastElementCallback = useCallback(
@@ -194,60 +188,34 @@ export function RevenuesTable({
 	}) => {
 		try {
 			if (selectedRevenue) {
-				const response = await fetch(`/api/revenues?id=${selectedRevenue.id}`, {
-					method: "PUT",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
+				await updateRevenueMutation.mutateAsync({
+					id: selectedRevenue.id,
+					...data,
 				});
-
-				if (!response.ok) throw new Error("Erro ao atualizar receita");
-
-				const updatedRevenue = await response.json();
-				setAllRevenues((prev) =>
-					prev.map((rev) =>
-						rev.id === selectedRevenue.id ? updatedRevenue : rev,
-					),
-				);
+				toast.success("Receita atualizada com sucesso!");
 			} else {
-				const response = await fetch("/api/revenues", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
-				});
-
-				if (!response.ok) throw new Error("Erro ao criar receita");
-
-				const newRevenue = await response.json();
-				setAllRevenues((prev) => [newRevenue, ...prev]);
+				await createRevenueMutation.mutateAsync(data);
+				toast.success("Receita criada com sucesso!");
 			}
-
-			router.refresh();
 			handleCloseDialog();
 		} catch (error) {
 			console.error("Erro ao salvar receita:", error);
-			alert("Erro ao salvar receita. Tente novamente.");
+			toast.error(
+				error instanceof Error ? error.message : "Erro ao salvar receita",
+			);
 		}
 	};
 
 	const handleDeleteRevenue = async (id: string) => {
 		if (window.confirm("Tem certeza que deseja excluir esta receita?")) {
 			try {
-				const response = await fetch(`/api/revenues?id=${id}`, {
-					method: "DELETE",
-				});
-
-				if (!response.ok) throw new Error("Erro ao excluir receita");
-
-				setAllRevenues((prev) => prev.filter((rev) => rev.id !== id));
+				await deleteRevenueMutation.mutateAsync(id);
 				toast.success("Receita excluída com sucesso!");
-				router.refresh();
 			} catch (error) {
 				console.error("Erro ao excluir receita:", error);
-				const errorMessage =
-					error instanceof Error
-						? error.message
-						: "Ocorreu um erro desconhecido";
-				toast.error(`Erro ao excluir receita: ${errorMessage}`);
+				toast.error(
+					error instanceof Error ? error.message : "Erro ao excluir receita",
+				);
 			}
 		}
 	};
@@ -266,13 +234,26 @@ export function RevenuesTable({
 							Gerencie suas receitas e entradas de dinheiro
 						</p>
 					</div>
-					<button
-						className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90"
-						type="button"
-						onClick={() => handleOpenDialog()}
-					>
-						Nova Receita
-					</button>
+					<div className="flex gap-2">
+						<button
+							className="rounded-lg border px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+							type="button"
+							onClick={() => refetch()}
+							disabled={isLoading}
+						>
+							<RefreshCw
+								className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+							/>
+						</button>
+						<button
+							className="rounded-lg bg-black px-4 py-2 text-white hover:bg-black/90 disabled:opacity-50"
+							type="button"
+							onClick={() => handleOpenDialog()}
+							disabled={isLoading}
+						>
+							Nova Receita
+						</button>
+					</div>
 				</div>
 
 				{/* Filters */}
@@ -341,7 +322,31 @@ export function RevenuesTable({
 								</tr>
 							</thead>
 							<tbody className="bg-white divide-y divide-gray-200">
-								{revenues.length === 0 ? (
+								{isLoading ? (
+									<tr>
+										<td
+											colSpan={4}
+											className="px-6 py-8 text-center text-muted-foreground"
+										>
+											<div className="flex items-center justify-center gap-2">
+												<RefreshCw className="w-4 h-4 animate-spin" />
+												Carregando receitas...
+											</div>
+										</td>
+									</tr>
+								) : error ? (
+									<tr>
+										<td
+											colSpan={4}
+											className="px-6 py-8 text-center text-red-600"
+										>
+											Erro ao carregar receitas:{" "}
+											{error instanceof Error
+												? error.message
+												: "Erro desconhecido"}
+										</td>
+									</tr>
+								) : revenues.length === 0 ? (
 									<tr>
 										<td
 											colSpan={4}

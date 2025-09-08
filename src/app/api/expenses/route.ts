@@ -32,30 +32,24 @@ export async function GET(request: NextRequest) {
 		const startDate = searchParams.get("startDate");
 		const endDate = searchParams.get("endDate");
 		const categoryId = searchParams.get("categoryId");
+		const search = searchParams.get("search");
+		const sortBy = searchParams.get("sortBy") || "date";
+		const sortOrder = searchParams.get("sortOrder") || "desc";
+		const expand =
+			searchParams.get("$expand") === "true" ||
+			searchParams.get("expand") === "true";
 
-		// Usar o serviço para buscar todas as despesas do usuário
-		let expenses = await expenseService.getExpensesByUser(session.user.id);
-
-		// Aplicar filtros de data e categoria manualmente (se fornecidos)
-		// Isso mantém a funcionalidade da API original, embora possa ser menos eficiente
-		// do que filtrar no banco de dados. Idealmente, o serviço teria um método
-		// que aceitasse todos os filtros.
-		if (startDate) {
-			const start = new Date(startDate);
-			expenses = expenses.filter((exp) => exp.date >= start);
-		}
-		if (endDate) {
-			const end = new Date(endDate);
-			// Ajustar a data final para incluir todo o dia
-			end.setHours(23, 59, 59, 999);
-			expenses = expenses.filter((exp) => exp.date <= end);
-		}
-		if (categoryId) {
-			expenses = expenses.filter((exp) => exp.categoryId === categoryId);
-		}
-
-		// Ordenar por data descendente (como na implementação original)
-		expenses.sort((a, b) => b.date.getTime() - a.date.getTime());
+		// Use the new service method with database-level filtering and sorting
+		const expenses = await expenseService.getExpensesWithFilters({
+			userId: session.user.id,
+			startDate: startDate ? new Date(startDate) : undefined,
+			endDate: endDate ? new Date(endDate) : undefined,
+			categoryId: categoryId || undefined,
+			search: search || undefined,
+			sortBy: sortBy as "amount" | "date" | "description" | "category",
+			sortOrder: sortOrder as "asc" | "desc",
+			expand: expand,
+		});
 
 		// O serviço já deve retornar o amount como number e incluir a categoria
 		return NextResponse.json(expenses);
