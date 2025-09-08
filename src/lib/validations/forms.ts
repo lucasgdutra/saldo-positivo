@@ -12,6 +12,9 @@ export const UserRegistrationFormSchema = UserInputSchema.omit({
 	revenues: true,
 	balance: true,
 	passwordResetTokens: true,
+	createdAt: true,
+	updatedAt: true,
+	id: true,
 })
 	.extend({
 		email: z.string().email("E-mail inválido"),

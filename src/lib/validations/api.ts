@@ -22,7 +22,13 @@ const BaseUserApiSchema = UserInputSchema.omit({
 	salaryRange: z.string().min(1, "Faixa salarial é obrigatória"),
 });
 
-export const CreateUserApiSchema = BaseUserApiSchema.refine(
+export const CreateUserApiSchema = BaseUserApiSchema.omit(
+	{
+		createdAt: true,
+		updatedAt: true,
+		id: true,
+	}
+).refine(
 	(data) => {
 		if (data.usageMotivation === "outro" && !data.customMotivation) {
 			return false;
