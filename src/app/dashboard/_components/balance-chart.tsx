@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import {
 	Bar,
 	BarChart,
@@ -11,6 +10,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { useBalanceHistory } from "@/hooks/use-dashboard";
 import { DashboardErrorContainer } from "./dashboard-error";
 
 type BalanceData = {
@@ -28,42 +28,17 @@ export function BalanceChart({
 	data,
 	isLoading: initialLoading = false,
 }: BalanceChartProps) {
-	const [chartData, setChartData] = useState<BalanceData[]>([]);
-	const [isLoading, setIsLoading] = useState(initialLoading);
-	const [error, setError] = useState<string | null>(null);
+	// Use provided data if available, otherwise fetch from API
+	const {
+		data: fetchedData,
+		isLoading: queryLoading,
+		error: queryError,
+		refetch,
+	} = useBalanceHistory();
 
-	const fetchData = useCallback(async () => {
-		if (data) {
-			setChartData(data);
-			return;
-		}
-
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const response = await fetch("/api/dashboard/balance-history");
-
-			if (!response.ok) {
-				throw new Error("Falha ao buscar dados do histórico de saldo");
-			}
-
-			const balanceData = await response.json();
-			setChartData(balanceData);
-		} catch (err) {
-			console.error("Erro ao buscar dados do histórico:", err);
-			setError("Não foi possível carregar os dados do histórico");
-
-			// Não usar dados fictícios em caso de erro
-			setChartData([]);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [data]);
-
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
+	const chartData = data || fetchedData || [];
+	const isLoading = initialLoading || (queryLoading && !data);
+	const error = queryError?.message || null;
 
 	if (isLoading) {
 		return (
@@ -77,7 +52,7 @@ export function BalanceChart({
 		<DashboardErrorContainer
 			isError={!!error}
 			error={error}
-			onRetry={fetchData}
+			onRetry={() => refetch()}
 		>
 			{chartData.length === 0 ? (
 				<div className="h-80 w-full flex flex-col items-center justify-center p-6 text-center border rounded-lg">

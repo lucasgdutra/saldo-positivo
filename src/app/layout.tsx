@@ -43,24 +43,24 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
 			>
-				<PostHogProvider>
-					<AuthProvider>
-						<QueryProvider>
-							<div id="__next">
-								<a
-									href="#main-content"
-									className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-blue-600 text-white px-4 py-2 rounded-md"
-								>
-									Pular para o conteúdo principal
-								</a>
-								<main id="main-content">{children}</main>
-							</div>
-							<Toaster position="top-right" expand={true} richColors />
-						</QueryProvider>
-					</AuthProvider>
-					<Analytics />
-					<SpeedInsights />
-				</PostHogProvider>
+				{/* <PostHogProvider> */}
+				<AuthProvider>
+					<QueryProvider>
+						<div id="__next">
+							<a
+								href="#main-content"
+								className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-blue-600 text-white px-4 py-2 rounded-md"
+							>
+								Pular para o conteúdo principal
+							</a>
+							<main id="main-content">{children}</main>
+						</div>
+						<Toaster position="top-right" expand={true} richColors />
+					</QueryProvider>
+				</AuthProvider>
+				<Analytics />
+				<SpeedInsights />
+				{/* </PostHogProvider> */}
 			</body>
 		</html>
 	);

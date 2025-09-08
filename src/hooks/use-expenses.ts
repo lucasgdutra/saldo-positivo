@@ -128,6 +128,8 @@ export function useCreateExpense() {
 		onSuccess: () => {
 			// Invalidate all expenses queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [EXPENSES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on expense data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }
@@ -166,6 +168,8 @@ export function useUpdateExpense() {
 		onSuccess: () => {
 			// Invalidate all expenses queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [EXPENSES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on expense data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }
@@ -187,6 +191,8 @@ export function useDeleteExpense() {
 		onSuccess: () => {
 			// Invalidate all expenses queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [EXPENSES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on expense data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }

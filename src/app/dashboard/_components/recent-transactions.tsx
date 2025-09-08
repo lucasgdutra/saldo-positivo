@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useRecentTransactions } from "@/hooks/use-dashboard";
 import { DashboardErrorContainer } from "./dashboard-error";
 
 type Transaction = {
@@ -21,43 +21,17 @@ export function RecentTransactions({
 	data,
 	isLoading: initialLoading = false,
 }: RecentTransactionsProps) {
-	const [transactions, setTransactions] = useState<Transaction[]>([]);
-	const [isLoading, setIsLoading] = useState(initialLoading);
-	const [error, setError] = useState<string | null>(null);
+	// Use provided data if available, otherwise fetch from API
+	const {
+		data: fetchedData,
+		isLoading: queryLoading,
+		error: queryError,
+		refetch,
+	} = useRecentTransactions();
 
-	const fetchData = useCallback(async () => {
-		if (data) {
-			setTransactions(data);
-			return;
-		}
-
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const response = await fetch("/api/dashboard/recent-transactions");
-
-			if (!response.ok) {
-				throw new Error("Falha ao buscar transações recentes");
-			}
-
-			const transactionsData = await response.json();
-
-			setTransactions(transactionsData);
-		} catch (err) {
-			console.error("Erro ao buscar transações recentes:", err);
-			setError("Não foi possível carregar as transações recentes");
-
-			// Não usar dados fictícios em caso de erro
-			setTransactions([]);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [data]);
-
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
+	const transactions = data || fetchedData || [];
+	const isLoading = initialLoading || (queryLoading && !data);
+	const error = queryError?.message || null;
 
 	if (isLoading) {
 		return (
@@ -71,7 +45,7 @@ export function RecentTransactions({
 		<DashboardErrorContainer
 			isError={!!error}
 			error={error}
-			onRetry={fetchData}
+			onRetry={() => refetch()}
 		>
 			<div className="w-full">
 				<div className="rounded-md border">

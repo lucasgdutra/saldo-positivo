@@ -103,6 +103,8 @@ export function useCreateRevenue() {
 		onSuccess: () => {
 			// Invalidate all revenues queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [REVENUES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on revenue data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }
@@ -136,6 +138,8 @@ export function useUpdateRevenue() {
 		onSuccess: () => {
 			// Invalidate all revenues queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [REVENUES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on revenue data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }
@@ -156,6 +160,8 @@ export function useDeleteRevenue() {
 		onSuccess: () => {
 			// Invalidate all revenues queries to refetch data
 			queryClient.invalidateQueries({ queryKey: [REVENUES_QUERY_KEY] });
+			// Also invalidate dashboard queries that depend on revenue data
+			queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 		},
 	});
 }

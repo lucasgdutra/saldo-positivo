@@ -1,19 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRevenueStats } from "@/hooks/use-dashboard";
 import { formatCurrency } from "@/lib/utils";
-
-interface RevenueStats {
-	currentMonth: {
-		revenues: number;
-		revenueCount: number;
-	};
-	changes: {
-		revenues: number;
-	};
-	avgDaily: number;
-	largestRevenue: number;
-}
 
 interface RevenueStatsCardsProps {
 	selectedYear?: number;
@@ -24,34 +12,10 @@ export function RevenueStatsCards({
 	selectedYear,
 	selectedMonth,
 }: RevenueStatsCardsProps) {
-	const [stats, setStats] = useState<RevenueStats | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const fetchStats = async () => {
-			try {
-				const params = new URLSearchParams();
-				if (selectedYear !== undefined)
-					params.append("year", selectedYear.toString());
-				if (selectedMonth !== undefined)
-					params.append("month", selectedMonth.toString());
-
-				const response = await fetch(
-					`/api/dashboard/revenue-stats?${params.toString()}`,
-				);
-				if (response.ok) {
-					const data = await response.json();
-					setStats(data);
-				}
-			} catch (error) {
-				console.error("Erro ao buscar estatísticas de receitas:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchStats();
-	}, [selectedYear, selectedMonth]);
+	const { data: stats, isLoading } = useRevenueStats({
+		year: selectedYear,
+		month: selectedMonth,
+	});
 
 	if (isLoading) {
 		return (
@@ -88,10 +52,10 @@ export function RevenueStatsCards({
 		return `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`;
 	};
 
-	const getCurrentMonthDays = () => {
-		const now = new Date();
-		return now.getDate(); // Current day of month
-	};
+	const averagePerRevenue =
+		stats.currentMonth.revenueCount > 0
+			? stats.currentMonth.revenues / stats.currentMonth.revenueCount
+			: 0;
 
 	return (
 		<div className="grid gap-4 md:grid-cols-3">
@@ -103,14 +67,14 @@ export function RevenueStatsCards({
 							Total do Mês
 						</p>
 						<p className="text-2xl font-bold text-green-600">
-							{formatCurrency(stats.currentMonth.revenues)}
+							{formatCurrency(stats.currentMonth.revenues || 0)}
 						</p>
 						<div className="flex items-center gap-1 mt-1">
 							<span
-								className={`text-sm ${getChangeColor(stats.changes.revenues)}`}
+								className={`text-sm ${getChangeColor(stats.changes.revenues || 0)}`}
 							>
-								{getChangeIcon(stats.changes.revenues)}{" "}
-								{formatChange(stats.changes.revenues)}
+								{getChangeIcon(stats.changes.revenues || 0)}{" "}
+								{formatChange(stats.changes.revenues || 0)}
 							</span>
 							<span className="text-xs text-muted-foreground">
 								vs mês anterior
@@ -128,27 +92,24 @@ export function RevenueStatsCards({
 				</p>
 			</div>
 
-			{/* Média Diária */}
+			{/* Média de Receitas */}
 			<div className="rounded-lg border p-6">
 				<div className="flex items-center justify-between">
 					<div>
 						<p className="text-sm font-medium text-muted-foreground">
-							Média Diária
+							Média por Receita
 						</p>
 						<p className="text-2xl font-bold text-blue-600">
-							{formatCurrency(stats.avgDaily)}
+							{formatCurrency(averagePerRevenue)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Baseado nos {getCurrentMonthDays()} dias do mês
+							Valor médio por transação
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
 						<span className="text-blue-600 text-sm">📊</span>
 					</div>
 				</div>
-				<p className="text-xs text-muted-foreground mt-2">
-					Entrada média por dia
-				</p>
 			</div>
 
 			{/* Maior Receita */}
@@ -159,19 +120,16 @@ export function RevenueStatsCards({
 							Maior Receita
 						</p>
 						<p className="text-2xl font-bold text-green-800">
-							{formatCurrency(stats.largestRevenue)}
+							{formatCurrency(stats.largestRevenue || 0)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Maior entrada do mês
+							Maior receita individual
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
 						<span className="text-green-800 text-sm">📈</span>
 					</div>
 				</div>
-				<p className="text-xs text-muted-foreground mt-2">
-					{stats.largestRevenue > 0 ? "Este mês" : "Nenhuma receita ainda"}
-				</p>
 			</div>
 		</div>
 	);

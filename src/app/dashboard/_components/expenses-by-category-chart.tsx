@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import {
 	Cell,
 	Legend,
@@ -9,6 +8,7 @@ import {
 	ResponsiveContainer,
 	Tooltip,
 } from "recharts";
+import { useExpensesByCategory } from "@/hooks/use-dashboard";
 import { DashboardErrorContainer } from "./dashboard-error";
 
 type CategoryExpense = {
@@ -37,43 +37,27 @@ export function ExpensesByCategoryChart({
 	data,
 	isLoading: initialLoading = false,
 }: ExpensesByCategoryChartProps) {
-	const [chartData, setChartData] = useState<CategoryExpense[]>([]);
-	const [isLoading, setIsLoading] = useState(initialLoading);
-	const [error, setError] = useState<string | null>(null);
+	// Use provided data if available, otherwise fetch from API
+	const {
+		data: fetchedData,
+		isLoading: queryLoading,
+		error: queryError,
+		refetch,
+	} = useExpensesByCategory();
 
-	const fetchData = useCallback(async () => {
-		if (data) {
-			setChartData(data);
-			return;
-		}
+	// Transform data if needed
+	const transformData = (apiData: any[]): CategoryExpense[] => {
+		return (
+			apiData?.map((item) => ({
+				name: item.category || item.name,
+				value: item.amount || item.value,
+			})) || []
+		);
+	};
 
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const response = await fetch("/api/dashboard/expenses-by-category");
-
-			if (!response.ok) {
-				throw new Error("Falha ao buscar dados de despesas por categoria");
-			}
-
-			const categoryData = await response.json();
-
-			setChartData(categoryData);
-		} catch (err) {
-			console.error("Erro ao buscar dados de categorias:", err);
-			setError("Não foi possível carregar os dados de despesas por categoria");
-
-			// Não usar dados fictícios em caso de erro
-			setChartData([]);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [data]);
-
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
+	const chartData = data || transformData(fetchedData || []) || [];
+	const isLoading = initialLoading || (queryLoading && !data);
+	const error = queryError?.message || null;
 
 	if (isLoading) {
 		return (
@@ -87,7 +71,7 @@ export function ExpensesByCategoryChart({
 		<DashboardErrorContainer
 			isError={!!error}
 			error={error}
-			onRetry={fetchData}
+			onRetry={() => refetch()}
 		>
 			{chartData.length === 0 ? (
 				<div className="h-80 w-full flex flex-col items-center justify-center p-6 text-center border rounded-lg">
