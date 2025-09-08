@@ -80,6 +80,7 @@ export function ExpensesTable({
 			search?: string;
 			sortBy?: string;
 			sortOrder?: string;
+			expand?: boolean;
 		} = {};
 
 		if (

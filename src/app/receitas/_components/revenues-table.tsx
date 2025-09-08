@@ -58,6 +58,7 @@ export function RevenuesTable({ globalFilters = {} }: RevenuesTableProps) {
 			search?: string;
 			sortBy?: string;
 			sortOrder?: string;
+			expand?: boolean;
 		} = {};
 
 		if (
