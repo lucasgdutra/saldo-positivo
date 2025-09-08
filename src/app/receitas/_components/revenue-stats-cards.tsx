@@ -66,7 +66,7 @@ export function RevenueStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Total do Mês
 						</p>
-						<p className="text-2xl font-bold text-green-600">
+						<p className="text-2xl font-bold ">
 							{formatCurrency(stats.currentMonth.revenues || 0)}
 						</p>
 						<div className="flex items-center gap-1 mt-1">
@@ -82,7 +82,7 @@ export function RevenueStatsCards({
 						</div>
 					</div>
 					<div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-						<span className="text-green-600 text-sm">💰</span>
+						<span className="text-sm">💰</span>
 					</div>
 				</div>
 				<p className="text-xs text-muted-foreground mt-2">
@@ -99,7 +99,7 @@ export function RevenueStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Média por Receita
 						</p>
-						<p className="text-2xl font-bold text-blue-600">
+						<p className="text-2xl font-bold ">
 							{formatCurrency(averagePerRevenue)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
@@ -107,7 +107,7 @@ export function RevenueStatsCards({
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-						<span className="text-blue-600 text-sm">📊</span>
+						<span className="text-sm">📊</span>
 					</div>
 				</div>
 			</div>
@@ -119,7 +119,7 @@ export function RevenueStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Maior Receita
 						</p>
-						<p className="text-2xl font-bold text-green-800">
+						<p className="text-2xl font-bold ">
 							{formatCurrency(stats.largestRevenue || 0)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
@@ -127,7 +127,7 @@ export function RevenueStatsCards({
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
-						<span className="text-green-800 text-sm">📈</span>
+						<span className="text-sm">📈</span>
 					</div>
 				</div>
 			</div>

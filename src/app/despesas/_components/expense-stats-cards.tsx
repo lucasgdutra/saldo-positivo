@@ -69,7 +69,7 @@ export function ExpenseStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Total do Mês
 						</p>
-						<p className="text-2xl font-bold text-red-600">
+						<p className="text-2xl font-bold ">
 							{formatCurrency(stats.currentMonth.expenses || 0)}
 						</p>
 						<div className="flex items-center gap-1 mt-1">
@@ -85,7 +85,7 @@ export function ExpenseStatsCards({
 						</div>
 					</div>
 					<div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-						<span className="text-red-600 text-sm">💸</span>
+						<span className="text-sm">💸</span>
 					</div>
 				</div>
 				<p className="text-xs text-muted-foreground mt-2">
@@ -102,7 +102,7 @@ export function ExpenseStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Média por Despesa
 						</p>
-						<p className="text-2xl font-bold text-orange-600">
+						<p className="text-2xl font-bold ">
 							{formatCurrency(averagePerExpense)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
@@ -110,7 +110,7 @@ export function ExpenseStatsCards({
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-						<span className="text-orange-600 text-sm">📊</span>
+						<span className="text-sm">📊</span>
 					</div>
 				</div>
 			</div>
@@ -122,7 +122,7 @@ export function ExpenseStatsCards({
 						<p className="text-sm font-medium text-muted-foreground">
 							Média Diária
 						</p>
-						<p className="text-2xl font-bold text-purple-600">
+						<p className="text-2xl font-bold">
 							{formatCurrency(stats.avgDaily || 0)}
 						</p>
 						<p className="text-xs text-muted-foreground mt-1">
@@ -130,7 +130,7 @@ export function ExpenseStatsCards({
 						</p>
 					</div>
 					<div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-						<span className="text-purple-600 text-sm">📈</span>
+						<span className="text-sm">📈</span>
 					</div>
 				</div>
 			</div>
